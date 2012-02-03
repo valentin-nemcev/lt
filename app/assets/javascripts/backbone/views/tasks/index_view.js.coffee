@@ -4,19 +4,26 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
   template: JST["backbone/templates/tasks/index"]
 
   events:
-    'editTask li' : 'editTask'
-    'closeEditTask li' : 'closeEditTask'
+    'editTask      li': 'editTask'
+    'closeEditTask li': 'closeEditTask'
+    'click .new': 'newTask'
 
   initialize: () ->
     @options.tasks.bind('reset', @addAll)
+    @options.tasks.bind('add', @addOne)
 
-  editTask: (ev, task) ->
-    $('.task', ev.currentTarget).hide()
-    $('.task-form', ev.currentTarget).show()
+  newTask: (ev) ->
+    ev.preventDefault()
 
-  closeEditTask: (ev, task) ->
-    $('.task', ev.currentTarget).show()
-    $('.task-form', ev.currentTarget).hide()
+    newTask = new Lt.Models.Task()
+    @options.tasks.add(newTask)
+
+  editTask:      (ev) -> @toggleEditTask(ev.currentTarget, true)
+  closeEditTask: (ev) -> @toggleEditTask(ev.currentTarget, false)
+
+  toggleEditTask: (li, edit) ->
+    $('.task', li).toggle(!edit)
+    $('.task-form', li).toggle(edit)
 
   addAll: () =>
     @options.tasks.each(@addOne)
@@ -26,7 +33,8 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     taskView = new Lt.Views.Tasks.TaskView({model : task})
     $li = $('<li/>')
       .append(taskView.render().el)
-      .append($(formView.render().el).hide())
+      .append(formView.render().el)
+    @toggleEditTask($li[0], task.isNew())
     $(@el).append($li)
 
   render: =>

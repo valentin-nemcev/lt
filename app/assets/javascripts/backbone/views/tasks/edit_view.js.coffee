@@ -24,5 +24,4 @@ class Lt.Views.Tasks.EditView extends Backbone.View
 
   render : ->
     $(@el).html(@template(@model.toJSON()))
-
     return this
