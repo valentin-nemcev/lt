@@ -2,10 +2,12 @@
 
 <script type="text/javascript">
   $(function() {
-    window.router = new Lt.Routers.TasksRouter({
-      tasks: <%= @tasks.to_json.html_safe -%>
+    var tasks = <%= @tasks.to_json.html_safe -%>;
+    var view = new Lt.Views.Tasks.IndexView({
+      tasks: new Lt.Collections.TasksCollection(tasks), 
+      el: $('#tasks')[0]
     });
-    Backbone.history.start();
+    view.render();
   });
 </script>
 
