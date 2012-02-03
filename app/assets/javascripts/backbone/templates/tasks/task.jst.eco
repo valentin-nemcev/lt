@@ -1,4 +1,4 @@
 <%= @body %>
 
-<a class='edit' href="">Edit</a>
-<a href="#/<%= @id %>/destroy" class="destroy">Destroy</a>
+<a class="edit" href="#">Редактировать</a>
+<a class="delete" href="#">Удалить</a>

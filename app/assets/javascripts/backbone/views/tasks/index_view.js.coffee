@@ -9,8 +9,9 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     'click .new': 'newTask'
 
   initialize: () ->
-    @options.tasks.bind('reset', @addAll)
-    @options.tasks.bind('add', @addOne)
+    @options.tasks.bind 'reset'   , @addAll, @
+    @options.tasks.bind 'add'     , @addOne, @
+    @options.tasks.bind 'destroy' , @remove, @
 
   newTask: (ev) ->
     ev.preventDefault()
@@ -25,19 +26,23 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     $('.task', li).toggle(!edit)
     $('.task-form', li).toggle(edit)
 
-  addAll: () =>
-    @options.tasks.each(@addOne)
+  addAll: () ->
+    @addOne task for task in @options.tasks.models
+    return
 
-  addOne: (task) =>
+  addOne: (task) ->
     formView = new Lt.Views.Tasks.EditView({model : task})
     taskView = new Lt.Views.Tasks.TaskView({model : task})
-    $li = $('<li/>')
+    $li = $('<li/>', 'task-cid': task.cid)
       .append(taskView.render().el)
       .append(formView.render().el)
     @toggleEditTask($li[0], task.isNew())
     $(@el).append($li)
 
-  render: =>
+  remove: (task) ->
+    @$("[task-cid='#{task.cid}']").remove()
+
+  render: ->
     $(@el).html(@template(tasks: @options.tasks.toJSON() ))
     @addAll()
 

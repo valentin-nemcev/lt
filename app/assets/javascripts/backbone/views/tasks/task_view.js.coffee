@@ -5,6 +5,7 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
 
   events:
     "click .edit" : "edit"
+    "click .delete" : "delete"
 
   tagName: "div"
   className: 'task'
@@ -16,11 +17,9 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
     ev.preventDefault()
     $(@el).trigger('editTask', [@model])
 
-  destroy: () ->
+  delete: (ev) ->
+    ev.preventDefault()
     @model.destroy()
-    this.remove()
-
-    return false
 
   render: ->
     $(@el).html(@template(@model.toJSON() ))
