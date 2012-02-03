@@ -3,7 +3,7 @@
 <form id="edit-task" name="task">
   <div class="field">
     <label for="body"> body:</label>
-    <input type="text" name="body" id="body" value="<%= body %>" >
+    <input type="text" name="body" id="body" value="<%= @body %>" >
   </div>
 
   <div class="actions">
