@@ -1,7 +1,0 @@
-<p>
-  <b>Body:</b>
-  <%= @body %>
-</p>
-
-
-<a href="#/index">Back</a>

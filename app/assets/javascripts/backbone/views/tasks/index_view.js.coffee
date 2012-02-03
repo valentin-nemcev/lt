@@ -11,7 +11,7 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
 
   addOne: (task) =>
     view = new Lt.Views.Tasks.TaskView({model : task})
-    @$("tbody").append(view.render().el)
+    $(@el).append(view.render().el)
 
   render: =>
     $(@el).html(@template(tasks: @options.tasks.toJSON() ))

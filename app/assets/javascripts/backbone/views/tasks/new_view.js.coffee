@@ -23,7 +23,7 @@ class Lt.Views.Tasks.NewView extends Backbone.View
     @collection.create(@model.toJSON(),
       success: (task) =>
         @model = task
-        window.location.hash = "/#{@model.id}"
+        window.location.hash = "#/index"
 
       error: (task, jqXHR) =>
         @model.set({errors: $.parseJSON(jqXHR.responseText)})

@@ -6,7 +6,7 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
   events:
     "click .destroy" : "destroy"
 
-  tagName: "tr"
+  tagName: "li"
 
   destroy: () ->
     @model.destroy()
