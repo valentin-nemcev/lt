@@ -3,22 +3,26 @@ Lt.Views.Tasks ||= {}
 class Lt.Views.Tasks.EditView extends Backbone.View
   template : JST["backbone/templates/tasks/edit"]
 
+  tagName: 'div'
+  className: 'task-form'
+
   events :
     "submit #edit-task" : "update"
+
+  initialize: ->
+    @model.bind 'change', @render, @
 
   update : (e) ->
     e.preventDefault()
     e.stopPropagation()
 
-    @model.save(null,
+    attrs = body: @$('[name="body"]').val()
+    @model.save(attrs,
       success : (task) =>
-        @model = task
-        window.location.hash = "#/index"
+        $(@el).trigger('closeEditTask')
     )
 
   render : ->
-    $(@el).html(@template(@model.toJSON() ))
-
-    this.$("form").backboneLink(@model)
+    $(@el).html(@template(@model.toJSON()))
 
     return this

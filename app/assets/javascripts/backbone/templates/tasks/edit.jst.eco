@@ -1,5 +1,3 @@
-<h1>Edit task</h1>
-
 <form id="edit-task" name="task">
   <div class="field">
     <label for="body"> body:</label>
@@ -12,4 +10,3 @@
 
 </form>
 
-<a href="#/index">Back</a>

@@ -3,6 +3,9 @@ class Lt.Routers.TasksRouter extends Backbone.Router
     @tasks = new Lt.Collections.TasksCollection()
     @tasks.reset options.tasks
 
+    @view = new Lt.Views.Tasks.IndexView(tasks: @tasks)
+    $("#tasks").html(@view.render().el)
+
   routes:
     "/new"      : "newTask"
     "/index"    : "index"
@@ -15,17 +18,4 @@ class Lt.Routers.TasksRouter extends Backbone.Router
     $("#tasks").html(@view.render().el)
 
   index: ->
-    @view = new Lt.Views.Tasks.IndexView(tasks: @tasks)
-    $("#tasks").html(@view.render().el)
 
-  show: (id) ->
-    task = @tasks.get(id)
-
-    @view = new Lt.Views.Tasks.ShowView(model: task)
-    $("#tasks").html(@view.render().el)
-
-  edit: (id) ->
-    task = @tasks.get(id)
-
-    @view = new Lt.Views.Tasks.EditView(model: task)
-    $("#tasks").html(@view.render().el)
