@@ -7,21 +7,43 @@ class Lt.Views.Tasks.EditView extends Backbone.View
   className: 'task-form'
 
   events :
-    "submit #edit-task" : "update"
+    "submit form" : "update"
+    "click .delete" : "delete"
+    "click .cancel" : "cancel"
+    "focus": "focus"
 
   initialize: ->
     @model.bind 'change', @render, @
 
-  update : (e) ->
-    e.preventDefault()
-    e.stopPropagation()
+  delete: (ev) ->
+    ev.preventDefault()
+    @model.destroy()
+    return
+
+  cancel: (ev) ->
+    ev.preventDefault()
+    if @model.isNew()
+      @delete(ev)
+    else
+      $(@el).trigger('closeEditTask')
+      @render
+
+    return
+
+  update : (ev) ->
+    ev.preventDefault()
 
     attrs = body: @$('[name="body"]').val()
     @model.save(attrs,
       success : (task) =>
         $(@el).trigger('closeEditTask')
     )
+    return
+
+  focus: (ev) ->
+    @$('[name="body"]').focus()
+    return
 
   render : ->
-    $(@el).html(@template(@model.toJSON()))
+    $(@el).html(@template(@model))
     return this

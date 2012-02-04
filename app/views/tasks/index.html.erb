@@ -4,7 +4,7 @@
   $(function() {
     var tasks = <%= @tasks.to_json.html_safe -%>;
     var view = new Lt.Views.Tasks.IndexView({
-      tasks: new Lt.Collections.TasksCollection(tasks), 
+      collection: new Lt.Collections.TasksCollection(tasks), 
       el: $('#tasks')[0]
     });
     view.render();

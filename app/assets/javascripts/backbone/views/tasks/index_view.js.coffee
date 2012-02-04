@@ -4,12 +4,12 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
   template: JST["backbone/templates/tasks/index"]
 
   initialize: () ->
-    @options.tasks.bind 'reset'   , @reset, @
-    @options.tasks.bind 'add'     , @add, @
-    @options.tasks.bind 'destroy' , @destroy, @
+    @collection.bind 'reset'   , @reset, @
+    @collection.bind 'add'     , @add, @
+    @collection.bind 'destroy' , @destroy, @
 
   reset: () ->
-    @add task for task in @options.tasks.models
+    @add task for task in @collection.models
     return
 
   add: (task) ->
@@ -18,8 +18,8 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     $li = $('<li/>', 'id': 'task-' + task.cid)
       .append(taskView.render().el)
       .append(formView.render().el)
-    @toggleEditTask($li[0], task.isNew())
     @$('ul').append($li)
+    @toggleEditTask($li[0], task.isNew())
 
   destroy: (task) ->
     @$('#task-' + task.cid).remove()
@@ -34,7 +34,7 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     ev.preventDefault()
 
     newTask = new Lt.Models.Task()
-    @options.tasks.add(newTask)
+    @collection.add(newTask)
 
     return
 
@@ -44,9 +44,10 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
   toggleEditTask: (li, edit) ->
     $('.task', li).toggle(!edit)
     $('.task-form', li).toggle(edit)
+    $('.task-form', li).trigger('focus') if edit
 
   render: ->
-    $(@el).html(@template(tasks: @options.tasks.toJSON() ))
+    $(@el).html(@template(tasks: @collection.toJSON() ))
     @reset()
 
     return this

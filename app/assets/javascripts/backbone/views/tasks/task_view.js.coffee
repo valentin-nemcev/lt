@@ -4,8 +4,7 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
   template: JST["backbone/templates/tasks/task"]
 
   events:
-    "click .edit" : "edit"
-    "click .delete" : "delete"
+    "dblclick" : "edit"
 
   tagName: "div"
   className: 'task'
@@ -16,11 +15,6 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
   edit: (ev) ->
     ev.preventDefault()
     $(@el).trigger('editTask', [@model])
-    return
-
-  delete: (ev) ->
-    ev.preventDefault()
-    @model.destroy()
     return
 
   render: ->

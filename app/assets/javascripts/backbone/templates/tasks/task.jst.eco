@@ -1,4 +1,2 @@
 <%= @body %>
 
-<a class="edit" href="#">Редактировать</a>
-<a class="delete" href="#">Удалить</a>

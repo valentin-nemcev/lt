@@ -1,12 +1,10 @@
-<form id="edit-task" name="task">
-  <div class="field">
-    <label for="body"> body:</label>
-    <input type="text" name="body" id="body" value="<%= @body %>" >
-  </div>
+<form name="task">
+  <input type="text" name="body" value="<%- @escape('body') %>" >
 
-  <div class="actions">
-    <input type="submit" value="Update Task" />
-  </div>
-
+  <input type="submit" value="Сохранить" />
+  <a class="cancel" href="#">Отменить</a>
+  <% unless @isNew(): %> 
+    <a class="delete" href="#">Удалить</a>
+  <% end %>
 </form>
 
