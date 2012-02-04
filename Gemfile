@@ -19,7 +19,7 @@ group :assets do
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   gem 'therubyracer', '~> 0.9.9'
-
+  gem 'compass-rails', '~> 1.0.0.rc.2'
   gem 'uglifier', '>= 1.0.3'
 end
 
