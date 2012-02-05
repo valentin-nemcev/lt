@@ -7,6 +7,8 @@ gem 'rails', '3.2.1'
 
 gem 'mysql2'
 
+gem 'awesome_nested_set', '~> 2.1.2'
+
 # gem 'thin', '~> 1.3.1'
 
 # Gems used only for assets and not required
