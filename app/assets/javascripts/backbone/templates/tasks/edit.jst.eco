@@ -4,6 +4,7 @@
   <input type="submit" value="Сохранить" />
   <a class="cancel" href="#">Отменить</a>
   <% unless @isNew(): %> 
+    <a class="new-subtask" href="#">Добавить</a>
     <a class="delete" href="#">Удалить</a>
   <% end %>
 </form>

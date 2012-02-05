@@ -14,7 +14,8 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
 
   edit: (ev) ->
     ev.preventDefault()
-    $(@el).trigger('editTask', [@model])
+    ev.stopPropagation()
+    $(@el).trigger('editTask', [@model.cid])
     return
 
   render: ->

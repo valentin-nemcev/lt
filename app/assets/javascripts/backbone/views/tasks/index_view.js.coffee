@@ -18,17 +18,26 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     $li = $('<li/>', 'id': 'task-' + task.cid)
       .append(taskView.render().el)
       .append(formView.render().el)
-    @$('ul').append($li)
-    @toggleEditTask($li[0], task.isNew())
+      .append($('<ul/>', class: 'subtasks'))
+
+    parentTask = @collection.get task.get('parent_id')
+    $ul = if parentTask?
+      @$('#task-' + parentTask.cid).children('ul.subtasks')
+    else
+      @$('ul.tasks')
+
+    $ul.append($li)
+    @toggleEditTask($li, task.isNew())
 
   destroy: (task) ->
     @$('#task-' + task.cid).remove()
 
 
   events:
-    'editTask      li': 'editTask'
-    'closeEditTask li': 'closeEditTask'
-    'click .new': 'newTask'
+    'editTask'      : 'editOrCloseTask'
+    'closeEditTask' : 'editOrCloseTask'
+    'newSubtask'    : 'newSubtask'
+    'click .new'    : 'newTask'
 
   newTask: (ev) ->
     ev.preventDefault()
@@ -38,13 +47,24 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
 
     return
 
-  editTask:      (ev) -> @toggleEditTask(ev.currentTarget, true)
-  closeEditTask: (ev) -> @toggleEditTask(ev.currentTarget, false)
+  newSubtask: (ev, taskCid) ->
+    ev.preventDefault()
 
-  toggleEditTask: (li, edit) ->
-    $('.task', li).toggle(!edit)
-    $('.task-form', li).toggle(edit)
-    $('.task-form', li).trigger('focus') if edit
+    parentTask = @collection.getByCid taskCid
+    return if not parentTask? or parentTask.isNew()
+    newSubtask = new Lt.Models.Task(parent_id: parentTask.id)
+    @collection.add(newSubtask)
+
+    return
+
+  editOrCloseTask: (ev, taskCid) ->
+    @toggleEditTask(@$('#task-' + taskCid), ev.type == 'editTask')
+
+  toggleEditTask: ($li, edit) ->
+    $li.children('.task').toggle(!edit)
+    $form = $li.children('.task-form')
+    $form.toggle(edit)
+    $form.trigger('focus') if edit
 
   render: ->
     $(@el).html(@template(tasks: @collection.toJSON() ))

@@ -2,5 +2,5 @@
 
 <a href="#" class='new'>Добавить</a>
 
-<ul id="tasks-list"></ul>
+<ul id="tasks-list" class="tasks"></ul>
 

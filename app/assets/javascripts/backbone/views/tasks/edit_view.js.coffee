@@ -6,14 +6,21 @@ class Lt.Views.Tasks.EditView extends Backbone.View
   tagName: 'div'
   className: 'task-form'
 
-  events :
-    "submit form" : "update"
-    "click .delete" : "delete"
-    "click .cancel" : "cancel"
-    "focus": "focus"
+  events:
+    "submit form"        : "update"
+    "click .new-subtask" : "newSubtask"
+    "click .delete"      : "delete"
+    "click .cancel"      : "cancel"
+    "focus"              : "focus"
 
   initialize: ->
     @model.bind 'change', @render, @
+
+  newSubtask: (ev) ->
+    ev.preventDefault()
+    @triggerEv 'newSubtask'
+    @triggerEv 'closeEditTask'
+    return
 
   delete: (ev) ->
     ev.preventDefault()
@@ -25,7 +32,7 @@ class Lt.Views.Tasks.EditView extends Backbone.View
     if @model.isNew()
       @delete(ev)
     else
-      $(@el).trigger('closeEditTask')
+      @triggerEv 'closeEditTask'
       @render
 
     return
@@ -36,13 +43,15 @@ class Lt.Views.Tasks.EditView extends Backbone.View
     attrs = body: @$('[name="body"]').val()
     @model.save(attrs,
       success : (task) =>
-        $(@el).trigger('closeEditTask')
+        @triggerEv 'closeEditTask'
     )
     return
 
   focus: (ev) ->
     @$('[name="body"]').focus()
     return
+
+  triggerEv: (evName) -> $(@el).trigger(evName, [@model.cid])
 
   render : ->
     $(@el).html(@template(@model))
