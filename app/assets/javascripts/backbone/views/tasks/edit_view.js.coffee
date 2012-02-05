@@ -33,7 +33,7 @@ class Lt.Views.Tasks.EditView extends Backbone.View
       @delete(ev)
     else
       @triggerEv 'closeEditTask'
-      @render
+      @render()
 
     return
 
