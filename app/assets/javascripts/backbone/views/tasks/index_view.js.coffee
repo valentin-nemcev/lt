@@ -1,7 +1,6 @@
 Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.IndexView extends Backbone.View
-  template: JST["backbone/templates/tasks/index"]
 
   initialize: () ->
     @collection.bind 'reset'   , @reset, @
@@ -66,26 +65,21 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
 
 
   events:
-    'editTask'        : 'editOrCloseTask'
-    'closeEditTask'   : 'editOrCloseTask'
-    'newSubtask'      : 'newSubtask'
-    'click .new'      : 'newTask'
+    'editTask'      : 'editOrCloseTask'
+    'closeEditTask' : 'editOrCloseTask'
+    'newSubtask'    : 'newTask'
+    'click .new'    : 'newTask'
 
-  newTask: (ev) ->
+  newTask: (ev, parentTaskCid) ->
     ev.preventDefault()
 
     newTask = new Lt.Models.Task()
+    if parentTaskCid?
+      parentTask = @collection.getByCid parentTaskCid
+      return if parentTask.isNew()
+      newTask.set parent_id: parentTask.id
+
     @collection.add(newTask)
-
-    return
-
-  newSubtask: (ev, taskCid) ->
-    ev.preventDefault()
-
-    parentTask = @collection.getByCid taskCid
-    return if not parentTask? or parentTask.isNew()
-    newSubtask = new Lt.Models.Task(parent_id: parentTask.id)
-    @collection.add(newSubtask)
 
     return
 
@@ -99,7 +93,6 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     $form.trigger('focus') if edit
 
   render: ->
-    $(@el).html(@template(tasks: @collection.toJSON() ))
     @setupSortable @$('ul.tasks')
     @reset()
 

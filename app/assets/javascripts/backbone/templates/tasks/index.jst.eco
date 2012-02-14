@@ -1,6 +1,0 @@
-<h1>Дела</h1>
-
-<a href="#" class='new'>Добавить</a>
-
-<ul id="tasks-list" class="tasks"></ul>
-
