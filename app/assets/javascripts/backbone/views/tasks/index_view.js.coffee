@@ -13,12 +13,7 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     return
 
   add: (task) ->
-    formView = new Lt.Views.Tasks.EditView({model : task})
-    taskView = new Lt.Views.Tasks.TaskView({model : task})
-    $li = $('<li/>', 'id': 'task-' + task.cid)
-      .append(taskView.render().el)
-      .append(formView.render().el)
-      .append($('<ul/>', class: 'subtasks'))
+    $li = @buildLi task
 
     parentTask = @collection.get task.get('parent_id')
     $ul = if parentTask?
@@ -32,12 +27,49 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
   destroy: (task) ->
     @$('#task-' + task.cid).remove()
 
+  buildLi: (task) ->
+    formView = new Lt.Views.Tasks.EditView({model : task})
+    taskView = new Lt.Views.Tasks.TaskView({model : task})
+    $('<li/>', 'id': 'task-' + task.cid)
+      .append(taskView.render().el, formView.render().el)
+      .append($('<ul/>', class: 'subtasks'))
+
+
+  setupSortable: ($ul) ->
+    $ul.nestedSortable
+      listType             : 'ul'
+      items                : 'li'
+      handle               : 'div.task'
+      toleranceElement     : '> div.task'
+      maxLevels            : 30
+      placeholder          : 'sort-placeholder'
+      forcePlaceholderSize : true
+      tolerance            : 'pointer'
+
+    $ul.bind 'sortupdate', (ev, ui) =>
+      $moved = ui.item
+
+      [position, $target] = if ($prev = $moved.prev('li')).length
+        ['right', $prev]
+      else if ($next = $moved.next('li')).length
+        ['left', $next]
+      else if ($parent = $moved.parent().closest('li', @el)).length
+        ['child', $parent]
+      else
+        ['root']
+
+      [movedCid, targetCid] = for $li in [$moved, $target]
+        $li.attr('id').match(/task-(.*)/)[1]
+      @collection.move movedCid, to: position, of: targetCid
+
+    return this
+
 
   events:
-    'editTask'      : 'editOrCloseTask'
-    'closeEditTask' : 'editOrCloseTask'
-    'newSubtask'    : 'newSubtask'
-    'click .new'    : 'newTask'
+    'editTask'        : 'editOrCloseTask'
+    'closeEditTask'   : 'editOrCloseTask'
+    'newSubtask'      : 'newSubtask'
+    'click .new'      : 'newTask'
 
   newTask: (ev) ->
     ev.preventDefault()
@@ -68,6 +100,7 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
 
   render: ->
     $(@el).html(@template(tasks: @collection.toJSON() ))
+    @setupSortable @$('ul.tasks')
     @reset()
 
     return this

@@ -11,10 +11,11 @@
 // GO AFTER THE REQUIRES BELOW.
 //
 //= require jquery
+//= require jquery-ui
+//= require jquery.ui.nestedSortable
 //= require jquery_ujs
 //= require underscore
 //= require backbone
 //= require backbone_rails_sync
-//= require backbone_datalink
 //= require backbone/lt
 //= require_tree .
