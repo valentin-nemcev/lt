@@ -5,9 +5,16 @@
 ul#tasks-list
   li > ul
     padding-left: 1.5em
+    &:not(:empty)
+      margin-bottom: 0.5em
+
   .sort-placeholder
     outline: 1px dashed gray
   li
-    margin: 0.5em 0
+    margin: 0.3em 0
   .task
     cursor: default
+
+  .task-form
+    input[name=body]
+      width: 25em
