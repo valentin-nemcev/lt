@@ -16,7 +16,14 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
 
     parentTask = @collection.get task.get('parent_id')
     $ul = if parentTask?
-      @$('#task-' + parentTask.cid).children('ul.subtasks')
+      $parentLi = @$('#task-' + parentTask.cid)
+      if ($subUl = $parentLi.children('ul.subtasks')).length
+        $subUl
+      else
+        # nestedSortable plugin destroys empty uls nested inside lis so we
+        # create them only when needed and we better not forget to remove empty
+        # uls when reordering list without nestedSortable
+        $('<ul/>', class: 'subtasks').appendTo($parentLi)
     else
       @$('ul.tasks')
 
@@ -31,7 +38,6 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     taskView = new Lt.Views.Tasks.TaskView({model : task})
     $('<li/>', 'id': 'task-' + task.cid)
       .append(taskView.render().el, formView.render().el)
-      .append($('<ul/>', class: 'subtasks'))
 
 
   setupSortable: ($ul) ->
