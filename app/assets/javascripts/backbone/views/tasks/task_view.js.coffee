@@ -20,4 +20,5 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
 
   render: ->
     $(@el).html(@template(@model.toJSON() ))
+    $(@el).toggleClass('done', @model.get('done'))
     return this

@@ -1,7 +1,7 @@
 class Task < ActiveRecord::Base
   acts_as_nested_set
 
-  attr_accessible :position, :id, :parent_id, :body
+  attr_accessible :position, :id, :parent_id, :body, :done
 
   default_scope order('lft')
 

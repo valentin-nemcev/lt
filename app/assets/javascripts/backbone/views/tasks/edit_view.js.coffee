@@ -40,7 +40,9 @@ class Lt.Views.Tasks.EditView extends Backbone.View
   update : (ev) ->
     ev.preventDefault()
 
-    attrs = body: @$('[name="body"]').val()
+    attrs =
+      body: @$('[name="body"]').val()
+      done: @$('[name="done"]').is(':checked')
     @model.save(attrs,
       success : (task) =>
         @triggerEv 'closeEditTask'
