@@ -1,6 +1,7 @@
 <form name="task">
   <input type="text" name="body" value="<%- @escape('body') %>" >
   <input type="checkbox" name="done" <%- 'checked' if @get('done') %> >
+  <input type="text" name="deadline" value="<%- @escape('deadline') %>" >
   <input type="submit" value="Сохранить" />
   <a class="cancel" href="#">Отменить</a>
   <% unless @isNew(): %> 

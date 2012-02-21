@@ -43,6 +43,7 @@ class Lt.Views.Tasks.EditView extends Backbone.View
     attrs =
       body: @$('[name="body"]').val()
       done: @$('[name="done"]').is(':checked')
+      deadline: @$('[name="deadline"]').val()
     @model.save(attrs,
       success : (task) =>
         @triggerEv 'closeEditTask'

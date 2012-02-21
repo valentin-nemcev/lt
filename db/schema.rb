@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120221075040) do
+ActiveRecord::Schema.define(:version => 20120221075908) do
 
   create_table "tasks", :force => true do |t|
     t.text    "body",                         :null => false
@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(:version => 20120221075040) do
     t.integer "rgt",                          :null => false
     t.integer "depth"
     t.boolean "done",      :default => false, :null => false
+    t.date    "deadline"
   end
 
 end
