@@ -1,3 +1,7 @@
 <div> <%- @contentHtml %> </div>
 <a href="<%= @source %>"><%= @sourceTitle %></a>
+<div>
+  <a href="#" class="next">Еще</a>
+  <a href="/quotes">Все</a>
+</div>
 

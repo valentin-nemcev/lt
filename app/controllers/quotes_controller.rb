@@ -10,6 +10,14 @@ class QuotesController < ApplicationController
     end
   end
 
+  def next_random
+    @quote = Quote.find_random(:after => params['after'])
+
+    respond_to do |format|
+      format.json { render json: @quote }
+    end
+  end
+
   # GET /quotes/1
   # GET /quotes/1.json
   def show

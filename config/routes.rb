@@ -1,5 +1,7 @@
 Lt::Application.routes.draw do
-  resources :quotes
+  resources :quotes do
+    get 'next_random', :on => :collection
+  end
 
   resources :tasks
 

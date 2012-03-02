@@ -10,6 +10,7 @@ class Lt.Views.Quotes.QuoteView extends Backbone.View
     'dblclick' : 'edit'
 
   initialize: ->
+    @presenter = new Lt.Views.Quotes.Presenter(@model)
     @model.bind 'change', @render, @
 
   edit: (ev) ->
@@ -19,5 +20,5 @@ class Lt.Views.Quotes.QuoteView extends Backbone.View
     return
 
   render: ->
-    $(@el).html @template(@model.toJSON())
+    $(@el).html @template(@presenter)
     return this
