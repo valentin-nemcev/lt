@@ -3,12 +3,12 @@ Lt.Views.Tasks ||= {}
 class Lt.Views.Tasks.IndexView extends Backbone.View
 
   initialize: () ->
-    @collection.bind 'reset'   , @reset, @
-    @collection.bind 'add'     , @add, @
+    @collection.bind 'reset'   , @reset,   @
+    @collection.bind 'add'     , @add,     @
     @collection.bind 'destroy' , @destroy, @
 
-  reset: () ->
-    @add task for task in @collection.models
+  reset: (tasks) ->
+    @add task for task in tasks.models
     return
 
   add: (task) ->
@@ -34,8 +34,8 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     @$('#task-' + task.cid).remove()
 
   buildLi: (task) ->
-    formView = new Lt.Views.Tasks.EditView({model : task})
-    taskView = new Lt.Views.Tasks.TaskView({model : task})
+    formView = new Lt.Views.Tasks.EditView model: task
+    taskView = new Lt.Views.Tasks.TaskView model: task
     $('<li/>', 'id': 'task-' + task.cid)
       .append(taskView.render().el, formView.render().el)
 
@@ -79,6 +79,7 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
   newTask: (ev, parentTaskCid) ->
     ev.preventDefault()
 
+    # TODO: Move to model
     newTask = new Lt.Models.Task()
     if parentTaskCid?
       parentTask = @collection.getByCid parentTaskCid
@@ -100,6 +101,6 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
 
   render: ->
     @setupSortable @$('ul.tasks')
-    @reset()
+    @reset(@collection)
 
     return this

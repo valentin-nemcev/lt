@@ -1,0 +1,19 @@
+<div id="quotes">
+  <h1>Цитаты</h1>
+
+  <a href="#" class='new'>Добавить</a>
+
+  <ul id="quotes-list" class="quotes"></ul>
+</div>
+
+<script type="text/javascript">
+  $(function() {
+    var quotes = <%= @quotes.to_json.html_safe -%>;
+    var view = new Lt.Views.Quotes.IndexView({
+      collection: new Lt.Collections.QuotesCollection(quotes),
+      el: $('#quotes')[0]
+    });
+    view.render();
+  });
+</script>
+

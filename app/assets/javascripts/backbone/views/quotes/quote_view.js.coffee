@@ -1,10 +1,10 @@
-Lt.Views.Tasks ||= {}
+Lt.Views.Quotes ||= {}
 
-class Lt.Views.Tasks.TaskView extends Backbone.View
-  template  : JST['backbone/templates/tasks/task']
+class Lt.Views.Quotes.QuoteView extends Backbone.View
+  template  : JST['backbone/templates/quotes/quote']
 
   tagName   : 'div'
-  className : 'task'
+  className : 'quote'
 
   events:
     'dblclick' : 'edit'
@@ -15,10 +15,9 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
   edit: (ev) ->
     ev.preventDefault()
     ev.stopPropagation()
-    $(@el).trigger('editTask', [@model.cid])
+    @$el.trigger('editQuote', [@model.cid])
     return
 
   render: ->
     $(@el).html @template(@model.toJSON())
-    $(@el).toggleClass('done', @model.get('done'))
     return this

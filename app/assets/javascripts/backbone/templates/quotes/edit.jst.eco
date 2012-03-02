@@ -1,0 +1,20 @@
+<form name="quote">
+  <div class="field">
+    <textarea name="content"><%- @escape('content') %></textarea>
+  </div>
+
+  <div class="field">
+    <label>Источник:</label>
+    <input type="text" name="source" value="<%- @escape('source') %>" >
+  </div>
+
+  <div class="actions">
+    <input type="submit" value="Сохранить" />
+    <a class="cancel" href="#">Отменить</a>
+    <% unless @isNew(): %>
+      <a class="delete" href="#">Удалить</a>
+    <% end %>
+  </div>
+
+</form>
+

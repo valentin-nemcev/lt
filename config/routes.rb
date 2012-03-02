@@ -1,4 +1,6 @@
 Lt::Application.routes.draw do
+  resources :quotes
+
   resources :tasks
 
   # The priority is based upon order of creation:

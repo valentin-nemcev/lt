@@ -20,11 +20,6 @@ class TasksController < ApplicationController
     end
   end
 
-  # GET /tasks/1/edit
-  def edit
-    @task = Task.find(params[:id])
-  end
-
   # POST /tasks
   # POST /tasks.json
   def create
@@ -46,7 +41,7 @@ class TasksController < ApplicationController
 
     respond_to do |format|
       if @task.update_attributes(params[:task])
-        format.json { render json: @task, status: :ok}
+        format.json { render json: @task, status: :ok }
       else
         format.json { render json: @task.errors, status: :unprocessable_entity }
       end

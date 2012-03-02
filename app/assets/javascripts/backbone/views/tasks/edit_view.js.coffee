@@ -1,25 +1,25 @@
 Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.EditView extends Backbone.View
-  template : JST["backbone/templates/tasks/edit"]
+  template  : JST['backbone/templates/tasks/edit']
 
-  tagName: 'div'
-  className: 'task-form'
+  tagName   : 'div'
+  className : 'task-form'
 
   events:
-    "submit form"        : "update"
-    "click .new-subtask" : "newSubtask"
-    "click .delete"      : "delete"
-    "click .cancel"      : "cancel"
-    "focus"              : "focus"
+    'submit form'        : 'update'
+    'click .new-subtask' : 'newSubtask'
+    'click .delete'      : 'delete'
+    'click .cancel'      : 'cancel'
+    'focus'              : 'focus'
 
   initialize: ->
     @model.bind 'change', @render, @
 
   newSubtask: (ev) ->
     ev.preventDefault()
-    @triggerEv 'newSubtask'
-    @triggerEv 'closeEditTask'
+    @triggerDomEv 'newSubtask'
+    @triggerDomEv 'closeEditTask'
     return
 
   delete: (ev) ->
@@ -32,30 +32,29 @@ class Lt.Views.Tasks.EditView extends Backbone.View
     if @model.isNew()
       @delete(ev)
     else
-      @triggerEv 'closeEditTask'
+      @triggerDomEv 'closeEditTask'
       @render()
 
     return
 
-  update : (ev) ->
+  update: (ev) ->
     ev.preventDefault()
 
     attrs =
       body: @$('[name="body"]').val()
       done: @$('[name="done"]').is(':checked')
       deadline: @$('[name="deadline"]').val()
-    @model.save(attrs,
-      success : (task) =>
-        @triggerEv 'closeEditTask'
-    )
+
+    @model.save attrs, success: (task) => @triggerDomEv 'closeEditTask'
+
     return
 
   focus: (ev) ->
     @$('[name="body"]').focus()
     return
 
-  triggerEv: (evName) -> $(@el).trigger(evName, [@model.cid])
+  triggerDomEv: (evName) -> $(@el).trigger(evName, [@model.cid])
 
   render : ->
-    $(@el).html(@template(@model))
+    $(@el).html @template(@model)
     return this
