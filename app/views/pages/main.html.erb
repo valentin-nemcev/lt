@@ -1,6 +1,11 @@
+<div id="random_quote"></div>
+
 <h1>Задачи</h1>
+
 <div id="tasks"></div>
 
 <script type="text/javascript">
+  Lt.initRandomQuote('#random_quote', <%= @quote.to_json.html_safe -%>);
   Lt.initTasksList('#tasks', <%= @tasks.to_json.html_safe -%>);
 </script>
+

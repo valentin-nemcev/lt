@@ -1,6 +1,7 @@
 Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.IndexView extends Backbone.View
+  template  : JST['backbone/templates/tasks/index']
 
   initialize: () ->
     @collection.bind 'reset'   , @reset,   @
@@ -100,6 +101,7 @@ class Lt.Views.Tasks.IndexView extends Backbone.View
     $form.trigger('focus') if edit
 
   render: ->
+    @$el.html @template()
     @setupSortable @$('ul.tasks')
     @reset(@collection)
 

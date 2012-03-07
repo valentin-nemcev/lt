@@ -1,6 +1,7 @@
 Lt.Views.Quotes ||= {}
 
 class Lt.Views.Quotes.IndexView extends Backbone.View
+  template  : JST['backbone/templates/quotes/index']
 
   initialize: () ->
     @collection.bind 'reset'   , @reset, @
@@ -47,6 +48,7 @@ class Lt.Views.Quotes.IndexView extends Backbone.View
     return
 
   render: =>
+    @$el.html @template()
     @reset(@collection)
 
     return this

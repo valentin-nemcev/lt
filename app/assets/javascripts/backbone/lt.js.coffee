@@ -9,3 +9,26 @@ window.Lt =
   Collections: {}
   Routers: {}
   Views: {}
+
+  initTasksList: (selector, tasks) ->
+    view = new Lt.Views.Tasks.IndexView
+      collection: new Lt.Collections.TasksCollection tasks
+      el: $(selector)[0]
+
+    view.render()
+
+  initQuotesList: (selector, quotes) ->
+    view = new Lt.Views.Quotes.IndexView
+      collection: new Lt.Collections.QuotesCollection quotes
+      el: $(selector)[0]
+
+    view.render()
+
+
+  initRandomQuote: (selector, quote) ->
+    view = new Lt.Views.Quotes.RandomQuoteView
+      model: new Lt.Models.RandomQuote quote
+      el: $(selector)[0]
+
+    view.render()
+
