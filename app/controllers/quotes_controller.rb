@@ -1,6 +1,4 @@
 class QuotesController < ApplicationController
-  # GET /quotes
-  # GET /quotes.json
   def index
     @quotes = Quote.all
 
@@ -18,8 +16,6 @@ class QuotesController < ApplicationController
     end
   end
 
-  # GET /quotes/1
-  # GET /quotes/1.json
   def show
     @quote = Quote.find(params[:id])
 
@@ -28,8 +24,6 @@ class QuotesController < ApplicationController
     end
   end
 
-  # POST /quotes
-  # POST /quotes.json
   def create
     @quote = Quote.new(params[:quote])
 
@@ -42,8 +36,6 @@ class QuotesController < ApplicationController
     end
   end
 
-  # PUT /quotes/1
-  # PUT /quotes/1.json
   def update
     @quote = Quote.find(params[:id])
 
@@ -56,8 +48,6 @@ class QuotesController < ApplicationController
     end
   end
 
-  # DELETE /quotes/1
-  # DELETE /quotes/1.json
   def destroy
     @quote = Quote.find(params[:id])
     @quote.destroy
