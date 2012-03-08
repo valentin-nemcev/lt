@@ -1,7 +1,7 @@
 Lt.Views.Quotes ||= {}
 
-class Lt.Views.Quotes.EditView extends Backbone.View
-  template  : JST['backbone/templates/quotes/edit']
+class Lt.Views.Quotes.FormView extends Backbone.View
+  template  : JST['backbone/templates/quotes/form']
 
   tagName   : 'div'
   className : 'quote-form'
@@ -25,7 +25,7 @@ class Lt.Views.Quotes.EditView extends Backbone.View
     if @model.isNew()
       @delete(ev)
     else
-      @triggerDomEv 'closeEditQuote'
+      @triggerDomEv 'closeEditItem'
       @render()
 
     return
@@ -37,7 +37,7 @@ class Lt.Views.Quotes.EditView extends Backbone.View
       content: @$('[name="content"]').val()
       source:  @$('[name="source"]').val()
 
-    @model.save attrs, success: (quote) => @triggerDomEv 'closeEditQuote'
+    @model.save attrs, success: (quote) => @triggerDomEv 'closeEditItem'
 
     return
 

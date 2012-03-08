@@ -11,14 +11,14 @@ window.Lt =
   Views: {}
 
   initTasksList: (selector, tasks) ->
-    view = new Lt.Views.Tasks.IndexView
+    view = new Lt.Views.Tasks.ListView
       collection: new Lt.Collections.TasksCollection tasks
       el: $(selector)[0]
 
     view.render()
 
   initQuotesList: (selector, quotes) ->
-    view = new Lt.Views.Quotes.IndexView
+    view = new Lt.Views.Quotes.ListView
       collection: new Lt.Collections.QuotesCollection quotes
       el: $(selector)[0]
 

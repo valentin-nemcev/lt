@@ -1,7 +1,7 @@
 Lt.Views.Tasks ||= {}
 
-class Lt.Views.Tasks.TaskView extends Backbone.View
-  template  : JST['backbone/templates/tasks/task']
+class Lt.Views.Tasks.ItemView extends Backbone.View
+  template  : JST['backbone/templates/tasks/item']
 
   tagName   : 'div'
   className : 'task'
@@ -15,7 +15,7 @@ class Lt.Views.Tasks.TaskView extends Backbone.View
   edit: (ev) ->
     ev.preventDefault()
     ev.stopPropagation()
-    $(@el).trigger('editTask', [@model.cid])
+    $(@el).trigger('editItem', [@model.cid])
     return
 
   render: ->

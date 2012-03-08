@@ -1,7 +1,7 @@
 Lt.Views.Tasks ||= {}
 
-class Lt.Views.Tasks.EditView extends Backbone.View
-  template  : JST['backbone/templates/tasks/edit']
+class Lt.Views.Tasks.FormView extends Backbone.View
+  template  : JST['backbone/templates/tasks/form']
 
   tagName   : 'div'
   className : 'task-form'
@@ -18,8 +18,8 @@ class Lt.Views.Tasks.EditView extends Backbone.View
 
   newSubtask: (ev) ->
     ev.preventDefault()
-    @triggerDomEv 'newSubtask'
-    @triggerDomEv 'closeEditTask'
+    @triggerDomEv 'newModel'
+    @triggerDomEv 'closeEditItem'
     return
 
   delete: (ev) ->
@@ -32,7 +32,7 @@ class Lt.Views.Tasks.EditView extends Backbone.View
     if @model.isNew()
       @delete(ev)
     else
-      @triggerDomEv 'closeEditTask'
+      @triggerDomEv 'closeEditItem'
       @render()
 
     return
@@ -45,7 +45,7 @@ class Lt.Views.Tasks.EditView extends Backbone.View
       done: @$('[name="done"]').is(':checked')
       deadline: @$('[name="deadline"]').val()
 
-    @model.save attrs, success: (task) => @triggerDomEv 'closeEditTask'
+    @model.save attrs, success: (task) => @triggerDomEv 'closeEditItem'
 
     return
 

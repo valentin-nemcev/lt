@@ -1,7 +1,7 @@
 Lt.Views.Quotes ||= {}
 
-class Lt.Views.Quotes.QuoteView extends Backbone.View
-  template  : JST['backbone/templates/quotes/quote']
+class Lt.Views.Quotes.ItemView extends Backbone.View
+  template  : JST['backbone/templates/quotes/item']
 
   tagName   : 'div'
   className : 'quote'
@@ -16,7 +16,7 @@ class Lt.Views.Quotes.QuoteView extends Backbone.View
   edit: (ev) ->
     ev.preventDefault()
     ev.stopPropagation()
-    @$el.trigger('editQuote', [@model.cid])
+    @$el.trigger('editItem', [@model.cid])
     return
 
   render: ->
