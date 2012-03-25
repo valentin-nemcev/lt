@@ -6,6 +6,7 @@ require "rvm/capistrano"
 set :rvm_ruby_string, 'ruby-1.9.3-p0'
 set :rvm_type, :user
 
+
 require 'bundler/capistrano'
 set :bundle_flags, '--deployment --binstubs'
 
@@ -36,7 +37,9 @@ namespace :deploy do
       run "ln -nfs #{shared_path}/#{from} #{latest_release}/#{to}"
     end
   end
+
 end
+load 'deploy/assets'
 
 
 def run_rake(*args)

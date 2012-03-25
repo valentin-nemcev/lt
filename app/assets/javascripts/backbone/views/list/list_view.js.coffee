@@ -4,7 +4,6 @@ class Views.ListView extends Backbone.View
   Views: Views
 
   initialize: () ->
-    @itemName  = @collection.model.name.toLowerCase()
     @itemsName = @itemName + 's' # TODO: Install underscore-string
 
     @sortable = @collection.sortable
