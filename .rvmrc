@@ -1,1 +1,1 @@
-rvm use 1.9.3@lt --create
+rvm use 1.9.3-p0@lt --create
