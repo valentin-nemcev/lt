@@ -57,7 +57,7 @@ class Views.ListView extends Backbone.View
       @$('ul.' + @itemsName)
 
 
-  events:
+  events: ->
     'editItem'      : (ev, model) -> @editItem @getItem(model), on
     'closeEditItem' : (ev, model) -> @editItem @getItem(model), off
     'newModel'      : 'newModel'
@@ -82,7 +82,7 @@ class Views.ListView extends Backbone.View
 
 
   render: ->
-    @$el.html @template()
+    @$el.html @template(this)
     @reset(@collection)
     @setupSortable @getParentList() if @sortable
 
