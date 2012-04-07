@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120301092607) do
+ActiveRecord::Schema.define(:version => 20120407092537) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -21,13 +21,14 @@ ActiveRecord::Schema.define(:version => 20120301092607) do
   end
 
   create_table "tasks", :force => true do |t|
-    t.text    "body",                         :null => false
-    t.integer "parent_id"
-    t.integer "lft",                          :null => false
-    t.integer "rgt",                          :null => false
-    t.integer "depth"
-    t.boolean "done",      :default => false, :null => false
-    t.date    "deadline"
+    t.text     "body",                          :null => false
+    t.integer  "parent_id"
+    t.integer  "lft",                           :null => false
+    t.integer  "rgt",                           :null => false
+    t.integer  "depth"
+    t.boolean  "done",       :default => false, :null => false
+    t.date     "deadline"
+    t.datetime "created_at",                    :null => false
   end
 
 end
