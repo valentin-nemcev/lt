@@ -20,8 +20,10 @@ group :assets do
   gem 'uglifier',      '>= 1.0.3'
 end
 
-group :development do
+group :development, :test do
   gem 'capistrano',        '~> 2.11.2'
   gem 'capistrano_colors', '~> 0.5.5'
+
+  gem 'rspec-rails', '~> 2.9.0'
 end
 
