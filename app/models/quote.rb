@@ -1,5 +1,6 @@
 class Quote < ActiveRecord::Base
 
+  attr_accessible :content, :source
   def self.find_random options = {}
     logger.info options
     r = self.order('RAND()')

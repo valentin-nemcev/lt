@@ -5,6 +5,12 @@ class Lt.Models.Quote extends Backbone.Model
     content: null
     source: null
 
+  toJSON: ->
+    attributes = {}
+    for key in ['content', 'source']
+      attributes[key] = @attributes[key]
+    return attributes
+
 class Lt.Models.RandomQuote extends Lt.Models.Quote
   url: '/quotes/next_random'
 
