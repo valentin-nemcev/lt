@@ -21,6 +21,17 @@ class ResourceController < ApplicationController
   end
 
 
+  def with_resource
+    set_resource model.find(params[:id])
+
+    yield resource
+
+    respond_to do |format|
+      format.json { render json: resource }
+    end
+  end
+
+
   def index
     set_collection model.all
 

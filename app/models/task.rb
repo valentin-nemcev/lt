@@ -1,7 +1,7 @@
 class Task < ActiveRecord::Base
   acts_as_nested_set
 
-  attr_accessible :position, :id, :parent_id, :body, :done, :deadline
+  attr_accessible :position, :id, :parent_id, :body, :deadline
 
   default_scope order('lft')
 
@@ -28,9 +28,25 @@ class Task < ActiveRecord::Base
   end
 
 
+  def complete!
+    update_attribute(:completed_at, Time.now)
+    return self
+  end
+
+  def undo_complete!
+    update_attribute(:completed_at, nil)
+    return self
+  end
+
+  def completed?
+    !!(completed_at && completed_at <= Time.now)
+  end
+
+
   def as_json options = {}
     accessible_attributes = self.class.accessible_attributes.map(&:to_sym)
-    options.merge! :only => accessible_attributes, :methods => :position
+    options.merge! :only => accessible_attributes,
+                   :methods => [:position, :completed?]
     super options
   end
 end

@@ -1,6 +1,6 @@
 <a href="#" class='new control'>Добавить</a>
-<label class="show-done control minor">
-  <input type="checkbox" <%= 'checked' if @showingDone %>/>
+<label class="show-completed control minor">
+  <input type="checkbox" <%= 'checked' if @showingCompleted %>/>
   Показать выполненные
 </label>
 <ul id="tasks-list" class="tasks"></ul>

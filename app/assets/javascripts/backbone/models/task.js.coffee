@@ -4,8 +4,27 @@ class Lt.Models.Task extends Backbone.Model
   defaults:
     body: null
 
+  toJSON: ->
+    attributes = {}
+    for key in ['body', 'deadline', 'parent_id', 'position']
+      attributes[key] = @attributes[key]
+    return attributes
+
   getParent: ->
     @collection.get @get('parent_id')
+
+  isCompleted: -> !!@get('completed?')
+
+  postAction: (action, options) ->
+    success = (resp, status, jqXHR) =>
+      @set(@parse(resp, jqXHR))
+      options.success() if options.success
+
+    $.post @url() + '/' + action, success
+
+  undoComplete: (options) -> @postAction 'undo_complete', options
+  complete:     (options) -> @postAction 'complete'     , options
+
 
 class Lt.Collections.TasksCollection extends Backbone.Collection
   model: Lt.Models.Task
@@ -23,3 +42,4 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
     model = @getByCid model
     position.of = @getByCid(position.of)?.id
     model.save position: position
+

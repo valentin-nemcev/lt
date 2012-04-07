@@ -4,10 +4,13 @@
            value="<%- @escape('body') %>" >
   </div>
   <div class='field-group minor'>
-    <label class="control">
-      Выполнена
-      <input type="checkbox" name="done" <%- 'checked' if @get('done') %> >
-    </label>
+    <% unless @isNew(): %>
+      <% if @isCompleted(): %>
+        <button class="undo-complete control">Не сделано</button>
+      <% else: %>
+        <button class="complete control">Сделано!</button>
+      <% end %>
+    <% end %>
     <label class="control">
       Крайний срок
       <input type="text" name="deadline" value="<%- @escape('deadline') %>" >

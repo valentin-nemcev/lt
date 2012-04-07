@@ -7,11 +7,13 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   className : 'task-form'
 
   events:
-    'submit form'        : 'update'
-    'click .new-subtask' : 'newSubtask'
-    'click .delete'      : 'delete'
-    'click .cancel'      : 'cancel'
-    'focus'              : 'focus'
+    'submit form'          : 'update'
+    'click .new-subtask'   : 'newSubtask'
+    'click .delete'        : 'delete'
+    'click .cancel'        : 'cancel'
+    'click .complete'      : (ev) -> ev.preventDefault(); @action 'complete'
+    'click .undo-complete' : (ev) -> ev.preventDefault(); @action 'undoComplete'
+    'focus'                : 'focus'
 
   initialize: ->
     @model.bind 'change', @render, @
@@ -42,12 +44,14 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
     attrs =
       body: @$('[name="body"]').val()
-      done: @$('[name="done"]').is(':checked')
       deadline: @$('[name="deadline"]').val()
 
     @model.save attrs, success: (task) => @triggerDomEv 'closeEditItem'
 
     return
+
+  action: (action) ->
+    @model[action] success: (task) => @triggerDomEv 'closeEditItem'
 
   focus: (ev) ->
     @$('[name="body"]').focus()

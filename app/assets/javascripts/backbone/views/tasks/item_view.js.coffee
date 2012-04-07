@@ -20,5 +20,5 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   render: ->
     $(@el).html @template(@model.toJSON())
-    $(@el).toggleClass('done', @model.get('done'))
+    $(@el).toggleClass('completed', @model.isCompleted())
     return this
