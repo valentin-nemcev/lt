@@ -5,7 +5,7 @@ class QuotesController < ResourceController
   end
 
   def next_random
-    set_resource = model.find_random(:after => params['after'])
+    set_resource model.find_random(:after => params['after'])
 
     respond_to do |format|
       format.json { render json: resource }
