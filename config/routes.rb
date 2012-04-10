@@ -11,4 +11,6 @@ Lt::Application.routes.draw do
     get 'next_random', :on => :collection
   end
 
+  match 'users/select' => 'users#select', :via => :post, :as => :select_user
+
 end
