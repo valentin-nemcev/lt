@@ -1,5 +1,9 @@
 class TasksController < ResourceController
 
+  def scope
+    current_user.tasks
+  end
+
   def resource_name
     :task
   end

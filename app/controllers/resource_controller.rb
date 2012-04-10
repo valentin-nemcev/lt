@@ -1,7 +1,11 @@
 class ResourceController < ApplicationController
 
+  def scope
+    resource_name.to_s.classify.constantize
+  end
+
   def model
-    @model ||= resource_name.to_s.classify.constantize
+    @model ||= scope
   end
 
   def set_collection collection

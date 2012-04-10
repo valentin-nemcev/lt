@@ -1,5 +1,9 @@
 class QuotesController < ResourceController
 
+  def scope
+    current_user.quotes
+  end
+
   def resource_name
     :quote
   end
