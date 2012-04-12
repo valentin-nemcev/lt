@@ -7,22 +7,25 @@ class Views.ListView extends Lt.Views.List.ListView
 
   initialize: ->
     super
-    @showCompleted yes
+    @state = @options.state
+    @state.bind 'change:show_completed', @showCompleted, @
 
   events: ->
     _.extend super,
       'change .show-completed input' : (ev) =>
-        @showCompleted $(ev.currentTarget).prop('checked')
+        @state.save show_completed: $(ev.currentTarget).prop('checked')
 
   buildItem: (model) ->
     @toggleCompletedVisibility(model, super)
 
-  showCompleted: (showingCompleted) ->
-    @showingCompleted = showingCompleted
+  showCompleted: (state, showingCompleted) ->
     @$('.show-completed input').prop('checked', showingCompleted)
-    @toggleCompletedVisibility(task, @getItem(task)) for task in @collection.models
+    for task in @collection.models
+      @toggleCompletedVisibility(task, @getItem(task))
+
+    return
 
   toggleCompletedVisibility: (model, item) ->
-    item.toggle(not model.isCompleted() or @showingCompleted)
+    item.toggle(not model.isCompleted() or @state.get('show_completed'))
 
 

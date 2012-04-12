@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120410112420) do
+ActiveRecord::Schema.define(:version => 20120412102013) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -32,6 +32,15 @@ ActiveRecord::Schema.define(:version => 20120410112420) do
     t.datetime "completed_at"
     t.integer  "user_id",      :null => false
   end
+
+  create_table "ui_states", :force => true do |t|
+    t.string  "component", :null => false
+    t.integer "user_id",   :null => false
+    t.text    "state"
+  end
+
+  add_index "ui_states", ["user_id", "component"], :name => "index_ui_states_on_user_id_and_component", :unique => true
+  add_index "ui_states", ["user_id"], :name => "index_ui_states_on_user_id"
 
   create_table "users", :force => true do |t|
     t.string "login"

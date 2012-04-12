@@ -6,6 +6,9 @@
 
 <script type="text/javascript">
   Lt.initRandomQuote('#random_quote', <%= @quote.to_json.html_safe -%>);
-  Lt.initTasksList('#tasks', <%= @tasks.to_json.html_safe -%>);
+  Lt.initTasksList(
+      '#tasks', 
+      <%= @tasks.to_json.html_safe -%>, 
+      <%= ui_state_of(:tasks_list).state.to_json.html_safe -%>);
 </script>
 

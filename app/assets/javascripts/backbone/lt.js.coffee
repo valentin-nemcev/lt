@@ -10,9 +10,10 @@ window.Lt =
   Routers: {}
   Views: {}
 
-  initTasksList: (selector, tasks) ->
+  initTasksList: (selector, tasks, tasks_list_state) ->
     view = new Lt.Views.Tasks.ListView
       collection: new Lt.Collections.TasksCollection tasks
+      state: new Lt.Models.TasksListState tasks_list_state
       el: $(selector)[0]
 
     view.render()
