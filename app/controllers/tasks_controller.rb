@@ -6,6 +6,7 @@ class TasksController < ResourceController
       current_date = Time.parse params[:current_date]
       s = s.for_date current_date
     end
+    return s
   end
 
   def resource_name
