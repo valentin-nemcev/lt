@@ -6,7 +6,6 @@ class Task < ActiveRecord::Base
   default_scope order('lft')
 
   belongs_to :user
-  validates :user_id, :presence => true
 
   attr_writer :position
 

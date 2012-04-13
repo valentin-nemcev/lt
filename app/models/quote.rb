@@ -1,7 +1,6 @@
 class Quote < ActiveRecord::Base
 
   belongs_to :user
-  validates :user_id, :presence => true
 
   attr_accessible :content, :source
   def self.find_random options = {}
