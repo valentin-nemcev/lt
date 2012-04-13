@@ -15,6 +15,7 @@ class Views.ListView extends Backbone.View
     @collection.bind 'destroy' , @destroy, @
 
   reset: (collection) ->
+    @$('ul.' + @itemsName).empty()
     @add model for model in collection.models
     return
 
