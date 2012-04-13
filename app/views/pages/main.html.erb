@@ -2,10 +2,12 @@
 
 <h1>Задачи</h1>
 
+<div id="timeline"></div>
 <div id="tasks"></div>
 
 <script type="text/javascript">
   Lt.initRandomQuote('#random_quote', <%= @quote.to_json.html_safe -%>);
+  Lt.initTimeline('#timeline');
   Lt.initTasksList(
       '#tasks', 
       <%= @tasks.to_json.html_safe -%>, 

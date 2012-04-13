@@ -10,17 +10,27 @@ window.Lt =
   Routers: {}
   Views: {}
 
+  initTimeline: (selector) ->
+    @timeline = new Lt.Models.Timeline
+    view = new Lt.Views.Tasks.Timeline
+      model: @timeline
+      el: $(selector)[0]
+
+    view.render()
+
   initTasksList: (selector, tasks, tasks_list_state) ->
+    @tasks = new Lt.Collections.TasksCollection tasks
     view = new Lt.Views.Tasks.ListView
-      collection: new Lt.Collections.TasksCollection tasks
+      collection: @tasks
       state: new Lt.Models.TasksListState tasks_list_state
       el: $(selector)[0]
 
     view.render()
 
   initQuotesList: (selector, quotes) ->
+    @quotes = new Lt.Collections.QuotesCollection quotes
     view = new Lt.Views.Quotes.ListView
-      collection: new Lt.Collections.QuotesCollection quotes
+      collection: @quotes
       el: $(selector)[0]
 
     view.render()

@@ -14,6 +14,7 @@
 //= require jquery-ui
 //= require jquery.ui.nestedSortable
 //= require jquery_ujs
+//= require moment
 //= require underscore
 //= require backbone
 //= require backbone_rails_sync

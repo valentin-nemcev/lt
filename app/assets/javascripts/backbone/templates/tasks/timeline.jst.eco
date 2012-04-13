@@ -1,0 +1,5 @@
+<button class="change_current_date" change="prev day">&lt;&lt;</button>
+<button class="change_current_date" change="prev hour">&lt;</button>
+<input type="text" name="current_date" value=""/>
+<button class="change_current_date" change="next hour">&gt;</button>
+<button class="change_current_date" change="next day">&gt;&gt;</button>
