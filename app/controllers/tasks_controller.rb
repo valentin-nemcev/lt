@@ -1,7 +1,11 @@
 class TasksController < ResourceController
 
   def scope
-    current_user.tasks
+    s = current_user.tasks
+    if params[:current_date]
+      current_date = Time.parse params[:current_date]
+      s = s.for_date current_date
+    end
   end
 
   def resource_name

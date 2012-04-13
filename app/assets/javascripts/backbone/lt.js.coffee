@@ -12,6 +12,7 @@ window.Lt =
 
   initTimeline: (selector) ->
     @timeline = new Lt.Models.Timeline
+    @bindTasksToTimeline()
     view = new Lt.Views.Tasks.Timeline
       model: @timeline
       el: $(selector)[0]
@@ -20,12 +21,17 @@ window.Lt =
 
   initTasksList: (selector, tasks, tasks_list_state) ->
     @tasks = new Lt.Collections.TasksCollection tasks
+    @bindTasksToTimeline()
     view = new Lt.Views.Tasks.ListView
       collection: @tasks
       state: new Lt.Models.TasksListState tasks_list_state
       el: $(selector)[0]
 
     view.render()
+
+  bindTasksToTimeline: () ->
+    @tasks.bindToTimeline(@timeline) if @tasks? and @timeline?
+
 
   initQuotesList: (selector, quotes) ->
     @quotes = new Lt.Collections.QuotesCollection quotes

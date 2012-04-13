@@ -43,3 +43,11 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
     position.of = @getByCid(position.of)?.id
     model.save position: position
 
+
+  bindToTimeline: (timeline) ->
+    timeline.bind 'change:current_date', (tl, current_date) =>
+      @fetchForDate current_date
+
+  fetchForDate: (date, options = {}) ->
+    date_opts = data: {current_date: date.toISOString()}
+    @fetch _.extend({}, date_opts, options)
