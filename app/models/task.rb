@@ -29,8 +29,15 @@ class Task < ActiveRecord::Base
   end
 
 
-  def complete!
-    update_attribute(:completed_at, Time.now)
+  def self.for_date(date)
+    current_date = self.sanitize_sql ['? AS `current_date`', date]
+    select(['tasks.*', current_date]).where('? >= created_at', date)
+  end
+
+
+  def complete!(at = nil)
+    at ||= DateTime.now
+    update_attribute(:completed_at, at)
     return self
   end
 
@@ -39,9 +46,19 @@ class Task < ActiveRecord::Base
     return self
   end
 
-  def completed?
-    !!(completed_at && completed_at <= Time.now)
+
+  def current_date
+    attributes.fetch('current_date', DateTime.now)
   end
+
+  def completed
+    if completed_at
+      completed_at <= current_date
+    else
+      false
+    end
+  end
+  alias_method :completed?, :completed
 
 
   def as_json options = {}
