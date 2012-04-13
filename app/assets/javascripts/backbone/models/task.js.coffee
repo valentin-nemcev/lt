@@ -13,7 +13,7 @@ class Lt.Models.Task extends Backbone.Model
   getParent: ->
     @collection.get @get('parent_id')
 
-  isCompleted: -> !!@get('completed?')
+  isCompleted: -> !!@get('completed')
 
   postAction: (action, options) ->
     success = (resp, status, jqXHR) =>

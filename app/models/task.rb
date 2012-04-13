@@ -64,7 +64,7 @@ class Task < ActiveRecord::Base
   def as_json options = {}
     accessible_attributes = self.class.accessible_attributes.map(&:to_sym)
     options.merge! :only => accessible_attributes,
-                   :methods => [:position, :completed?]
+                   :methods => [:position, :completed]
     super options
   end
 end
