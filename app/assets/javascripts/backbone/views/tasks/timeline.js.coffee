@@ -19,10 +19,13 @@ class Views.Timeline extends Backbone.View
       @changeCurrentDate($(ev.currentTarget).attr('change'))
 
   changeCurrentDate: (change) ->
-    [dir, unit] = change.split(' ')
-    units = unit + 's'
-    diff = {next: +1, prev: -1}[dir]
-    @current_date.add(units, diff)
+    if change == 'now'
+      @current_date = moment()
+    else
+      [dir, unit] = change.split(' ')
+      units = unit + 's'
+      diff = {next: +1, prev: -1}[dir]
+      @current_date.add(units, diff)
     @updateModel()
 
   render: ->
