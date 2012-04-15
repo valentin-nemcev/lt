@@ -1,7 +1,6 @@
-Views = Lt.Views.List ||= {}
+Lt.Views.List ||= {}
 
-class Views.ListView extends Backbone.View
-  Views: Views
+class Lt.Views.List.ListView extends Backbone.View
 
   initialize: () ->
     @itemsName = @itemName + 's' # TODO: Install underscore-string
@@ -21,10 +20,7 @@ class Views.ListView extends Backbone.View
 
   add: (model) ->
     $li = @buildItem model
-
-    $ul = @getParentList(model.getParent() if @sortable)
-    $ul.append($li)
-    @editItem($li, model.isNew())
+    @addItem($li, model)
 
     return
 
@@ -40,9 +36,12 @@ class Views.ListView extends Backbone.View
 
   buildItem: (model) ->
     itemView = new @Views.ItemView model: model
-    formView = new @Views.FormView model: model
     $('<li/>', 'id': @itemName + '-' + model.cid)
-      .append(itemView.render().el, formView.render().el)
+      .append(itemView.render().el)
+
+  addItem: ($li, model) ->
+    $ul = @getParentList(model.getParent() if @sortable)
+    $ul.append($li)
 
   getParentList: (parentModel) ->
     if parentModel?
@@ -58,28 +57,7 @@ class Views.ListView extends Backbone.View
       @$('ul.' + @itemsName)
 
 
-  events: ->
-    'editItem'      : (ev, model) -> @editItem @getItem(model), on
-    'closeEditItem' : (ev, model) -> @editItem @getItem(model), off
-    'newModel'      : 'newModel'
-    'click .new'    : 'newModel'
-
-  editItem: ($li, edit) ->
-    $li.children('.' + @itemName).toggle(!edit)
-    $form = $li.children('.' + @itemName + '-form')
-    $form.toggle(edit)
-    $form.trigger('focus') if edit
-
-  newModel: (ev, parentModelCid) ->
-    ev.preventDefault()
-
-    newModel = new @collection.model()
-    if @sortable
-      @collection.addChild newModel, parentModelCid
-    else
-      @collection.add newModel
-
-    return
+  events: -> {}
 
 
   render: ->
