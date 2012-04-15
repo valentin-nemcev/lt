@@ -1,0 +1,12 @@
+<div id='task_view_switcher'>
+  <span class='tab' tab-handle='task_plan'>
+    <a href='#'>Планирование</a>
+    <span>Планирование</span>
+  </span>
+  <span class='tab' tab-handle='task_actions'>
+    <a href='#'>Исполнение</a>
+    <span>Исполнение</span>
+  </span>
+</div>
+<div id='task_plan' class='tasks'></div>
+<div id='task_actions' class='tasks'></div>

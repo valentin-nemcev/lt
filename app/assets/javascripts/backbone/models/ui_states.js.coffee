@@ -1,10 +1,11 @@
-class Lt.Models.TasksListState extends Backbone.Model
+class Lt.Models.TaskViewState extends Backbone.Model
   paramRoot: 'state'
 
-  url: -> "ui_states/tasks_list"
+  url: -> "ui_states/task_view"
 
   isNew: -> false
 
 
   defaults:
     show_completed: no
+    current_view: 'plan'

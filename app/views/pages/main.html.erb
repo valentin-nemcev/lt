@@ -8,9 +8,9 @@
 <script type="text/javascript">
   Lt.initRandomQuote('#random_quote', <%= @quote.to_json.html_safe -%>);
   Lt.initTimeline('#timeline');
-  Lt.initTasksList(
+  Lt.initTaskView(
       '#tasks', 
       <%= @tasks.to_json.html_safe -%>, 
-      <%= ui_state_of(:tasks_list).state.to_json.html_safe -%>);
+      <%= ui_state_of(:task_view).state.to_json.html_safe -%>);
 </script>
 
