@@ -1,5 +1,6 @@
 class Task < ActiveRecord::Base
   acts_as_nested_set
+  alias_method :subtasks, :children
 
   attr_accessible :position, :id, :parent_id, :body, :deadline
 
@@ -64,11 +65,19 @@ class Task < ActiveRecord::Base
   end
   alias_method :completed?, :completed
 
+  def actionable
+    !project? && !completed?
+  end
+  alias_method :actionable?, :actionable
+
+  def project?
+    not leaf?
+  end
 
   def as_json options = {}
     accessible_attributes = self.class.accessible_attributes.map(&:to_sym)
     options.merge! :only => accessible_attributes,
-                   :methods => [:position, :completed]
+                   :methods => [:position, :completed, :actionable]
     super options
   end
 end

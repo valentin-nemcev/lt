@@ -15,7 +15,7 @@ class Lt.Models.Task extends Backbone.Model
 
   isCompleted: -> !!@get('completed')
 
-  isActionable: -> true
+  isActionable: -> !!@get('actionable')
 
   postAction: (action, options) ->
     success = (resp, status, jqXHR) =>
