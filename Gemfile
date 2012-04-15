@@ -25,5 +25,7 @@ group :development, :test do
   gem 'capistrano_colors', '~> 0.5.5'
 
   gem 'rspec-rails', '~> 2.9.0'
+
+  gem 'timecop', '~> 0.3.5'
 end
 

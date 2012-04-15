@@ -15,4 +15,13 @@ RSpec.configure do |config|
   # automatically. This will be the default behavior in future versions of
   # rspec-rails.
   config.infer_base_class_for_anonymous_controllers = false
+
+
+  def with_frozen_time(time=nil)
+    time ||= Time.now
+    # Databases and other places may truncate usecs, so we truncate them too to
+    # avoid problems with comparisons
+    time = time.change :usec => 0
+    Timecop.freeze(time) { yield time }
+  end
 end
