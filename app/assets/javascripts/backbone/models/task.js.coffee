@@ -15,6 +15,8 @@ class Lt.Models.Task extends Backbone.Model
 
   isCompleted: -> !!@get('completed')
 
+  isActionable: -> true
+
   postAction: (action, options) ->
     success = (resp, status, jqXHR) =>
       @set(@parse(resp, jqXHR))
@@ -51,3 +53,25 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
   fetchForDate: (date, options = {}) ->
     date_opts = data: {current_date: date.toISOString()}
     @fetch _.extend({}, date_opts, options)
+
+
+class Backbone.FilteredCollection extends Backbone.Collection
+  constructor: (@sourceCollection, params)->
+    super(null, params)
+
+  initialize: ->
+    @sourceCollection.bind 'add'    , @add    , @
+    @sourceCollection.bind 'remove' , @remove , @
+    @sourceCollection.bind 'reset'  , @reset  , @
+    @reset @sourceCollection.models
+
+  add: (models) ->
+    models = [models] unless models.length?
+    models = models.models || models
+    filteredModels = _.filter(models, (model) => @modelFilter model)
+    super(filteredModels)
+
+class Lt.Collections.ActionableTasks extends Backbone.FilteredCollection
+
+  modelFilter: (task) ->
+    task.isActionable()

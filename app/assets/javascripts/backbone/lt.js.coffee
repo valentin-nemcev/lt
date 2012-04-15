@@ -29,11 +29,12 @@ window.Lt =
   initTaskView: (selector, tasks, taskViewState) ->
     @tasks = new Lt.Collections.TasksCollection tasks
     @bindTasksToTimeline()
+    @actionableTasks = new Lt.Collections.ActionableTasks @tasks
 
     @taskViewState = new Lt.Models.TaskViewState taskViewState
 
-    @taskActionView = new Lt.Views.Tasks.ActionView
-      collection: @tasks
+    @taskActionView = new Lt.Views.ActionableTasks.ListView
+      collection: @actionableTasks
       state: @taskViewState
 
     @taskPlanView = new Lt.Views.Tasks.ListView
