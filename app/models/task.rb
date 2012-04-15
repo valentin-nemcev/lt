@@ -48,7 +48,11 @@ class Task < ActiveRecord::Base
 
 
   def current_date
-    attributes.fetch('current_date', DateTime.now)
+    if cd = attributes['current_date']
+      Time.zone.parse cd
+    else
+      Time.zone.now
+    end
   end
 
   def completed

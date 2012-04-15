@@ -1,57 +1,91 @@
 require 'spec_helper'
 
 describe Task do
-  describe '.create' do
-    it 'sets creation date' do
-      task = Task.create!
-      task.created_at.should be <= DateTime.now
+  context 'created' do
+
+    context 'seen from now' do
+      subject { Task.create! }
+      it 'should have creation date in past' do
+        subject.created_at.should be <= DateTime.now
+      end
+    end
+
+    context 'seen from past' do
+      subject do
+        task_created_at = Task.create!.created_at
+        Task.for_date(task_created_at - 1.second).first
+      end
+
+      it {should be_nil}
     end
   end
 
+
+  shared_examples 'not completed' do
+    it { should_not be_completed }
+    it 'should have no completion date' do
+      subject.completed_at.should be_nil
+    end
+  end
+
+  shared_examples 'completed' do
+    it { should be_completed }
+    it 'should have completion date in the past' do
+      subject.completed_at.should be <= DateTime.now
+    end
+  end
+
+
   context 'not completed' do
     subject { Task.create! }
-    it { should_not be_completed }
-    specify { subject.completed_at.should be_nil }
+    include_examples 'not completed'
   end
 
   context 'completed' do
     subject { Task.create!.complete! }
-    it { should be_completed }
-    specify { subject.completed_at.should be <= DateTime.now }
-  end
-
-  context 'completed on future date' do
-    let(:future_date) { DateTime.now + 1.day }
-    subject { Task.create!.complete!(future_date)  }
-    it { should_not be_completed }
-    specify { subject.completed_at.should == future_date }
+    include_examples 'completed'
   end
 
   context 'completed, then completion undone' do
     subject { Task.create!.complete!.undo_complete! }
-    it { should_not be_completed }
-    specify { subject.completed_at.should be_nil }
+    it_should_behave_like 'not completed'
+  end
+
+  context 'completed on future date' do
+    let(:future_date) { DateTime.now + 1.day }
+
+    context 'seen from now' do
+      subject { Task.create!.complete!(future_date)  }
+
+      it { should_not be_completed }
+      it 'should have completion date in the future' do
+        subject.completed_at.should == future_date
+      end
+    end
+
+    context 'seen from future date' do
+      subject do
+        Task.create!.complete!(future_date)
+        Task.for_date(future_date).first
+      end
+
+      it { should be_completed }
+    end
   end
 
 
-  describe '.for_date' do
-    it 'selects tasks that were created after provided date' do
-      task_created_at = Task.create!.created_at
-      Task.for_date(task_created_at).size.should == 1
-      Task.for_date(task_created_at - 1.second).size.should == 0
-    end
+  describe 'unscoped tasks' do
+    specify 'should behave like scoped to current date' do
+      Task.create!
+      with_frozen_time do |now|
+        unscoped = Task.scoped.first
+          scoped = Task.for_date(now).first
+        unscoped.current_date.should == now
+          scoped.current_date.should == now
 
-    it 'returns tasks with completed state relevant to provided date' do
-      task = Task.create!
-      task_created_at = task.created_at
-      task_completed_at = task_created_at + 1.day
-      task.complete! task_completed_at
-
-      Task.scoped.first.should_not be_completed
-
-      Task.for_date(task_completed_at).first.should be_completed
-      task = Task.for_date(task_completed_at - 1.second).first
-      task.should_not be_completed
+        scoped.should == unscoped
+      end
     end
   end
+
 end
