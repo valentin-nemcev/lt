@@ -41,11 +41,12 @@ window.Lt =
       collection: @tasks
       state: @taskViewState
 
-    @taskViewSwitcher = new Lt.Views.Tasks.ViewSwitcher
+    @taskViewSwitcher = new Lt.Views.Tasks.PlanActionsTabsView
       el: $(selector)[0]
       state: @taskViewState
-      planView: @taskPlanView
-      actionView: @taskActionView
+      tabs:
+        plan: @taskPlanView
+        actions: @taskActionView
 
     @taskViewSwitcher.render()
 

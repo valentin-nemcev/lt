@@ -8,4 +8,4 @@ class Lt.Models.TaskViewState extends Backbone.Model
 
   defaults:
     show_completed: no
-    current_view: 'plan'
+    current_tab: 'plan'

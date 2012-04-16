@@ -1,0 +1,4 @@
+<div class='tab-handles'>
+  <span class='tab' tab-handle='plan'>Планирование</span>
+  <span class='tab' tab-handle='actions'>Исполнение</span>
+</div>
