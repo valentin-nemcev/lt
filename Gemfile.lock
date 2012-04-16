@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/resgraph/acts-as-dag.git
+  revision: b1d64a1666d7afdaa3eb31024a7ef320a3cc45c6
+  specs:
+    acts-as-dag (2.5.7)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -164,6 +170,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  acts-as-dag!
   awesome_nested_set (~> 2.1.2)
   capistrano (~> 2.11.2)
   capistrano_colors (~> 0.5.5)

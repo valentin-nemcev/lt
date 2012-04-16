@@ -4,6 +4,7 @@ gem 'rails', '~> 3.2.2'
 
 gem 'mysql2',             '~> 0.3.11'
 gem 'awesome_nested_set', '~> 2.1.2'
+gem 'acts-as-dag', :git => 'https://github.com/resgraph/acts-as-dag.git'
 
 gem 'unicorn'           , '~> 4.2.0'
 
