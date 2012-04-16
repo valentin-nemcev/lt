@@ -1,9 +1,7 @@
 require 'capistrano_colors'
 
-$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
 require "rvm/capistrano"
 set :rvm_ruby_string, `rvm current`
-set :rvm_type, :user
 
 
 require 'bundler/capistrano'
