@@ -14,8 +14,11 @@ class Lt.Views.List.ListView extends Backbone.View
     @collection.bind 'destroy' , @destroy, @
 
   reset: (collection) ->
-    @$('ul.' + @itemsName).empty()
+    $rootUl = @$('ul.' + @itemsName)
+    @$emptyItem ?= $rootUl.children('.empty').detach()
+    $rootUl.empty()
     @add model for model in collection.models
+    @$emptyItem.appendTo($rootUl) if collection.models.length == 0
     return
 
   add: (model) ->
@@ -70,7 +73,7 @@ class Lt.Views.List.ListView extends Backbone.View
   setupSortable: ($ul) ->
     $ul.nestedSortable
       listType             : 'ul'
-      items                : 'li'
+      items                : 'li:not(.empty)'
       handle               : 'div.' + @itemName
       toleranceElement     : '> div.' + @itemName
       maxLevels            : 30

@@ -3,5 +3,7 @@
   <input type="checkbox" <%= 'checked' if @state.get('show_completed') %>/>
   Показать выполненные
 </label>
-<ul id="tasks-list" class="tasks"></ul>
+<ul id="tasks-list" class="tasks">
+  <li class="empty">Нет задач</li>
+</ul>
 
