@@ -9,9 +9,9 @@ class Lt.Views.List.ListView extends Backbone.View
 
     @template = JST["backbone/templates/#{@itemsName}/list"]
 
-    @collection.bind 'reset'   , @reset,   @
-    @collection.bind 'add'     , @add,     @
-    @collection.bind 'destroy' , @destroy, @
+    @collection.bind 'reset'  , @reset,   @
+    @collection.bind 'add'    , @add,     @
+    @collection.bind 'remove' , @remove,  @
 
   reset: (collection) ->
     $rootUl = @$('ul.' + @itemsName)
@@ -27,7 +27,7 @@ class Lt.Views.List.ListView extends Backbone.View
 
     return
 
-  destroy: (model) ->
+  remove: (model) ->
     @getItem(model).remove()
 
 

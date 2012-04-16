@@ -61,15 +61,25 @@ class Backbone.FilteredCollection extends Backbone.Collection
 
   initialize: ->
     @sourceCollection.bind 'add'    , @add    , @
+    @sourceCollection.bind 'change' , @change    , @
     @sourceCollection.bind 'remove' , @remove , @
     @sourceCollection.bind 'reset'  , @reset  , @
     @reset @sourceCollection.models
+
+  change: (model) ->
+    included = @get model
+    passes = @modelFilter model
+    if not included and passes
+      @add model
+    else if included and not passes
+      @remove model
 
   add: (models) ->
     models = [models] unless models.length?
     models = models.models || models
     filteredModels = _.filter(models, (model) => @modelFilter model)
     super(filteredModels)
+
 
 class Lt.Collections.ActionableTasks extends Backbone.FilteredCollection
 
