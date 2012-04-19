@@ -17,8 +17,12 @@ RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = false
 
 
+  def now
+    Time.current
+  end
+
   def with_frozen_time(time=nil)
-    time ||= Time.now
+    time ||= now
     # Databases and other places may truncate usecs, so we truncate them too to
     # avoid problems with comparisons
     time = time.change :usec => 0

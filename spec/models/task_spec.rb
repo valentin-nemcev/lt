@@ -5,86 +5,68 @@ describe Task do
     let(:single_task) { Task.create! }
     subject { single_task }
 
-    it { should be_actionable }
+    context 'after creation' do
+      it 'should have creation date' do
+        with_frozen_time { |now| single_task.created_at.should eq(now) }
+      end
 
-    context 'created' do
+      it 'should not have completion date' do
+        single_task.completed_at.should be_nil
+      end
+
+      it { should be_actionable }
+      it { should_not be_completed }
 
       context 'seen from now' do
-        it 'should have creation date in past' do
-          subject.created_at.should be <= DateTime.now
-        end
+        it {should be}
       end
 
       context 'seen from past' do
-        subject do
-          task_created_at = single_task.created_at
-          Task.for_date(task_created_at - 1.second).first
-        end
-
+        subject { single_task; Task.for_date(1.second.ago).first }
         it {should be_nil}
       end
     end
 
-
-    shared_examples 'not completed' do
-      it { should_not be_completed }
-      it 'should have no completion date' do
-        subject.completed_at.should be_nil
-      end
-    end
-
-    shared_examples 'completed' do
-      it { should be_completed }
-      it { should_not be_actionable }
-      it 'should have completion date in the past' do
-        subject.completed_at.should be <= DateTime.now
-      end
-    end
-
-
-    context 'not completed' do
-      include_examples 'not completed'
-    end
-
     context 'completed' do
       subject { single_task.complete! }
-      include_examples 'completed'
+      it { should be_completed }
+      it { should_not be_actionable }
+      it 'should have completion date' do
+        with_frozen_time { |now| subject.completed_at.should eq(now) }
+      end
     end
 
     context 'completed, then completion undone' do
       subject { single_task.complete!.undo_complete! }
-      it_should_behave_like 'not completed'
+      it { should_not be_completed }
     end
 
     context 'completed on future date' do
-      let(:future_date) { DateTime.now + 1.day }
+      let(:future_date) { 1.day.from_now }
+      let(:completed_in_future) { single_task.complete!(future_date) }
 
       context 'seen from now' do
-        subject { single_task.complete!(future_date)  }
+        subject { completed_in_future }
 
         it { should_not be_completed }
         it 'should have completion date in the future' do
-          subject.completed_at.should == future_date
+          with_frozen_time { subject.completed_at.should eq(future_date) }
         end
       end
 
       context 'seen from future date' do
-        subject do
-          single_task.complete!(future_date)
-          Task.for_date(future_date).first
-        end
+        subject { completed_in_future; Task.for_date(future_date).first }
 
         it { should be_completed }
       end
     end
   end
 
-  describe 'tasks with subtasks (project)' do
+
+  context 'with subtasks (project)' do
     let :project do
       Task.create!.tap do |project|
-        2.times do
-          project.subtasks.create!
-        end
+        2.times { project.subtasks.create! }
         project.reload
       end
     end
@@ -96,17 +78,16 @@ describe Task do
   end
 
 
-
-  describe 'unscoped tasks' do
+  context 'unscoped' do
     specify 'should behave like scoped to current date' do
       Task.create!
       with_frozen_time do |now|
         unscoped = Task.scoped.first
           scoped = Task.for_date(now).first
-        unscoped.current_date.should == now
-          scoped.current_date.should == now
+        unscoped.current_date.should eq(now)
+          scoped.current_date.should eq(now)
 
-        scoped.should == unscoped
+        scoped.should eq(unscoped)
       end
     end
   end
