@@ -16,6 +16,7 @@ describe Task do
 
       it { should be_actionable }
       it { should_not be_completed }
+      it { should_not be_blocked }
 
       context 'seen from now' do
         it {should be}
@@ -65,18 +66,107 @@ describe Task do
 
   context 'with subtasks (project)' do
     let :project do
-      Task.create!.tap do |project|
+      Task.create!.tap { |project|
         2.times { project.subtasks.create! }
-        project.reload
-      end
+      }.reload
     end
 
     subject { project }
 
     it { should be_project }
     it { should_not be_actionable }
+    it { should_not be_completed }
+
+    it 'could not be completed directly' do
+      expect { project.complete! }.to raise_error
+    end
+
+    context 'with some subtasks completed' do
+      subject { project.subtasks.first.complete!; project }
+      it { should_not be_completed }
+    end
+
+    context 'with all subtasks completed' do
+      let(:with_subtasks_completed) do
+        project.tap { |p| p.subtasks.each(&:complete!) }
+      end
+
+      context 'and no blocking tasks' do
+        subject { with_subtasks_completed }
+        it { should be_completed }
+        it { should_not be_blocked }
+      end
+
+      context 'and with blocking tasks' do
+        subject do
+          with_subtasks_completed.tap { |p| p.blocking_tasks.create! }
+        end
+
+        it { should_not be_completed }
+        it { should be_blocked }
+      end
+
+      context 'and with completed blocking tasks' do
+        subject do
+          with_subtasks_completed.tap { |p| p.blocking_tasks.create!.complete! }
+        end
+
+        it { should be_completed }
+        it { should_not be_blocked }
+      end
+
+    end
+
+    context 'with subprojects with subtasks completed' do
+      subject do
+        Task.create!.tap { |project|
+          2.times {
+            project.subtasks.create!.tap { |subproject|
+              2.times { subproject.subtasks.create!.complete! }
+            }
+          }
+          project.subtasks.create!.complete!
+        }.reload
+      end
+
+      it { should be_completed }
+    end
+
   end
 
+
+  context 'blocked task' do
+    let(:blocked_task) do
+      Task.create!.tap { |blocked_task|
+        2.times { blocked_task.blocking_tasks.create! }
+      }.reload
+    end
+
+    subject { blocked_task }
+
+    it { should be_blocked }
+    it { should_not be_actionable }
+    it { should_not be_completed }
+
+    context 'with some blocking tasks completed' do
+      subject do
+        blocked_task.tap { |t| t.blocking_tasks.first.complete! }
+      end
+
+      it { should be_blocked }
+      it { should_not be_actionable }
+    end
+
+    context 'with all blocking tasks completed' do
+      subject do
+        blocked_task.tap { |t| t.blocking_tasks.each(&:complete!) }
+      end
+
+      it { should_not be_blocked }
+      it { should be_actionable }
+    end
+
+  end
 
   context 'unscoped' do
     specify 'should behave like scoped to current date' do

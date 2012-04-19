@@ -1,6 +1,6 @@
 class Task < ActiveRecord::Base
   has_dag_links :link_class_name => 'TaskDependency', :prefix => 'dependency'
-
+  alias_method :blocking_tasks, :dependency_ancestors
 
   acts_as_nested_set
   alias_method :subtasks, :children
@@ -40,6 +40,7 @@ class Task < ActiveRecord::Base
 
 
   def complete!(at = nil)
+    raise "Project could not be completed directly" if project?
     at ||= DateTime.now
     update_attribute(:completed_at, at)
     return self
@@ -60,6 +61,10 @@ class Task < ActiveRecord::Base
   end
 
   def completed
+    if project?
+      return leaves.all?(&:completed?) && !blocked?
+    end
+
     if completed_at
       completed_at <= current_date
     else
@@ -69,12 +74,16 @@ class Task < ActiveRecord::Base
   alias_method :completed?, :completed
 
   def actionable
-    !project? && !completed?
+    not project? and not completed? and not blocked?
   end
   alias_method :actionable?, :actionable
 
   def project?
     not leaf?
+  end
+
+  def blocked?
+    not blocking_tasks.all?(&:completed?)
   end
 
   def as_json options = {}
