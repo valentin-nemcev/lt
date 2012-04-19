@@ -1,4 +1,7 @@
 class Task < ActiveRecord::Base
+  has_dag_links :link_class_name => 'TaskDependency', :prefix => 'dependency'
+
+
   acts_as_nested_set
   alias_method :subtasks, :children
 

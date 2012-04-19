@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120413142055) do
+ActiveRecord::Schema.define(:version => 20120416185942) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -19,6 +19,13 @@ ActiveRecord::Schema.define(:version => 20120413142055) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
     t.integer  "user_id"
+  end
+
+  create_table "task_dependencies", :force => true do |t|
+    t.integer "blocking_task_id",  :null => false
+    t.integer "dependent_task_id", :null => false
+    t.boolean "direct",            :null => false
+    t.integer "count",             :null => false
   end
 
   create_table "tasks", :force => true do |t|
