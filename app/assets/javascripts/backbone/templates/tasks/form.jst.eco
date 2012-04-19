@@ -11,10 +11,6 @@
         <button class="complete control">Сделано!</button>
       <% end %>
     <% end %>
-    <label class="control">
-      Крайний срок
-      <input type="text" name="deadline" value="<%- @escape('deadline') %>" >
-    </label>
   </div>
 
   <div class='field-group minor'>

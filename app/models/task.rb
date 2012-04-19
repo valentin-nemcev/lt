@@ -5,7 +5,7 @@ class Task < ActiveRecord::Base
   acts_as_nested_set
   alias_method :subtasks, :children
 
-  attr_accessible :position, :id, :parent_id, :body, :deadline
+  attr_accessible :position, :id, :parent_id, :body
 
   default_scope order('lft')
 

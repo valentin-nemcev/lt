@@ -1,2 +1,1 @@
 <%= @body %>
-<%= "— #{@deadline}" if @deadline %>

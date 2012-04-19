@@ -44,7 +44,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
     attrs =
       body: @$('[name="body"]').val()
-      deadline: @$('[name="deadline"]').val()
 
     @model.save attrs, success: (task) => @triggerDomEv 'closeEditItem'
 
