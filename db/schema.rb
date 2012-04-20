@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120419205325) do
+ActiveRecord::Schema.define(:version => 20120420120206) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -34,8 +34,8 @@ ActiveRecord::Schema.define(:version => 20120419205325) do
     t.integer  "lft",          :null => false
     t.integer  "rgt",          :null => false
     t.integer  "depth"
-    t.datetime "created_at",   :null => false
-    t.datetime "completed_at"
+    t.datetime "created_on",   :null => false
+    t.datetime "completed_on"
     t.integer  "user_id"
   end
 

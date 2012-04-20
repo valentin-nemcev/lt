@@ -33,21 +33,21 @@ class Task < ActiveRecord::Base
   end
 
 
-  def self.for_date(date)
+  def self.as_of(date)
     current_date = self.sanitize_sql ['? AS `current_date`', date]
-    select(['tasks.*', current_date]).where('? >= created_at', date)
+    select(['tasks.*', current_date]).where('? >= created_on', date)
   end
 
 
   def complete!(at = nil)
     raise "Project could not be completed directly" if project?
     at ||= DateTime.now
-    update_attribute(:completed_at, at)
+    update_attribute(:completed_on, at)
     return self
   end
 
   def undo_complete!
-    update_attribute(:completed_at, nil)
+    update_attribute(:completed_on, nil)
     return self
   end
 
@@ -65,8 +65,8 @@ class Task < ActiveRecord::Base
       return leaves.all?(&:completed?) && !blocked?
     end
 
-    if completed_at
-      completed_at <= current_date
+    if completed_on
+      completed_on <= current_date
     else
       false
     end

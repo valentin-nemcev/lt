@@ -7,11 +7,11 @@ describe Task do
 
     context 'after creation' do
       it 'should have creation date' do
-        with_frozen_time { |now| single_task.created_at.should eq(now) }
+        with_frozen_time { |now| single_task.created_on.should eq(now) }
       end
 
       it 'should not have completion date' do
-        single_task.completed_at.should be_nil
+        single_task.completed_on.should be_nil
       end
 
       it { should be_actionable }
@@ -23,7 +23,7 @@ describe Task do
       end
 
       context 'seen from past' do
-        subject { single_task; Task.for_date(1.second.ago).first }
+        subject { single_task; Task.as_of(1.second.ago).first }
         it {should be_nil}
       end
     end
@@ -33,7 +33,7 @@ describe Task do
       it { should be_completed }
       it { should_not be_actionable }
       it 'should have completion date' do
-        with_frozen_time { |now| subject.completed_at.should eq(now) }
+        with_frozen_time { |now| subject.completed_on.should eq(now) }
       end
     end
 
@@ -51,12 +51,12 @@ describe Task do
 
         it { should_not be_completed }
         it 'should have completion date in the future' do
-          with_frozen_time { subject.completed_at.should eq(future_date) }
+          with_frozen_time { subject.completed_on.should eq(future_date) }
         end
       end
 
       context 'seen from future date' do
-        subject { completed_in_future; Task.for_date(future_date).first }
+        subject { completed_in_future; Task.as_of(future_date).first }
 
         it { should be_completed }
       end
@@ -173,7 +173,7 @@ describe Task do
       Task.create!
       with_frozen_time do |now|
         unscoped = Task.scoped.first
-          scoped = Task.for_date(now).first
+          scoped = Task.as_of(now).first
         unscoped.current_date.should eq(now)
           scoped.current_date.should eq(now)
 

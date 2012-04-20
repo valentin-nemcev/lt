@@ -4,7 +4,7 @@ class TasksController < ResourceController
     s = current_user.tasks
     if params[:current_date]
       current_date = Time.parse params[:current_date]
-      s = s.for_date current_date
+      s = s.as_of current_date
     end
     return s
   end
