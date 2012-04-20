@@ -27,6 +27,7 @@ group :development, :test do
   gem 'rvm-capistrano',    '~> 1.0.2'
 
   gem 'rspec-rails', '~> 2.9.0'
+  gem 'spork-rails', '~> 3.2.0'
 
   gem 'timecop', '~> 0.3.5'
 end
