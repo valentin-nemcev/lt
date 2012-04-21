@@ -9,7 +9,6 @@ Spork.prefork do
   require 'rspec/rails'
   require 'rspec/autorun'
 
-  Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 
   RSpec.configure do |config|
     # If you're not using ActiveRecord, or you'd prefer not to run each of your
@@ -22,22 +21,10 @@ Spork.prefork do
     # rspec-rails.
     config.infer_base_class_for_anonymous_controllers = false
 
-
-    def now
-      Time.current
-    end
-
-    def with_frozen_time(time=nil)
-      time ||= now
-      # Databases and other places may truncate usecs, so we truncate them too to
-      # avoid problems with comparisons
-      time = time.change :usec => 0
-      Timecop.freeze(time) { yield time }
-    end
+    config.treat_symbols_as_metadata_keys_with_true_values = true
   end
 end
 
 Spork.each_run do
-  # This code will be run each time you run your specs.
-
+  Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 end
