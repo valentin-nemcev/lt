@@ -1,19 +1,23 @@
 require 'spec_helper'
 
-describe 'Task' do
+describe Task do
 
   def create_task(attrs={})
-    attrs.merge! body: 'Test task'
-    TaskMapper.create attrs
+    # attrs.merge! body: 'Test task'
+    Task.new attrs
   end
 
-  describe 'single task' do
+  describe 'without connections' do
     let(:single_task) { create_task }
     subject { single_task }
 
     context 'after creation' do
       it 'should have creation date', :with_frozen_time do
         single_task.created_on.should eq(Time.current)
+      end
+
+      it 'should have effective date same as creation date' do
+        single_task.effective_date.should eq(single_task.created_on)
       end
 
       it 'should not have completion date' do
@@ -32,6 +36,23 @@ describe 'Task' do
         subject { single_task.as_of(1.second.ago) }
         it {should be_nil}
       end
+
+      context 'created in past' do
+        subject { create_task on: 2.days.ago }
+        it 'should have creation date in past', :with_frozen_time do
+          subject.created_on.should eq(2.days.ago)
+        end
+        it 'should have effective date set to now', :with_frozen_time do
+          subject.effective_date.should eq(Time.current)
+        end
+      end
+
+      context 'created in future' do
+        subject { create_task on: 2.days.from_now }
+        it 'should have effective date in future', :with_frozen_time do
+          subject.effective_date.should eq(2.days.from_now)
+        end
+      end
     end
 
     context 'completed' do
@@ -40,6 +61,12 @@ describe 'Task' do
       it { should_not be_actionable }
       it 'should have completion date', :with_frozen_time do
         subject.completed_on.should eq(Time.current)
+      end
+    end
+
+    context 'completed before created' do
+      it 'should raise error' do
+        expect { single_task.complete! on: 1.day.ago }.to raise_error
       end
     end
 
@@ -142,7 +169,7 @@ describe 'Task' do
   end
 
 
-  context 'blocked task' do
+  context 'blocked task', :pending do
     let(:blocked_task) do
       create_task.tap { |blocked_task|
         2.times { blocked_task.blocking_tasks.create! }
