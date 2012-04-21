@@ -1,13 +1,19 @@
 require 'spec_helper'
 
-describe Task do
+describe 'Task' do
+
+  def create_task(attrs={})
+    attrs.merge! body: 'Test task'
+    TaskMapper.create attrs
+  end
+
   describe 'single task' do
-    let(:single_task) { Task.create! }
+    let(:single_task) { create_task }
     subject { single_task }
 
     context 'after creation' do
-      it 'should have creation date' do
-        with_frozen_time { |now| single_task.created_on.should eq(now) }
+      it 'should have creation date', :with_frozen_time do
+        single_task.created_on.should eq(Time.current)
       end
 
       it 'should not have completion date' do
@@ -23,7 +29,7 @@ describe Task do
       end
 
       context 'seen from past' do
-        subject { single_task; Task.as_of(1.second.ago).first }
+        subject { single_task.as_of(1.second.ago) }
         it {should be_nil}
       end
     end
@@ -32,8 +38,8 @@ describe Task do
       subject { single_task.complete! }
       it { should be_completed }
       it { should_not be_actionable }
-      it 'should have completion date' do
-        with_frozen_time { |now| subject.completed_on.should eq(now) }
+      it 'should have completion date', :with_frozen_time do
+        subject.completed_on.should eq(Time.current)
       end
     end
 
@@ -44,19 +50,19 @@ describe Task do
 
     context 'completed on future date' do
       let(:future_date) { 1.day.from_now }
-      let(:completed_in_future) { single_task.complete!(future_date) }
+      let(:completed_in_future) { single_task.complete! on: future_date }
 
       context 'seen from now' do
         subject { completed_in_future }
 
         it { should_not be_completed }
-        it 'should have completion date in the future' do
-          with_frozen_time { subject.completed_on.should eq(future_date) }
+        it 'should have completion date in the future', :with_frozen_time do
+          subject.completed_on.should eq(future_date)
         end
       end
 
       context 'seen from future date' do
-        subject { completed_in_future; Task.as_of(future_date).first }
+        subject { completed_in_future.as_of(future_date) }
 
         it { should be_completed }
       end
@@ -64,10 +70,11 @@ describe Task do
   end
 
 
-  context 'with subtasks (project)' do
+  context 'with subtasks (project)', :pending do
+
     let :project do
-      Task.create!.tap { |project|
-        2.times { project.subtasks.create! }
+      create_task.tap { |project|
+        2.times { create_task project: project }
       }.reload
     end
 
@@ -119,7 +126,7 @@ describe Task do
 
     context 'with subprojects with subtasks completed' do
       subject do
-        Task.create!.tap { |project|
+        create_task.tap { |project|
           2.times {
             project.subtasks.create!.tap { |subproject|
               2.times { subproject.subtasks.create!.complete! }
@@ -137,7 +144,7 @@ describe Task do
 
   context 'blocked task' do
     let(:blocked_task) do
-      Task.create!.tap { |blocked_task|
+      create_task.tap { |blocked_task|
         2.times { blocked_task.blocking_tasks.create! }
       }.reload
     end
@@ -170,6 +177,7 @@ describe Task do
 
   context 'unscoped' do
     specify 'should behave like scoped to current date' do
+      pending
       Task.create!
       with_frozen_time do |now|
         unscoped = Task.scoped.first
@@ -181,5 +189,4 @@ describe Task do
       end
     end
   end
-
 end

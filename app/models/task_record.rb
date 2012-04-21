@@ -1,9 +1,13 @@
-class Task < ActiveRecord::Base
+class TaskRecord < ActiveRecord::Base
+  self.table_name = 'tasks'
+  class TaskDateInvalid < StandardError; end;
+
   has_dag_links :link_class_name => 'TaskDependency', :prefix => 'dependency'
   alias_method :blocking_tasks, :dependency_ancestors
 
   acts_as_nested_set
   alias_method :subtasks, :children
+  alias_method :project, :parent
 
   attr_accessible :position, :id, :parent_id, :body
 
@@ -34,26 +38,40 @@ class Task < ActiveRecord::Base
 
 
   def self.as_of(date)
-    current_date = self.sanitize_sql ['? AS `current_date`', date]
-    select(['tasks.*', current_date]).where('? >= created_on', date)
+    effective_date = self.sanitize_sql ['? AS `effective_date`', date]
+    select(['tasks.*', effective_date]).where('? >= created_on', date)
   end
 
 
-  def complete!(at = nil)
+  def complete!(opts={})
     raise "Project could not be completed directly" if project?
-    at ||= DateTime.now
-    update_attribute(:completed_on, at)
+    on = opts.fetch(:on, effective_date)
+    self.completed_on = on
     return self
   end
 
   def undo_complete!
-    update_attribute(:completed_on, nil)
+    write_attribute(:completed_on, nil)
     return self
   end
 
 
-  def current_date
-    if cd = attributes['current_date']
+  def as_of(date)
+    clone.tap { |t| t.effective_date = date }
+  rescue TaskDateInvalid
+    nil
+  end
+
+  def effective_date=(date)
+    if date < self.created_on
+      raise TaskDateInvalid, "Task didn't exist as of #{date}"
+    end
+    @effective_date = date
+    return self
+  end
+
+  def effective_date
+    @effective_date ||= if cd = attributes['effective_date']
       Time.zone.parse cd
     else
       Time.zone.now
@@ -66,7 +84,7 @@ class Task < ActiveRecord::Base
     end
 
     if completed_on
-      completed_on <= current_date
+      completed_on <= effective_date
     else
       false
     end
