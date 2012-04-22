@@ -1,12 +1,14 @@
 class TaskDateInvalid < StandardError; end;
 class Task
 
-  attr_reader :effective_date, :created_on, :completed_on
+  attr_reader :effective_date, :created_on
 
   def initialize(attrs={})
     now = Time.current
     @created_on = attrs.fetch(:on, now)
     @effective_date = [@created_on, now].max
+
+    @supertasks = []
   end
 
 
@@ -24,33 +26,6 @@ class Task
     return self
   end
 
-
-  def actionable?
-    !completed?
-  end
-
-  def completed?
-    completed_on && effective_date >= completed_on
-  end
-
-  def blocked?
-    false
-  end
-
-
-  def complete!(opts={})
-    date = opts[:on]
-    if date && date < self.created_on
-      raise TaskDateInvalid, "Task couldn't be completed before it was created"
-    end
-    @completed_on = bump_effective_date date
-    return self
-  end
-
-  def undo_complete!
-    @completed_on = nil
-    return self
-  end
 
   protected
 
