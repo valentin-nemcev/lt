@@ -17,16 +17,16 @@ describe Graph do
       describe 'parent' do
         it 'should have reference to child via edge' do
           parent.edges.nodes.should include(child)
-          parent.edges.descending.nodes.should include(child)
-          parent.edges.ascending.nodes.should be_empty
+          parent.edges.outgoing.nodes.should include(child)
+          parent.edges.incoming.nodes.should be_empty
         end
       end
 
       describe 'child' do
         it 'should have reference to parent via edge' do
           child.edges.nodes.should include(parent)
-          child.edges.ascending.nodes.should include(parent)
-          child.edges.descending.nodes.should be_empty
+          child.edges.incoming.nodes.should include(parent)
+          child.edges.outgoing.nodes.should be_empty
         end
       end
     end
@@ -41,8 +41,8 @@ describe Graph do
 
     context 'connected via nodes' do
       before(:each) do
-        parent.edges.add_descending edge
-        child.edges.add_ascending edge
+        parent.edges.add_outgoing edge
+        child.edges.add_incoming edge
       end
       include_examples 'two connected nodes'
     end

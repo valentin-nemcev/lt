@@ -1,6 +1,8 @@
 class TaskDateInvalid < StandardError; end;
 class Task
 
+  include Graph::Node
+
   attr_reader :effective_date, :created_on
 
   def initialize(attrs={})
@@ -8,7 +10,9 @@ class Task
     @created_on = attrs.fetch(:on, now)
     @effective_date = [@created_on, now].max
 
-    @supertasks = []
+    if project = attrs[:project]
+      add_project project
+    end
   end
 
 
@@ -26,6 +30,49 @@ class Task
     return self
   end
 
+  def blocked?
+    not subtasks.all?(&:completed?)
+  end
+
+  def add_project project
+    TaskRelation.new supertask: project, subtask: self, :type => :composition
+  end
+
+  def add_component_task component
+    TaskRelation.new supertask: self, subtask: component, :type => :composition
+  end
+
+  def add_dependent_task dependent
+    TaskRelation.new supertask: dependent, subtask: self, :type => :dependency
+  end
+
+  def add_blocking_task blocking
+    TaskRelation.new supertask: self, subtask: blocking, :type => :dependency
+  end
+
+  def subtasks
+    edges.outgoing.nodes
+  end
+
+  def supertasks
+    edges.incoming.nodes
+  end
+
+  def blocking_tasks
+    edges.outgoing.filter(&:dependency?).nodes
+  end
+
+  def dependent_tasks
+    edges.incoming.filter(&:dependency?).nodes
+  end
+
+  def projects
+    edges.incoming.filter(&:composition?).nodes
+  end
+
+  def component_tasks
+    edges.outgoing.filter(&:composition?).nodes
+  end
 
   protected
 

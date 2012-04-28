@@ -3,13 +3,12 @@ module Graph
     attr_reader :edge
     def initialize(edge)
       @edge = edge
-      @parent = @child = nil
     end
 
     def child=(node)
       return if @child.equal? node
       @child = node
-      node.edges.add_ascending edge
+      node.edges.add_incoming edge
     end
 
     def child
@@ -19,7 +18,7 @@ module Graph
     def parent=(node)
       return if @parent.equal? node
       @parent = node
-      node.edges.add_descending edge
+      node.edges.add_outgoing edge
     end
 
     def parent

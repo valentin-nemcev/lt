@@ -2,7 +2,7 @@ class Action < Task
   attr_reader :completed_on
 
   def actionable?
-    !completed?
+    !completed? && !blocked?
   end
 
   def completed?

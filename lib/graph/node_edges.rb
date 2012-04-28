@@ -2,7 +2,7 @@ module Graph
   class NodeEdges
 
     attr_reader :node
-    attr_accessor :direction
+    attr_accessor :direction, :filters
 
     def initialize(node, filters=[])
       @node = node
@@ -10,46 +10,60 @@ module Graph
       @filters = Set.new filters
     end
 
+    def initialize_copy(source)
+      super
+      @filters = source.filters.clone
+    end
+
     include Enumerable
 
     def each(*args, &block)
-      @edges.select do |edge|
-        if direction == :descending
-          edge.nodes.parent.equal? self.node
-        elsif direction == :ascending
-          edge.nodes.child.equal? self.node
-        else
-          true
-        end
-      end.each *args, &block
+      es = @edges.clone
+      case direction
+      when :outgoing then es.select!{ |e| e.nodes.parent.equal? self.node }
+      when :incoming then es.select!{ |e| e.nodes.child.equal?  self.node }
+      end
+
+      filters.each do |filter|
+        es.select! &filter
+      end
+
+      es.each *args, &block
     end
 
-    def add_ascending edge
+    def add_incoming edge
       if @edges.add? edge
         edge.nodes.child = node
       end
     end
 
-    def add_descending edge
+    def add_outgoing edge
       if @edges.add? edge
         edge.nodes.parent = node
       end
     end
 
-    def ascending
-      self.clone.tap { |c| c.direction = :ascending }
+
+    def filter(&filter)
+      self.clone.tap { |c| c.filters << filter }
     end
 
-    def descending
-      self.clone.tap { |c| c.direction = :descending }
+    def incoming
+      self.clone.tap { |c| c.direction = :incoming }
+    end
+
+    def outgoing
+      self.clone.tap { |c| c.direction = :outgoing }
     end
 
     def nodes
-      self.flat_map do |edge|
-        [edge.nodes.parent, edge.nodes.child].reject { |n| n.equal? self.node }
-      end
+      self.flat_map do |e|
+        case direction
+        when :outgoing then e.nodes.child
+        when :incoming then e.nodes.parent
+        else [e.nodes.child, e.nodes.parent]
+        end
+      end.uniq
     end
-
   end
-
 end
