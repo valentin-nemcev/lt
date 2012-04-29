@@ -1,6 +1,7 @@
-class TaskMapper
+module Task
+class Mapper
   def self.create(attrs = {})
-    TaskRecord.new.tap do |task|
+    Record.new.tap do |task|
       task.body = attrs.fetch(:body)
       current_time = Time.current
       task.created_on = attrs.fetch(:on, current_time)
@@ -15,7 +16,7 @@ class TaskMapper
   end
 
   def self.fetch_all(conditions = {})
-    t = TaskRecord.scoped
+    t = Record.scoped
 
     if user = conditions[:for_user]
       t = t.where(user_id: user.id)
@@ -25,10 +26,11 @@ class TaskMapper
   end
 
   def self.fetch_by_id(task_id)
-    TaskRecord.find(task_id)
+    Record.find(task_id)
   end
 
   def self.save(task)
     task.save!
   end
+end
 end

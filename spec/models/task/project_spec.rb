@@ -1,7 +1,10 @@
 require 'spec_helper'
-require 'models/task_factory_helper'
 
-describe Project do
+describe Task::Project do
+
+  def create_project(attrs={})
+    described_class.new attrs
+  end
 
   let(:project) { create_project }
   subject { project }

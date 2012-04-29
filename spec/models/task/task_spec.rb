@@ -1,7 +1,10 @@
 require 'spec_helper'
-require 'models/task_factory_helper'
 
-describe Task do
+describe Task::Task do
+  def create_task(attrs={})
+    described_class.new attrs
+  end
+
   context 'new' do
     let(:task) { create_task }
 

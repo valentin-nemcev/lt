@@ -1,7 +1,11 @@
 require 'spec_helper'
-require 'models/task_factory_helper'
 
-describe Action do
+describe Task::Action do
+
+  def create_action(attrs={})
+    described_class.new attrs
+  end
+
   let(:single_action) { create_action }
   subject { single_action }
 

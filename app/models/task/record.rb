@@ -1,8 +1,9 @@
-class TaskRecord < ActiveRecord::Base
+module Task
+class Record < ActiveRecord::Base
   self.table_name = 'tasks'
   class TaskDateInvalid < StandardError; end;
 
-  has_dag_links :link_class_name => 'TaskDependency', :prefix => 'dependency'
+  has_dag_links :link_class_name => 'Task::Dependency', :prefix => 'dependency'
   alias_method :blocking_tasks, :dependency_ancestors
 
   acts_as_nested_set
@@ -110,4 +111,5 @@ class TaskRecord < ActiveRecord::Base
                    :methods => [:position, :completed, :actionable]
     super options
   end
+end
 end

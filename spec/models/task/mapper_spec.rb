@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+TaskMapper = Task::Mapper
 describe TaskMapper do
   describe '.create' do
     it 'creates tasks with given body' do

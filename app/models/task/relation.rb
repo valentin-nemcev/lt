@@ -1,4 +1,4 @@
-class TaskRelation
+class Task::Relation
 
   include Graph::Edge
 

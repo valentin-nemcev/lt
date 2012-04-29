@@ -1,4 +1,4 @@
-class Project < Task
+class Task::Project < Task::Task
 
   def actionable?
     false

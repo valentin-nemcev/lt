@@ -1,5 +1,7 @@
-class TaskDateInvalid < StandardError; end;
+module Task
 class Task
+
+  class TaskDateInvalid < StandardError; end;
 
   include Graph::Node
 
@@ -35,19 +37,19 @@ class Task
   end
 
   def add_project project
-    TaskRelation.new supertask: project, subtask: self, :type => :composition
+    Relation.new supertask: project, subtask: self, :type => :composition
   end
 
   def add_component_task component
-    TaskRelation.new supertask: self, subtask: component, :type => :composition
+    Relation.new supertask: self, subtask: component, :type => :composition
   end
 
   def add_dependent_task dependent
-    TaskRelation.new supertask: dependent, subtask: self, :type => :dependency
+    Relation.new supertask: dependent, subtask: self, :type => :dependency
   end
 
   def add_blocking_task blocking
-    TaskRelation.new supertask: self, subtask: blocking, :type => :dependency
+    Relation.new supertask: self, subtask: blocking, :type => :dependency
   end
 
   def subtasks
@@ -79,4 +81,5 @@ class Task
   def bump_effective_date date
     date || self.effective_date = Time.current
   end
+end
 end

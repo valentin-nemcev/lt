@@ -1,4 +1,4 @@
-class Action < Task
+class Task::Action < Task::Task
   attr_reader :completed_on
 
   def actionable?

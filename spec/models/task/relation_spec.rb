@@ -1,5 +1,5 @@
 require 'spec_helper'
 
-describe TaskRelation do
+describe Task::Relation do
 
 end
