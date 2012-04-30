@@ -9,8 +9,8 @@
   Lt.initRandomQuote('#random_quote', <%= @quote.to_json.html_safe -%>);
   Lt.initTimeline('#timeline');
   Lt.initTaskView(
-      '#tasks', 
-      <%= @tasks.to_json.html_safe -%>, 
-      <%= ui_state_of(:task_view).state.to_json.html_safe -%>);
+      '#tasks',
+      <%=raw render template: 'tasks/list', :formats => [:json] -%>,
+      <%=raw ui_state_of(:task_view).state.to_json -%>);
 </script>
 

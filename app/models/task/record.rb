@@ -105,11 +105,5 @@ class Record < ActiveRecord::Base
     not blocking_tasks.all?(&:completed?)
   end
 
-  def as_json options = {}
-    accessible_attributes = self.class.accessible_attributes.map(&:to_sym)
-    options.merge! :only => accessible_attributes,
-                   :methods => [:position, :completed, :actionable]
-    super options
-  end
 end
 end
