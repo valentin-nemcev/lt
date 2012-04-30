@@ -4,9 +4,11 @@ gem 'rails', '~> 3.2.2'
 
 gem 'mysql2',             '~> 0.3.11'
 gem 'awesome_nested_set', '~> 2.1.2'
-gem 'acts-as-dag', :git => 'https://github.com/resgraph/acts-as-dag.git'
+gem 'acts-as-dag', git: 'https://github.com/resgraph/acts-as-dag.git'
 
-gem 'unicorn'           , '~> 4.2.0'
+gem 'unicorn' , '~> 4.2.0'
+
+gem 'jbuilder', '~> 0.4.0'
 
 gem 'jquery-rails',    '~> 2.0.0'
 gem 'rails-backbone',  '~> 0.7.0'
