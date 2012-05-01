@@ -3,6 +3,7 @@ require 'spec_helper'
 describe Task::Action do
 
   def create_action(attrs={})
+    attrs.reverse_merge! objective: 'Test action!'
     described_class.new attrs
   end
 

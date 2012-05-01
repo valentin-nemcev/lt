@@ -11,11 +11,11 @@ class Task::Action < Task::Task
 
 
   def complete!(opts={})
-    date = opts[:on]
-    if date && date < self.created_on
+    completed_on = opts.fetch :on, effective_date
+    if completed_on < self.created_on
       raise TaskDateInvalid, "Task couldn't be completed before it was created"
     end
-    @completed_on = bump_effective_date date
+    @completed_on = completed_on
     return self
   end
 

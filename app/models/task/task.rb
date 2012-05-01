@@ -1,7 +1,8 @@
 module Task
+class InvalidTaskError < StandardError;   end;
 class Task
 
-  class TaskDateInvalid < StandardError; end;
+  class TaskDateInvalid < InvalidTaskError; end;
 
   include Graph::Node
 
@@ -15,6 +16,9 @@ class Task
     if project = attrs[:project]
       add_project project
     end
+
+    @objective_revisions = []
+    update_objective attrs[:objective], on: created_on
   end
 
 
@@ -32,9 +36,30 @@ class Task
     return self
   end
 
+
+  def update_objective objective, opts={}
+    updated_on = opts.fetch :on, effective_date
+    obj_last_updated_on = @objective_revisions.map(&:updated_on).max
+    if obj_last_updated_on && updated_on < obj_last_updated_on
+      raise InvalidTaskError, 'Objective updates should be in chronological order'
+    end
+    @objective_revisions << ObjectiveRevision.new(self, objective, updated_on)
+    return self
+  end
+
+  def objective_revisions
+    @objective_revisions.select { |r| r.updated_on <= effective_date }
+  end
+
+  def objective
+    objective_revisions.max_by{ |r| r.updated_on }.objective
+  end
+
+
   def blocked?
     not subtasks.all?(&:completed?)
   end
+
 
   def add_project project
     Relation.new supertask: project, subtask: self, :type => :composition
@@ -76,10 +101,5 @@ class Task
     edges.outgoing.filter(&:composition?).nodes
   end
 
-  protected
-
-  def bump_effective_date date
-    date || self.effective_date = Time.current
-  end
 end
 end
