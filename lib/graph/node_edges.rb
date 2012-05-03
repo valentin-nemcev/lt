@@ -31,6 +31,7 @@ module Graph
       es.each *args, &block
     end
 
+
     def add_incoming edge
       if @edges.add? edge
         edge.nodes.child = node
@@ -40,6 +41,18 @@ module Graph
     def add_outgoing edge
       if @edges.add? edge
         edge.nodes.parent = node
+      end
+    end
+
+    def remove_incoming edge
+      if @edges.delete? edge
+        edge.nodes.child = nil
+      end
+    end
+
+    def remove_outgoing edge
+      if @edges.delete? edge
+        edge.nodes.parent = nil
       end
     end
 
