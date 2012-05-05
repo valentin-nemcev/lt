@@ -30,46 +30,45 @@ describe Task::ObjectiveMethods do
     end
   end
 
-  context 'with updated objective' do
-    let(:future_date) { 1.day.from_now }
-    let(:updated_in_future) do
-      task = create_task objective: 'Old objective'
-      task.update_objective 'New objective', on: future_date
-    end
-
-    context 'seen from now' do
-      subject { updated_in_future }
-      it 'should have old objective' do
-        subject.objective.should eq('Old objective')
-      end
-    end
-
-    context 'seen from future date' do
-      subject { updated_in_future.as_of future_date }
-      it 'should have new objective' do
-        subject.objective.should eq('New objective')
-      end
-    end
-  end
-
-
   context 'with objective revisions' do
-    subject do
+    let(:with_objective_revisions) do
       create_task(objective: 'first', on: 4.hours.ago).tap do |t|
-        t.update_objective 'second', on: 2.hours.ago
+        t.update_objective 'second', on: 2.hours.from_now
       end
     end
+    subject { with_objective_revisions }
 
     it 'should have objective revision history', :with_frozen_time do
       revs = subject.objective_revisions
       revs.should have(2).revisions
 
-      revs.first.objective.should eq('first')
-      revs.first.updated_on.should eq(4.hours.ago)
+      rev = revs.next
+      rev.objective.should eq('first')
+      rev.updated_on.should eq(4.hours.ago)
 
-      revs.second.objective.should eq('second')
-      revs.second.updated_on.should eq(2.hours.ago)
+      rev = revs.next
+      rev.objective.should eq('second')
+      rev.updated_on.should eq(2.hours.from_now)
     end
+
+    context 'seen from now' do
+      subject { with_objective_revisions }
+      it 'should have old objective' do
+        subject.objective.should eq('first')
+      end
+
+      it 'should have all revisions' do
+        subject.objective_revisions.should have(2).revisions
+      end
+    end
+
+    context 'seen from future date' do
+      subject { with_objective_revisions.as_of 2.hours.from_now }
+      it 'should have new objective' do
+        subject.objective.should eq('second')
+      end
+    end
+
 
     it 'should not allow objective updates in achronological order' do
       task = subject

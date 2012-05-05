@@ -19,11 +19,15 @@ module Task
     end
 
     def objective_revisions
-      @objective_revisions.select { |r| r.updated_on <= effective_date }
+      @objective_revisions.each
+    end
+
+    def effective_objective_revisions
+      objective_revisions.select { |r| r.updated_on <= effective_date }
     end
 
     def objective
-      objective_revisions.max_by{ |r| r.updated_on }.objective
+      effective_objective_revisions.max_by{ |r| r.updated_on }.objective
     end
 
   end
