@@ -7,7 +7,7 @@ describe Task::Action do
     described_class.new attrs
   end
 
-  let(:single_action) { create_action }
+  let(:single_action) { create_action.tap{ |a| a.stub subtasks: [] } }
   subject { single_action }
 
   context 'new' do

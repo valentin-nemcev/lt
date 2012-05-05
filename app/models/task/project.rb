@@ -1,10 +1,13 @@
-class Task::Project < Task::Task
+module Task
+  class Project < Base
 
-  def actionable?
-    false
-  end
+    def actionable?
+      false
+    end
 
-  def completed?
-    !subtasks.empty? && blocked?
+    def completed?
+      !subtasks.empty? && blocked?
+    end
+
   end
 end
