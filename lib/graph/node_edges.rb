@@ -15,13 +15,17 @@ module Graph
       @filters = source.filters.clone
     end
 
+    def clone_for_node(node)
+      clone.tap { |c| c.instance_variable_set :@node, node }
+    end
+
     include Enumerable
 
     def each(*args, &block)
       es = @edges.clone
       case direction
-      when :outgoing then es.select!{ |e| e.nodes.parent.equal? self.node }
-      when :incoming then es.select!{ |e| e.nodes.child.equal?  self.node }
+      when :outgoing then es.select!{ |e| e.nodes.parent == self.node }
+      when :incoming then es.select!{ |e| e.nodes.child  == self.node }
       end
 
       filters.each do |filter|

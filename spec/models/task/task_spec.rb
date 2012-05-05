@@ -49,6 +49,15 @@ describe Task::Task do
     end
 
 
+    context 'as of different date' do
+      let(:original) { create_task }
+      let(:as_of_different_date) { original.as_of 4.hours.from_now }
+      it 'should equal to original task' do
+        as_of_different_date.should == original
+      end
+    end
+
+
     context 'with objective' do
       let(:task_with_objective) { create_task objective: 'Task objective' }
       it 'should have objective attribute' do
@@ -86,6 +95,7 @@ describe Task::Task do
       end
     end
 
+
     context 'with objective revisions' do
       subject do
         create_task(objective: 'first', on: 4.hours.ago).tap do |t|
@@ -111,56 +121,137 @@ describe Task::Task do
           task.update_objective 'between first and second', on: 3.hours.ago
         end.to raise_error Task::InvalidTaskError
       end
+
     end
 
   end
 
-  context 'with sub and supertasks' do
-    let(:project1)   { create_task }
-    let(:project2)   { create_task }
-    let(:dependent1) { create_task }
-    let(:dependent2) { create_task }
-    let(:blocking1)  { create_task }
-    let(:blocking2)  { create_task }
-    let(:component1) { create_task }
-    let(:component2) { create_task }
-    subject do
-      create_task.tap do |t|
-        t.add_project project1
-        t.add_project project2
-        t.add_dependent_task dependent1
-        t.add_dependent_task dependent2
-        t.add_blocking_task blocking1
-        t.add_blocking_task blocking2
-        t.add_component_task component1
-        t.add_component_task component2
+  context 'with related tasks' do
+
+    [:project1, :project2, :dependent1, :dependent2,
+      :blocking1, :blocking2, :component1, :component2
+    ].each do |t|
+      let(t) { create_task objective: t }
+    end
+
+    let(:with_related_on_creation) do
+      create_task projects: [project1], dependent_tasks: [dependent1],
+        blocking_tasks: [blocking1], component_tasks: [component1]
+    end
+
+    shared_examples 'related task collectons on creation' do
+      it "has related tasks collections" do
+        {
+          supertasks:      [project1, dependent1],
+          dependent_tasks: [dependent1],
+          projects:        [project1],
+          subtasks:        [blocking1, component1],
+          blocking_tasks:  [blocking1],
+          component_tasks: [component1],
+        }.each do |collection, contents|
+          subject.public_send(collection).to_a.should =~ contents
+        end
       end
     end
 
-    it 'has #supertasks' do
-      subject.supertasks.to_a.should =~ [project1, project2, dependent1, dependent2]
+    shared_examples 'related task collectons after creation' do
+      it "has related tasks collections" do
+        {
+          supertasks:      [project1, project2, dependent1, dependent2],
+          dependent_tasks: [dependent1, dependent2],
+          projects:        [project1, project2],
+          subtasks:        [blocking1, blocking2, component1, component2],
+          blocking_tasks:  [blocking1, blocking2],
+          component_tasks: [component1, component2],
+        }.each do |collection, contents|
+          subject.public_send(collection).to_a.should =~ contents
+        end
+      end
     end
 
-    it 'has #dependent_tasks' do
-      subject.dependent_tasks.to_a.should =~ [dependent1, dependent2]
+    context 'added on creation' do
+      subject { with_related_on_creation }
+
+      it 'has #relations' do
+        subject.relations.should have(4).relations
+      end
+
+      include_examples 'related task collectons on creation'
     end
 
-    it 'has #projects' do
-      subject.projects.to_a.should =~ [project1, project2]
+    let(:addition_date) { 1.day.from_now }
+
+    let(:with_related_after_creation) do
+      opts = {on: addition_date}
+      with_related_on_creation.tap do |t|
+        t.add_project        project2,   opts
+        t.add_dependent_task dependent2, opts
+        t.add_blocking_task  blocking2,  opts
+        t.add_component_task component2, opts
+      end
     end
 
-    it 'has #subtasks' do
-      subject.subtasks.to_a.should =~ [blocking1, blocking2, component1, component2]
+
+    context 'added after creation on future date' do
+      context 'seen from creation date' do
+        subject { with_related_after_creation }
+
+        it 'has #relations' do
+          subject.relations.should have(8).relations
+        end
+
+        include_examples 'related task collectons on creation'
+      end
+
+      context 'seen from addition date' do
+        subject { with_related_after_creation.as_of addition_date }
+
+        it 'has #relations' do
+          # pp with_related_after_creation.edges.outgoing
+          # pp subject.edges.outgoing
+          subject.relations.should have(8).relations
+        end
+
+        include_examples 'related task collectons after creation'
+      end
+
     end
 
-    it 'has #blocking_tasks' do
-      subject.blocking_tasks.to_a.should =~ [blocking1, blocking2]
+    let(:removal_date) { 2.day.from_now }
+
+    let(:with_unrelated_after_creation) do
+      opts = {on: removal_date}
+      with_related_after_creation.tap do |t|
+        t.remove_project        project2,   opts
+        t.remove_dependent_task dependent2, opts
+        t.remove_blocking_task  blocking2,  opts
+        t.remove_component_task component2, opts
+      end
     end
 
-    it 'has #component_tasks' do
-      subject.component_tasks.to_a.should =~ [component1, component2]
+    context 'removed after addition on future date' do
+      context 'seen from addition date' do
+        subject { with_unrelated_after_creation.as_of addition_date }
+
+        it 'has #relations' do
+          subject.relations.should have(8).relations
+        end
+
+        include_examples 'related task collectons after creation'
+      end
+
+      context 'seen from removal date' do
+        subject { with_unrelated_after_creation.as_of removal_date }
+
+        it 'has #relations' do
+          subject.relations.should have(8).relations
+        end
+
+        include_examples 'related task collectons on creation'
+      end
     end
   end
+
 
   context 'with blocking tasks' do
     let(:blocked_task) do

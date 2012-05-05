@@ -14,7 +14,7 @@ module Graph
     end
 
     def child=(node)
-      return if @child.equal? node
+      return if @child == node
       old_node = @child
       @child = node
       if node.present?
@@ -25,7 +25,7 @@ module Graph
     end
 
     def parent=(node)
-      return if @parent.equal? node
+      return if @parent == node
       old_node = @parent
       @parent = node
       if node.present?

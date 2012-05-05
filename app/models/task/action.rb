@@ -1,5 +1,13 @@
 class Task::Action < Task::Task
-  attr_reader :completed_on
+
+  def completed_on
+    original.instance_variable_get :@completed_on
+  end
+
+  def completed_on=(date)
+    original.instance_variable_set :@completed_on, date
+  end
+  protected :completed_on=
 
   def actionable?
     !completed? && !blocked?
@@ -15,12 +23,12 @@ class Task::Action < Task::Task
     if completed_on < self.created_on
       raise TaskDateInvalid, "Task couldn't be completed before it was created"
     end
-    @completed_on = completed_on
+    self.completed_on = completed_on
     return self
   end
 
   def undo_complete!
-    @completed_on = nil
+    self.completed_on = nil
     return self
   end
 end

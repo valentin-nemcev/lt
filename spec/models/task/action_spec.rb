@@ -27,6 +27,19 @@ describe Task::Action do
     it 'should have completion date', :with_frozen_time do
       subject.completed_on.should eq(Time.current)
     end
+
+    context 'as of different date' do
+      let(:original) { create_action }
+      let!(:as_of_different_date) { original.as_of original.effective_date }
+      it 'should be completed when original is completed' do
+        original.complete!
+        as_of_different_date.should be_completed
+      end
+      it 'and vice versa' do
+        as_of_different_date.complete!
+        original.should be_completed
+      end
+    end
   end
 
   context 'completed before created' do
@@ -38,6 +51,19 @@ describe Task::Action do
   context 'completed, then completion undone' do
     subject { single_action.complete!.undo_complete! }
     it { should_not be_completed }
+
+    context 'as of different date' do
+      let(:original) { create_action.complete! }
+      let!(:as_of_different_date) { original.as_of original.effective_date }
+      it 'should not be completed when original is not completed' do
+        original.undo_complete!
+        as_of_different_date.should_not be_completed
+      end
+      it 'and vice versa' do
+        as_of_different_date.undo_complete!
+        original.should_not be_completed
+      end
+    end
   end
 
   context 'completed on future date' do
