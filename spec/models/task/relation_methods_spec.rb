@@ -91,8 +91,6 @@ describe Task::RelationMethods do
         subject { with_related_after_creation.as_of addition_date }
 
         it 'has #relations' do
-          # pp with_related_after_creation.edges.outgoing
-          # pp subject.edges.outgoing
           subject.relations.should have(8).relations
         end
 

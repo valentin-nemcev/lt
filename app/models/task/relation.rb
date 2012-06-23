@@ -22,9 +22,4 @@ class Task::Relation
     type == :composition
   end
 
-  def inspect
-    "#<#{self.class}: child=#{self.nodes.child.inspect}, parent=#{self.nodes.parent.inspect}, " +
-      "added_on=#{self.added_on}, removed_on=#{self.removed_on}>"
-  end
-
 end

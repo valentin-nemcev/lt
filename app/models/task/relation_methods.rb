@@ -20,10 +20,10 @@ module Task
       if project = attrs[:project]
         add_project project
       end
-      attrs.fetch(:projects, []).each        { |t| add_project t }
-      attrs.fetch(:dependent_tasks, []).each { |t| add_dependent_task t }
-      attrs.fetch(:blocking_tasks, []).each  { |t| add_blocking_task t }
-      attrs.fetch(:component_tasks, []).each { |t| add_component_task t }
+      attrs.fetch(:projects        , []).each { |t| add_project t }
+      attrs.fetch(:dependent_tasks , []).each { |t| add_dependent_task t }
+      attrs.fetch(:blocking_tasks  , []).each { |t| add_blocking_task t }
+      attrs.fetch(:component_tasks , []).each { |t| add_component_task t }
 
     end
 

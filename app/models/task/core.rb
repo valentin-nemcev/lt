@@ -2,6 +2,7 @@ module Task
   class InvalidTaskError < StandardError;   end;
 
   class Core
+    # TODO: Consitent names for exceptions
     class TaskDateInvalid < InvalidTaskError; end;
 
     attr_reader :effective_date, :created_on
