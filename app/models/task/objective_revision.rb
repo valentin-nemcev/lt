@@ -1,9 +1,8 @@
 module Task
   class InvalidObjectiveError < InvalidTaskError; end
   class ObjectiveRevision
-    attr_reader :task, :objective, :updated_on
-    def initialize(task, objective, updated_on)
-      @task = task
+    attr_reader :objective, :updated_on
+    def initialize(objective, updated_on)
       @objective = validate_objective objective
       @updated_on = updated_on
     end

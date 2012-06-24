@@ -5,26 +5,25 @@ module Task
     # TODO: Consitent names for exceptions
     class TaskDateInvalid < InvalidTaskError; end;
 
-    attr_reader :effective_date, :created_on
+    attr_reader :effective_date
+
+    def fields
+      @fields ||= {}
+    end
+    protected :fields
+
+    def ==(other)
+      fields.equal? other.fields
+    end
 
     def initialize(attrs={})
       now = Time.current
-      @created_on = attrs.fetch(:on, now)
-      @effective_date = [@created_on, now].max
+      fields[:created_on] = attrs.fetch(:on, now)
+      @effective_date = [created_on, now].max
     end
 
-    def initialize_copy(original)
-      @original = original
-      super
-    end
-
-    def original
-      @original or self
-    end
-    protected :original
-
-    def ==(other)
-      original.equal? other.original
+    def created_on
+      fields[:created_on]
     end
 
     def as_of(date)

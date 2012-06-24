@@ -2,11 +2,11 @@ module Task
   class Action < Core
 
     def completed_on
-      original.instance_variable_get :@completed_on
+      fields[:completed_on]
     end
 
     def completed_on=(date)
-      original.instance_variable_set :@completed_on, date
+      fields[:completed_on] = date
     end
     protected :completed_on=
 

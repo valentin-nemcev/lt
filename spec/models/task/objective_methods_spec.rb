@@ -30,6 +30,30 @@ describe Task::ObjectiveMethods do
     end
   end
 
+  context 'with objective revisions passed on creation' do
+    let(:revisions) do
+      [
+        Task::ObjectiveRevision.new('first', 4.hours.ago),
+        Task::ObjectiveRevision.new('second', 3.hours.ago),
+      ]
+    end
+    let(:with_objective_revisions) do
+      create_task_without_objective(objective_revisions: revisions, on: 4.hours.ago)
+    end
+
+    it 'should have objective revision history', :with_frozen_time do
+      with_objective_revisions.objective_revisions.to_a.should =~ revisions
+    end
+
+    it 'should not allow objective updates before task was created' do
+      revision = Task::ObjectiveRevision.new 'rev', 1.hour.ago
+      expect do
+        task = create_task_without_objective objective_revisions: [revision]
+      end.to raise_error Task::InvalidTaskError
+    end
+
+  end
+
   context 'with objective revisions' do
     let(:with_objective_revisions) do
       create_task(objective: 'first', on: 4.hours.ago).tap do |t|
