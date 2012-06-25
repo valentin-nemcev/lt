@@ -5,11 +5,6 @@ module Task
       fields[:completed_on]
     end
 
-    def completed_on=(date)
-      fields[:completed_on] = date
-    end
-    protected :completed_on=
-
     def actionable?
       !completed? && !blocked?
     end
@@ -24,12 +19,12 @@ module Task
       if completed_on < self.created_on
         raise TaskDateInvalid, "Task couldn't be completed before it was created"
       end
-      self.completed_on = completed_on
+      fields[:completed_on] = completed_on
       return self
     end
 
     def undo_complete!
-      self.completed_on = nil
+      fields[:completed_on] = nil
       return self
     end
 
