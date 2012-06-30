@@ -6,7 +6,7 @@ module Task
     end
 
     def completed?
-      !subtasks.empty? && blocked?
+      !subtasks.empty? && !blocked?
     end
 
   end

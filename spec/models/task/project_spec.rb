@@ -19,10 +19,4 @@ describe Task::Project do
   context 'new' do
     it { should_not be_completed }
   end
-
-  context 'blocked' do
-    subject { project.tap{ |p| p.stub(:blocked? => true) } }
-    it { should_not be_completed }
-  end
-
 end
