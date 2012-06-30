@@ -20,6 +20,17 @@ describe Task::Action do
 
   end
 
+  context 'new with completion date' do
+    subject { create_action created_on: 2.days.ago, completed_on: 1.day.ago }
+    it { should_not be_actionable }
+    it { should     be_completed }
+
+    it 'should have completion date', :with_frozen_time do
+      subject.completed_on.should eq(1.day.ago)
+    end
+
+  end
+
   context 'completed' do
     subject { single_action.complete! }
     it { should be_completed }

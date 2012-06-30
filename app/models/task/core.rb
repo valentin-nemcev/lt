@@ -18,7 +18,7 @@ module Task
 
     def initialize(attrs={})
       now = Time.current
-      fields[:created_on] = attrs.fetch(:on, now)
+      fields[:created_on] = attrs[:on] || attrs[:created_on] || now
       @effective_date = [created_on, now].max
     end
 
@@ -48,6 +48,10 @@ module Task
 
     def inspect
       "<#{self.class}: #{self.objective} as of #{self.effective_date}>"
+    end
+
+    def as_json(options=nil)
+      fields.dup
     end
   end
 end

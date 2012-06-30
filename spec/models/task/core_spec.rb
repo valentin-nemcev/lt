@@ -37,6 +37,13 @@ describe Task::Core do
       end
     end
 
+    context 'created in past with created_on' do
+      subject { create_task created_on: 2.days.ago }
+      it 'should have creation date in past', :with_frozen_time do
+        subject.created_on.should eq(2.days.ago)
+      end
+    end
+
     context 'created in future' do
       subject { create_task on: 2.days.from_now }
       it 'should have effective date in future', :with_frozen_time do

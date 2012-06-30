@@ -1,8 +1,21 @@
 module Task
-  class Action < Core
+  class Action < Base
+
+    def initialize(attrs={})
+      super
+
+      self.completed_on = attrs[:completed_on]
+    end
 
     def completed_on
       fields[:completed_on]
+    end
+
+    def completed_on=(completed_on)
+      if completed_on && completed_on < self.created_on
+        raise TaskDateInvalid, "Task couldn't be completed before it was created"
+      end
+      fields[:completed_on] = completed_on
     end
 
     def actionable?
@@ -15,16 +28,12 @@ module Task
 
 
     def complete!(opts={})
-      completed_on = opts.fetch :on, effective_date
-      if completed_on < self.created_on
-        raise TaskDateInvalid, "Task couldn't be completed before it was created"
-      end
-      fields[:completed_on] = completed_on
+      self.completed_on = opts.fetch :on, effective_date
       return self
     end
 
     def undo_complete!
-      fields[:completed_on] = nil
+      self.completed_on = nil
       return self
     end
 
