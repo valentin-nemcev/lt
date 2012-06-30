@@ -1,6 +1,8 @@
 class Lt.Models.Task extends Backbone.Model
   paramRoot: 'task'
 
+  url: 'tasks'
+
   defaults:
     body: null
 
