@@ -1,35 +1,23 @@
 class TasksController < ApplicationController
 
-  def create
-    attrs = {
-      user: current_user,
-      body: params[:task][:body],
-      project: TaskMapper.fetch_by_id(params[:task][:parent_id]),
-    }
-    task = TaskMapper.create attrs
+  def index
+    mapper = Task::LegacyMapper.new.for_user current_user
+    @tasks = mapper.fetch_all
 
-    render json: task
+    render :list
+  end
+
+  def create
+    head :status => :not_implemented
   end
 
 
   def complete
-    with_task do |task|
-      task.complete!
-    end
+    head :status => :not_implemented
   end
 
   def undo_complete
-    with_task do |task|
-      task.undo_complete!
-    end
+    head :status => :not_implemented
   end
 
-  protected
-
-  def with_task
-    task = TaskMapper.fetch_by_id params[:id]
-    yield task
-    TaskMapper.save task
-    render json: task
-  end
 end
