@@ -1,6 +1,6 @@
 module Task
-  class Record < ActiveRecord::Base
-    self.table_name = 'tasks'
+  class LegacyRecord < ActiveRecord::Base
+    self.table_name = 'legacy_tasks'
 
     acts_as_nested_set
 

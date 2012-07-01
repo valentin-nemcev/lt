@@ -2,7 +2,7 @@ module Task
   class LegacyMapper
 
     def initialize
-      @task_scope = Record.scoped
+      @task_scope = LegacyRecord.scoped
     end
 
     def records

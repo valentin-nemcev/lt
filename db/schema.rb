@@ -11,24 +11,9 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120420120206) do
+ActiveRecord::Schema.define(:version => 20120701113224) do
 
-  create_table "quotes", :force => true do |t|
-    t.text     "content",    :null => false
-    t.string   "source",     :null => false
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-    t.integer  "user_id"
-  end
-
-  create_table "task_dependencies", :force => true do |t|
-    t.integer "blocking_task_id",  :null => false
-    t.integer "dependent_task_id", :null => false
-    t.boolean "direct",            :null => false
-    t.integer "count",             :null => false
-  end
-
-  create_table "tasks", :force => true do |t|
+  create_table "legacy_tasks", :force => true do |t|
     t.text     "body",         :null => false
     t.integer  "parent_id"
     t.integer  "lft",          :null => false
@@ -36,6 +21,14 @@ ActiveRecord::Schema.define(:version => 20120420120206) do
     t.integer  "depth"
     t.datetime "created_on",   :null => false
     t.datetime "completed_on"
+    t.integer  "user_id"
+  end
+
+  create_table "quotes", :force => true do |t|
+    t.text     "content",    :null => false
+    t.string   "source",     :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
     t.integer  "user_id"
   end
 
