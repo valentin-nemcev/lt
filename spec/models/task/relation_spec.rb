@@ -20,6 +20,16 @@ describe Task::Relation do
   let(:test_date1) { 4.hours.ago }
   let(:test_date2) { 2.hours.ago }
 
+  context 'created with sub- and supertasks' do
+    let(:supertask) { create_task }
+    let(:subtask) { create_task }
+    let(:relation) { create_relation supertask: supertask, subtask: subtask }
+
+    it 'should have sub- and supertasks' do
+      relation.supertask.should be(supertask)
+      relation.subtask.should   be(subtask)
+    end
+  end
   context 'created without addition date' do
     let(:relation) { create_relation }
 

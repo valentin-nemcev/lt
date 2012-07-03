@@ -23,6 +23,15 @@ module Task
       return self
     end
 
+    def supertask
+      nodes.parent
+    end
+
+    def subtask
+      nodes.child
+    end
+
+
     def dependency?
       type == :dependency
     end
