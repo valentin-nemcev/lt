@@ -5,10 +5,12 @@ module Task
     # TODO: Consitent names for exceptions
     class TaskDateInvalid < InvalidTaskError; end;
 
+    include PersistenceMethods
+
     attr_reader :effective_date
 
     def fields
-      @fields ||= {}
+      @fields
     end
     protected :fields
 
@@ -17,9 +19,11 @@ module Task
     end
 
     def initialize(attrs={})
+      @fields = {}
       now = Time.current
       fields[:created_on] = attrs[:on] || attrs[:created_on] || now
       @effective_date = [created_on, now].max
+      super
     end
 
     def created_on

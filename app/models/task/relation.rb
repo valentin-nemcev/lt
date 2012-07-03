@@ -3,9 +3,18 @@ module Task
   class Relation
 
     include Graph::Edge
+    include PersistenceMethods
+
+
+    def fields
+      @fields
+    end
+    protected :fields
 
     attr_reader :type, :added_on, :removed_on
     def initialize(attrs={})
+      @fields = {}
+      super
       self.nodes.parent = attrs.fetch :supertask
       self.nodes.child = attrs.fetch :subtask
       @type = attrs.fetch :type

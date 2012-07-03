@@ -2,7 +2,6 @@ module Task
   module PersistenceMethods
 
     def initialize(attrs={})
-      super
       self.id = attrs[:id]
     end
 
