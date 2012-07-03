@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120701113224) do
+ActiveRecord::Schema.define(:version => 20120701145055) do
 
   create_table "legacy_tasks", :force => true do |t|
     t.text     "body",         :null => false
@@ -31,6 +31,34 @@ ActiveRecord::Schema.define(:version => 20120701113224) do
     t.datetime "updated_at", :null => false
     t.integer  "user_id"
   end
+
+  create_table "task_objective_revisions", :force => true do |t|
+    t.integer  "task_id"
+    t.string   "objective"
+    t.datetime "updated_on"
+  end
+
+  add_index "task_objective_revisions", ["task_id"], :name => "index_task_objective_revisions_on_task_id"
+
+  create_table "task_relations", :force => true do |t|
+    t.integer  "subtask_id"
+    t.integer  "supertask_id"
+    t.string   "type"
+    t.datetime "added_on"
+    t.datetime "removed_on"
+  end
+
+  add_index "task_relations", ["subtask_id"], :name => "index_task_relations_on_subtask_id"
+  add_index "task_relations", ["supertask_id"], :name => "index_task_relations_on_supertask_id"
+
+  create_table "tasks", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "type"
+    t.datetime "created_on"
+    t.datetime "completed_on"
+  end
+
+  add_index "tasks", ["user_id"], :name => "index_tasks_on_user_id"
 
   create_table "ui_states", :force => true do |t|
     t.string  "component", :null => false
