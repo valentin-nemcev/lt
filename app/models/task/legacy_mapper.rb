@@ -14,11 +14,13 @@ module Task
       self
     end
 
-    def fetch_all
+    def fetch_all(opts={})
       tasks = {}
       records.each do |record|
         task = map_record_to_task record
         tasks[record.id] = task
+        task.id = nil if opts[:dont_persist]
+
         unless record.root?
           parent_task = tasks[record.parent.id]
           Relation.new(
