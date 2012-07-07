@@ -8,6 +8,20 @@ module Task
       @user = opts.fetch :user
     end
 
+    def fetch_all
+      records = scope_records Records::Task
+      @task_objects = {}
+      tasks = records.all.map do |task_record|
+        @task_objects[task_record.id] = map_record_to_task task_record
+      end
+      cond = 'supertask_id IN (:ids) OR subtask_id IN (:ids)'
+      relations = Records::Relation.where(cond, ids: @task_objects.keys)
+      relations.all.each do |relation_record|
+        map_record_to_relation relation_record
+      end
+      return tasks
+    end
+
     def store_all(tasks)
       stats = Hash.new { 0 }
       @task_records = {}
@@ -33,7 +47,7 @@ module Task
     end
 
     def scope_records(records)
-      records.where user_id: user.id
+      records.where(user_id: user.id).includes(:objective_revisions)
     end
 
     def get_task_record(task)
@@ -64,6 +78,27 @@ module Task
       end
     end
 
+    def map_record_to_task(task_record)
+      task_type = case task_record
+                  when Records::Project then Project
+                  when Records::Action  then Action
+                  else fail TaskMapperError,
+                    "Unknown task record type: #{task_record.class}"
+                  end
+      task = task_type.new(
+        id: task_record.id,
+        created_on: task_record.created_on,
+        objective_revisions: task_record.objective_revisions.map { |rev_r|
+          map_record_to_objective_revision rev_r
+        }
+      )
+      if task.respond_to? :completed_on
+        task.completed_on = task_record.completed_on
+      end
+      return task
+
+    end
+
     def get_objective_revision_record(task_record, revision)
       records = Records::ObjectiveRevision.where(task: task_record)
       if revision.persisted?
@@ -79,6 +114,10 @@ module Task
         rev_r.objective = revision.objective
         rev_r.updated_on = revision.updated_on
       end
+    end
+
+    def map_record_to_objective_revision(rev_r)
+      ObjectiveRevision.new rev_r.objective, rev_r.updated_on, rev_r.id
     end
 
 
@@ -108,6 +147,22 @@ module Task
         relation_r.supertask = @task_records[relation.supertask.id]
         relation_r.subtask = @task_records[relation.subtask.id]
       end
+    end
+
+    def map_record_to_relation(relation_r)
+      rel_type = case relation_r
+                 when Records::CompositeRelation  then :composition
+                 when Records::DependencyRelation then :dependency
+                 else fail TaskMapperError,
+                   "Unknown relation record type: #{relation_r.class}"
+                 end
+      Relation.new(
+        type: rel_type,
+        added_on: relation_r.added_on,
+        removed_on: relation_r.removed_on,
+        subtask: @task_objects[relation_r.subtask_id],
+        supertask: @task_objects[relation_r.supertask_id],
+      )
     end
 
   end

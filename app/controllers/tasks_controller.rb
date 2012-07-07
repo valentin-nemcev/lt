@@ -1,7 +1,7 @@
 class TasksController < ApplicationController
 
   def index
-    mapper = Task::LegacyMapper.new.for_user current_user
+    mapper = Task::Mapper.new user: current_user
     @tasks = mapper.fetch_all
 
     render :list
