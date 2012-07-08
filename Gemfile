@@ -4,9 +4,8 @@ gem 'rails', '~> 3.2.2'
 
 gem 'mysql2',             '~> 0.3.11'
 gem 'awesome_nested_set', '~> 2.1.2'
-gem 'acts-as-dag', git: 'https://github.com/resgraph/acts-as-dag.git'
 
-gem 'unicorn' , '~> 4.2.0'
+gem 'unicorn' , '~> 4.3.0'
 
 gem 'jbuilder', '~> 0.4.0'
 
@@ -19,16 +18,16 @@ group :assets do
   gem 'compass-rails', '~> 1.0.0'
   gem 'eco',           '~> 1.0.0'
 
-  gem 'therubyracer',  '~> 0.9.9'
+  gem 'therubyracer',  '~> 0.10.1'
   gem 'uglifier',      '>= 1.0.3'
 end
 
 group :development, :test do
-  gem 'capistrano',        '~> 2.11.2'
+  gem 'capistrano',        '~> 2.12.0'
   gem 'capistrano_colors', '~> 0.5.5'
-  gem 'rvm-capistrano',    '~> 1.0.2'
+  gem 'rvm-capistrano',    '~> 1.2.0'
 
-  gem 'rspec-rails', '~> 2.9.0'
+  gem 'rspec-rails', '~> 2.11.0'
   gem 'spork-rails', '~> 3.2.0'
 
   gem 'timecop', '~> 0.3.5'
