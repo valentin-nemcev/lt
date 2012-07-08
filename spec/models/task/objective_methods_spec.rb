@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+# TODO: Use new rspec named subject everywhere
 describe Task::ObjectiveMethods do
   class TaskWithObjectiveMethods < Task::Core
     include Task::ObjectiveMethods
@@ -30,6 +31,7 @@ describe Task::ObjectiveMethods do
     end
   end
 
+  # TODO: Replace date "literals" with lets
   context 'with objective revisions passed on creation' do
     let(:revisions) do
       [

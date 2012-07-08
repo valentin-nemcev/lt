@@ -6,6 +6,7 @@ describe Task::Core do
     described_class.new attrs
   end
 
+  # TODO: Use new rspec named subject everywhere
   context 'new' do
     let(:task) { create_task }
     subject { task }
@@ -27,6 +28,7 @@ describe Task::Core do
       it {should be_nil}
     end
 
+    # TODO: Replace date "literals" with lets
     context 'created in past' do
       subject { create_task on: 2.days.ago }
       it 'should have creation date in past', :with_frozen_time do

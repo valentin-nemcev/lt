@@ -13,6 +13,7 @@ describe 'Migrating tasks form legacy mapper to new mapper' do
     end
 
     it 'migrates' do
+      pending "TODO: Delete"
       User.all.each do |user|
         puts "\nMigrating tasks for user #{user.login}"
 

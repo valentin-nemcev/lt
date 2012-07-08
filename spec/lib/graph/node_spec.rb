@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+# TODO: Use new rspec named subject everywhere
 describe Graph::Node do
 
   class TestNode

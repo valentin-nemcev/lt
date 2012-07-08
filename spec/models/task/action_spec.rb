@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+# TODO: Use new rspec named subject everywhere
 describe Task::Action do
 
   def create_action(attrs={})
@@ -25,6 +26,7 @@ describe Task::Action do
     it { should_not be_actionable }
     it { should     be_completed }
 
+    # TODO: Replace date "literals" with lets
     it 'should have completion date', :with_frozen_time do
       subject.completed_on.should eq(1.day.ago)
     end

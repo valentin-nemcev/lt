@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+# TODO: Use new rspec named subject everywhere
 describe Task::Project do
 
   def create_project(attrs={})
