@@ -1,5 +1,7 @@
-module Task::Records
-  class CompositeRelation < Relation
+module Task
+  module Records
+    class CompositeRelation < Relation
+    end
   end
 end
 

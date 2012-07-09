@@ -1,5 +1,7 @@
-module Task::Records
-  class DependencyRelation < Relation
+module Task
+  module Records
+    class DependencyRelation < Relation
+    end
   end
 end
 
