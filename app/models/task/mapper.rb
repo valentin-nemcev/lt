@@ -22,6 +22,10 @@ module Task
       return tasks
     end
 
+    def store(task)
+      Records::Action.create
+    end
+
     def store_all(tasks)
       stats = Hash.new { 0 }
       @task_records = {}
