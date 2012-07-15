@@ -31,6 +31,14 @@ describe Task::ObjectiveMethods do
     end
   end
 
+  context 'with empty objective revisions list' do
+    it 'should raise error' do
+      expect {
+        create_task_without_objective objective_revisions: []
+      }.to raise_error Task::InvalidTaskError
+    end
+  end
+
   # TODO: Replace date "literals" with lets
   context 'with objective revisions passed on creation' do
     let(:revisions) do

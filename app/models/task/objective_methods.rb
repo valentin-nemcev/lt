@@ -7,13 +7,22 @@ module Task
       fields[:objective_revisions] = []
 
       if attrs[:objective_revisions]
-        attrs[:objective_revisions].each do |r|
-          add_objective_revision r
-        end
+        set_objective_revisions attrs[:objective_revisions]
       else
         update_objective attrs[:objective], on: created_on
       end
     end
+
+    def set_objective_revisions(o_revs)
+      if o_revs.empty?
+        raise InvalidTaskError,
+          'Objective revisions are empty'
+      end
+      o_revs.each do |r|
+        add_objective_revision r
+      end
+    end
+    protected :set_objective_revisions
 
     def update_objective objective, opts={}
       updated_on = opts.fetch :on, effective_date
