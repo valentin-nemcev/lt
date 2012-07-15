@@ -1,3 +1,3 @@
-json.array! @tasks do |json, task|
+json.task do |json|
   json.partial! 'task', task: task
 end
