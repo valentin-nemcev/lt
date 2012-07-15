@@ -22,8 +22,18 @@ module Task
       return tasks
     end
 
+    def create_objective_revisions_mapper(task_record)
+      ObjectiveRevisionsMapper.new(task_record)
+    end
+
     def store(task)
-      Records::Action.create
+      attrs = { created_on: task.created_on.round }
+      task_record = scope_records(Records::Action).new attrs
+      o_revs_mapper = create_objective_revisions_mapper task_record
+      o_revs_mapper.store_all task.objective_revisions
+      task_record.save!
+      task.id = task_record.id
+      return self
     end
 
     def store_all(tasks)
