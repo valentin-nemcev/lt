@@ -43,7 +43,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     ev.preventDefault()
 
     attrs =
-      body: @$('[name="body"]').val()
+      objective: @$('[name="objective"]').val()
 
     @model.save attrs, success: (task) => @triggerDomEv 'closeEditItem'
 
@@ -53,7 +53,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     @model[action] success: (task) => @triggerDomEv 'closeEditItem'
 
   focus: (ev) ->
-    @$('[name="body"]').focus()
+    @$('[name="objective"]').focus()
     return
 
   triggerDomEv: (evName) -> $(@el).trigger(evName, [@model.cid])

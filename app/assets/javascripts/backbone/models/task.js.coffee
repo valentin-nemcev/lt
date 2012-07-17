@@ -4,11 +4,11 @@ class Lt.Models.Task extends Backbone.Model
   url: 'tasks'
 
   defaults:
-    body: null
+    objective: null
 
   toJSON: ->
     attributes = {}
-    for key in ['body', 'deadline', 'parent_id', 'position']
+    for key in ['objective', 'deadline', 'parent_id', 'position']
       attributes[key] = @attributes[key]
     return attributes
 

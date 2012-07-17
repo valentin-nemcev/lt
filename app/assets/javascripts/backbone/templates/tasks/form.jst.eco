@@ -1,7 +1,7 @@
 <form name="task">
   <div class='field-group'>
-    <input type="text" name="body" autocomplete="off"
-           value="<%- @escape('body') %>" >
+    <input type="text" name="objective" autocomplete="off"
+           value="<%- @escape('objective') %>" >
   </div>
   <div class='field-group minor'>
     <% unless @isNew(): %>

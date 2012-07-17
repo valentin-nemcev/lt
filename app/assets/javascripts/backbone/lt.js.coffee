@@ -29,27 +29,16 @@ window.Lt =
   initTaskView: (selector, tasks, taskViewState) ->
     @tasks = new Lt.Collections.TasksCollection tasks
     @tasks.fetch() if tasks.length == 0
-    @bindTasksToTimeline()
-    @actionableTasks = new Lt.Collections.ActionableTasks @tasks
+    # @bindTasksToTimeline()
 
     @taskViewState = new Lt.Models.TaskViewState taskViewState
-
-    @taskActionView = new Lt.Views.ActionableTasks.ListView
-      collection: @actionableTasks
-      state: @taskViewState
 
     @taskPlanView = new Lt.Views.Tasks.ListView
       collection: @tasks
       state: @taskViewState
-
-    @taskViewSwitcher = new Lt.Views.Tasks.PlanActionsTabsView
       el: $(selector)[0]
-      state: @taskViewState
-      tabs:
-        plan: @taskPlanView
-        actions: @taskActionView
 
-    @taskViewSwitcher.render()
+    @taskPlanView.render()
 
 
 
