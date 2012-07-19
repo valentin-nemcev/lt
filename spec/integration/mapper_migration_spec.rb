@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Migrating tasks form legacy mapper to new mapper' do
+describe 'Migrating tasks form legacy mapper to new mapper', :integration do
   describe 'successful migration' do
     include ActionView::Helpers::TextHelper
 
