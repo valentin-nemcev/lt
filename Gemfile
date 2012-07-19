@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'bundler', '~> 1.1.3'
+
 gem 'rails', '~> 3.2.2'
 
 gem 'mysql2',             '~> 0.3.11'
