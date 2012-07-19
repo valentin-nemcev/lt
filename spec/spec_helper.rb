@@ -9,6 +9,19 @@ Spork.prefork do
   require 'rspec/rails'
   require 'rspec/autorun'
 
+  require 'capybara/rails'
+  require 'capybara/rspec'
+
+  Capybara.javascript_driver = :selenium
+  Capybara.server_port = 9000
+  Capybara.app_host = 'http://lt.dev.lan:9000'
+  Capybara.register_driver :selenium do |app|
+    Capybara::Selenium::Driver.new(app,
+      :browser => :remote,
+      :url => "http://mainframe.lan:4444/wd/hub",
+      :desired_capabilities => :firefox)
+  end
+  Capybara.default_driver = :selenium
 
   RSpec.configure do |config|
     # If you're not using ActiveRecord, or you'd prefer not to run each of your

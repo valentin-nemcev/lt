@@ -32,6 +32,9 @@ group :development, :test do
   gem 'rspec-rails', '~> 2.11.0'
   gem 'spork-rails', '~> 3.2.0'
 
+  gem 'capybara',    '~> 1.1.2'
+
+  # ↓ TODO: Get rid of this in tests
   gem 'timecop', '~> 0.3.5'
 end
 
