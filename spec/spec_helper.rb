@@ -12,6 +12,8 @@ Spork.prefork do
   require 'capybara/rails'
   require 'capybara/rspec'
 
+  require 'acceptance/helpers.rb'
+
   Capybara.javascript_driver = :selenium
   Capybara.server_port = 9000
   Capybara.app_host = 'http://lt.dev.lan:9000'
@@ -19,9 +21,10 @@ Spork.prefork do
     Capybara::Selenium::Driver.new(app,
       :browser => :remote,
       :url => "http://mainframe.lan:4444/wd/hub",
-      :desired_capabilities => :firefox)
+      :desired_capabilities => :chrome)
   end
   Capybara.default_driver = :selenium
+  Capybara.ignore_hidden_elements = true
 
   RSpec.configure do |config|
     # If you're not using ActiveRecord, or you'd prefer not to run each of your
@@ -37,6 +40,7 @@ Spork.prefork do
     config.treat_symbols_as_metadata_keys_with_true_values = true
 
     config.include RSpec::Rails::RequestExampleGroup, :type => :api
+    config.include AcceptanceHelpers, :acceptance
   end
 end
 
