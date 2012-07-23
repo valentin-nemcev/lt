@@ -41,6 +41,20 @@ Spork.prefork do
 
     config.include RSpec::Rails::RequestExampleGroup, :type => :api
     config.include AcceptanceHelpers, :acceptance
+
+    config.before(:suite, :acceptance) do
+      DatabaseCleaner.strategy = :deletion
+      DatabaseCleaner.clean_with(:truncation)
+    end
+
+    config.before(:each, :acceptance) do
+      DatabaseCleaner.start
+    end
+
+    config.after(:each, :acceptance) do
+      DatabaseCleaner.clean
+    end
+
   end
 end
 
