@@ -1,8 +1,11 @@
 require 'spec_helper'
 
 feature "Task creation", :acceptance do
+  before(:all) { create_test_user }
+
   scenario 'Creating an action' do
-    visit tasks_path
+    visit tasks_page
+
     tasks = find('[widget=tasks]')
 
     tasks.find('[control=new]').click
@@ -21,7 +24,7 @@ feature "Task creation", :acceptance do
     end
 
     reload_page
-    tasks.should have_selector("[record=task][record-id=#{task_id}]")
+    tasks.should have_selector("[record=task][record-id='#{task_id}']")
   end
 
   scenario 'Creating task without objective', :pending

@@ -1,11 +1,13 @@
 require 'spec_helper'
 
 feature 'Task deletion', :acceptance do
+  before(:all) { create_test_user }
+
   scenario 'Deleting single task' do
     task_id = create_task :type => :action, :objective => 'Test task'
-    task_selector = "[record=task][record-id=#{task_id}]"
+    task_selector = "[record=task][record-id='#{task_id}']"
 
-    visit tasks_path
+    visit tasks_page
     tasks = find('[widget=tasks]')
     tasks.find(task_selector).tap do |task|
       task.find('.destructive[control=delete]').click
