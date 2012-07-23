@@ -38,9 +38,13 @@ class Lt.Views.List.ListView extends Backbone.View
     $item.attr('id').match(modelCidRegExp)[1]
 
   buildItem: (model) ->
-    itemView = new @Views.ItemView model: model
-    $('<li/>', 'id': @itemName + '-' + model.cid)
-      .append(itemView.render().el)
+    itemView = new @Views.ItemView 
+      model: model
+      tagName: 'li'
+      attributes: 
+        record: @itemName
+      id: @itemName + '-' + model.cid
+    itemView.render().el
 
   addItem: ($li, model) ->
     $ul = @getParentList(model.getParent() if @sortable)
@@ -74,8 +78,8 @@ class Lt.Views.List.ListView extends Backbone.View
     $ul.nestedSortable
       listType             : 'ul'
       items                : 'li:not(.empty)'
-      handle               : 'div.' + @itemName
-      toleranceElement     : '> div.' + @itemName
+      # handle               : 'div.' + @itemName
+      # toleranceElement     : '> div.' + @itemName
       maxLevels            : 30
       placeholder          : 'sort-placeholder'
       forcePlaceholderSize : true

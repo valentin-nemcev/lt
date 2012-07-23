@@ -5,6 +5,9 @@ class Views.ListView extends Lt.Views.List.EditableListView
 
   itemName: 'task'
 
+  attributes:
+    widget: 'tasks'
+
   initialize: ->
     super
     @state = @options.state
@@ -26,6 +29,6 @@ class Views.ListView extends Lt.Views.List.EditableListView
     return
 
   toggleCompletedVisibility: (model, item) ->
-    item.toggle(not model.isCompleted() or @state.get('show_completed'))
+    $(item).toggle(not model.isCompleted() or @state.get('show_completed'))
 
 

@@ -4,21 +4,21 @@ Lt.Views.List ||= {}
 
 class Lt.Views.List.EditableListView extends Lt.Views.List.ListView
 
-  buildItem: (model) ->
-    $item = super
-    formView = new @Views.FormView model: model
-    $item.append(formView.render().el)
+  # buildItem: (model) ->
+    # $item = $(super)
+    # formView = new @Views.FormView model: model
+    # $item.append(formView.render().el)
 
-  addItem: ($li, model) ->
-    super
-    @editItem($li, model.isNew())
+  # addItem: ($li, model) ->
+    # super
+    # @editItem($li, model.isNew())
 
   events: ->
     _.extend super,
-      'editItem'      : (ev, model) -> @editItem @getItem(model), on
-      'closeEditItem' : (ev, model) -> @editItem @getItem(model), off
+      # 'editItem'      : (ev, model) -> @editItem @getItem(model), on
+      # 'closeEditItem' : (ev, model) -> @editItem @getItem(model), off
       'newModel'      : 'newModel'
-      'click .new'    : 'newModel'
+      'click [control=new]'    : 'newModel'
 
 
   editItem: ($li, edit) ->

@@ -1,1 +1,1 @@
-<%= @objective %>
+<span field="objective"><%= @objective %></span>

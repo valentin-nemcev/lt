@@ -6,6 +6,10 @@ class Lt.Models.Task extends Backbone.Model
   defaults:
     objective: null
 
+  parse: (response) ->
+    # TODO: Make proper sync
+    return response[@paramRoot] ? response
+
   toJSON: ->
     attributes = {}
     for key in ['objective', 'deadline', 'parent_id', 'position']
