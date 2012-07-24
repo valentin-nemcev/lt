@@ -11,7 +11,7 @@ feature 'Task deletion', :acceptance do
     tasks = find('[widget=tasks]')
     tasks.find(task_selector).tap do |task|
       task.find('.destructive[control=delete]').click
-      task.should match_selector('.deleted')
+      task.should match_selector('[record-state=deleted]')
     end
 
     reload_page

@@ -9,13 +9,14 @@ feature "Task creation", :acceptance do
     tasks = find('[widget=tasks]')
 
     tasks.find('[control=new]').click
-    tasks.find('[form=new-task]').tap do |form|
+    task = tasks.find('[record=task][record-state=new]')
+    task.find('[form=new-task]').tap do |form|
       form.find('[input=type]').set('action')
       form.find('[input=objective]').set('Test objective')
       form.find('[control=save]').click
     end
 
-    task = tasks.find('.created[record=task]')
+    task.should match_selector('[record-state!=new]')
     task_id = task['record-id']
     task_id.should_not be_nil
 

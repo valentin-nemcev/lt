@@ -6,6 +6,17 @@ class Lt.Models.Task extends Backbone.Model
   defaults:
     objective: null
 
+  initialize: ->
+    @on 'change:id', @checkState, @
+    @checkState(this, @id, silent: true)
+
+  getState: ->
+    @state
+
+  checkState: (model, value, options = {})->
+    @state = if @id then 'persisted' else 'new'
+    @trigger 'changeState', model, @state, options
+
   parse: (response) ->
     # TODO: Make proper sync
     return response[@paramRoot] ? response
@@ -32,6 +43,7 @@ class Lt.Models.Task extends Backbone.Model
 
   undoComplete: (options) -> @postAction 'undo_complete', options
   complete:     (options) -> @postAction 'complete'     , options
+
 
 
 class Lt.Collections.TasksCollection extends Backbone.Collection

@@ -10,6 +10,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   initialize: ->
     @model.bind 'change', @render, @
+    @model.bind 'changeState', @updateState, @
     @model.bind 'all', -> console.log arguments
 
   edit: (ev) ->
@@ -25,16 +26,17 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @model.save(attrs)
     return this
 
+  updateState: ->
+    @$el.attr 'record-id': @model.id, 'record-state': @model.getState()
+
   render: ->
-    if @model.changed['id']?
-      @$el.addClass('created')
+    @updateState()
 
     if @model.isNew()
       $(@el).html @newFormTemplate(@model.toJSON())
-      @$el.removeAttr('record-id')
     else
       $(@el).html @itemTemplate(@model.toJSON())
-      @$el.attr('record-id', @model.id)
+
 
     $(@el).toggleClass('completed', @model.isCompleted())
     return this
