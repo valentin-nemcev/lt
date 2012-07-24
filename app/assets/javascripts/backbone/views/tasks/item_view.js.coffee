@@ -5,7 +5,9 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   newFormTemplate : JST['backbone/templates/tasks/new_form']
 
   events:
-    'dblclick' : 'edit'
+    'click [control=select]'       : -> @select(on);     false
+    'click [control=deselect]'     : -> @select(off);    false
+    'click [control=toggle-select]': -> @toggleSelect(); false
     'submit form': (ev) -> ev.preventDefault(); @save()
 
   initialize: ->
@@ -26,6 +28,21 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @model.save(attrs)
     return this
 
+  isSelected: -> @selected ?= no
+
+  toggleSelect: ->
+    @select(not @isSelected())
+
+  select: (state) ->
+    @$el.toggleClass('selected', state)
+    @$('[control=select],[control=deselect]')
+      .attr control: if state then 'deselect' else 'select'
+    @$('.additional-controls').toggle(state)
+    @selected = state
+
+    return this
+
+
   updateState: ->
     @$el.attr 'record-id': @model.id, 'record-state': @model.getState()
 
@@ -38,5 +55,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       $(@el).html @itemTemplate(@model.toJSON())
 
 
+    @select(@isSelected())
     $(@el).toggleClass('completed', @model.isCompleted())
     return this

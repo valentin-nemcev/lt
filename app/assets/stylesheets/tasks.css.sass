@@ -2,6 +2,7 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+@import compass/utilities/general/clearfix
 
 ul[collection=tasks]
   li > ul
@@ -12,12 +13,16 @@ ul[collection=tasks]
     outline: 1px dashed gray
   li
     margin: 0.3em 0
-  .task
+  [record=task]
     cursor: default
+    +clearfix
 
-  .task.completed
-    text-decoration: line-through
-    color: #666
+    &.completed
+      text-decoration: line-through
+      color: #666
+
+    &.selected
+      border: 1px dashed #999
 
   [form]
     margin: 0.8em 0

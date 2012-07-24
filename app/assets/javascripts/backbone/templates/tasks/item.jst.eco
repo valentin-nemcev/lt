@@ -1,1 +1,6 @@
-<span field="objective"><%= @objective %></span>
+<div field="objective" control="select">
+  <%= @objective %>
+</div>
+<div class="additional-controls">
+  <button control="delete" class="right destructive">Удалить</button>
+</div>

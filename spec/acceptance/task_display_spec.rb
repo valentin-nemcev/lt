@@ -24,7 +24,7 @@ feature 'Task display', :acceptance do
     tasks.find("[record=task][record-id='#{@task_ids[1]}']").tap do |task|
       task.find("[control=select]").click
       task.should match_selector('.selected')
-      task.should have_content('.additional-controls')
+      task.should have_selector('.additional-controls')
     end
   end
 end
