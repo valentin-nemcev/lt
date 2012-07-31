@@ -32,7 +32,7 @@ describe Task::ObjectiveRevisionsMapper do
         mapper.store_all [objective_revision]
         revision_record = new_task_record.objective_revisions.first
         revision_record.objective.should  eq(test_objective)
-        revision_record.updated_on.should eq(test_updated_on.round)
+        revision_record.updated_on.should eq_up_to_sec(test_updated_on)
       end
     end
   end

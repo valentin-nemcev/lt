@@ -62,6 +62,26 @@ describe Task::ObjectiveMethods do
       end.to raise_error Task::InvalidTaskError
     end
 
+    it 'should explicitly check objective revision type' do
+      revision = Object.new
+      expect do
+        task = create_task_without_objective objective_revisions: [revision]
+      end.to raise_error Task::InvalidTaskError
+    end
+
+    it 'should not allow empty revision list' do
+      expect do
+        task = create_task_without_objective objective_revisions: []
+      end.to raise_error Task::InvalidTaskError
+    end
+
+    it 'should check that creation dates of task and first revision are same' do
+      expect do
+        task = create_task_without_objective(objective_revisions: revisions,
+                                             on: 5.hours.ago)
+      end.to raise_error Task::InvalidTaskError
+    end
+
   end
 
   context 'with objective revisions' do

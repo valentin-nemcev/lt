@@ -1,15 +1,35 @@
 module Task
-  class TaskMapperError < StandardError; end;
   class Mapper
 
+    class TaskMapperError < StandardError; end;
+    class TaskNotFoundError < TaskMapperError
+      def initialize(task_id)
+        @task_id = task_id
+      end
+
+      def message
+        "Task record with id = #{@task_id} was not found"
+      end
+    end
     attr_reader :user
 
     def initialize(opts = {})
       @user = opts.fetch :user
     end
 
+    # TODO: Mark protected methods
+    def find_record(id)
+      scope_records(Records::Task).find_by_id!(id)
+    rescue ActiveRecord::RecordNotFound
+      raise TaskNotFoundError, id
+    end
+
+    def fetch(id)
+      map_record_to_task find_record(id)
+    end
+
     def fetch_all
-      records = scope_records Records::Task
+      records = Records::Task
       @task_objects = {}
       tasks = records.all.map do |task_record|
         @task_objects[task_record.id] = map_record_to_task task_record
@@ -22,14 +42,17 @@ module Task
       return tasks
     end
 
-    def create_objective_revisions_mapper(task_record)
-      ObjectiveRevisionsMapper.new(task_record)
+    def destroy(task)
+      raise TaskMapperError, "Task is not persisted" if task.id.nil?
+      find_record(task.id).destroy
+      task.id = nil
+      return self
     end
 
     def store(task)
-      attrs = { created_on: task.created_on.round }
+      attrs = { created_on: task.created_on }
       task_record = scope_records(Records::Action).new attrs
-      o_revs_mapper = create_objective_revisions_mapper task_record
+      o_revs_mapper = ObjectiveRevisionsMapper.new task_record
       o_revs_mapper.store_all task.objective_revisions
       task_record.save!
       task.id = task_record.id

@@ -6,7 +6,7 @@ module Task
         :class_name => ::Task::Records::ObjectiveRevision,
         :dependent => :destroy
 
-      attr_accessible :created_on
+      attr_accessible :user, :created_on
     end
   end
 end

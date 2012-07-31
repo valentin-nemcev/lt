@@ -11,7 +11,7 @@ module Task
       objective_revisions.each do |rev|
         task_record.objective_revisions.build do |rec|
           rec.objective = rev.objective
-          rec.updated_on = rev.updated_on.round
+          rec.updated_on = rev.updated_on
         end
       end
     end
