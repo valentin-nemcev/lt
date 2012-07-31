@@ -12,7 +12,7 @@ feature 'Task deletion', :acceptance do
     tasks.find(task_selector).tap do |task|
       task.find("[control=select]").click
       task.find('.destructive[control=delete]').click
-      task.should match_selector('[record-state=deleted]')
+      task.should_not match_selector('[record-state=persisted]')
     end
 
     reload_page

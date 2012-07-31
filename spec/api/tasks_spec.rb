@@ -7,6 +7,13 @@ class ActionDispatch::TestResponse
   end
 end
 
+def create_task(fields = {})
+  post '/tasks/', :task => {
+    :type => fields.fetch(:type, 'action'),
+    :objective => fields.fetch(:objective, 'Test objective')
+  }, :format => :json
+  OpenStruct.new response.body_json.fetch 'task'
+end
 
 describe '/tasks', :type => :api do
   before(:all) { User.delete_all; User.create! }
@@ -33,12 +40,13 @@ describe '/tasks', :type => :api do
         }, :format => :json
 
         @returned_action = OpenStruct.new response.body_json.fetch 'task'
-        get '/tasks/', :format => :json
-        @stored_action = OpenStruct.new response.body_json.fetch 0
       end
+      attr_accessor :returned_action
 
-      let(:returned_action) { @returned_action }
-      let(:stored_action)   { @stored_action }
+      let(:stored_action) do
+        get '/tasks/', :format => :json
+        OpenStruct.new response.body_json.fetch 0
+      end
 
       specify { response.should be_successful }
 
@@ -54,6 +62,33 @@ describe '/tasks', :type => :api do
       specify 'stored action should equal returned action' do
         stored_action.should eq(returned_action)
       end
+    end
+  end
+
+  describe '/:task_id' do
+    describe 'DELETE' do
+      let(:task) { create_task }
+      let(:task_url) { "/tasks/#{task.id}" }
+
+      before(:each) do
+        delete task_url
+        @delete_response = response
+      end
+      attr_accessor :delete_response
+
+      let(:task_list) do
+        get '/tasks/', :format => :json
+        response.body_json
+      end
+
+      let(:deleted_task_response) do
+        get task_url
+        response
+      end
+
+      specify { delete_response.should be_successful }
+      specify { task_list.should be_empty }
+      specify { deleted_task_response.should be_not_found }
     end
   end
 end

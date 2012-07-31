@@ -1,21 +1,28 @@
 class Lt.Models.Task extends Backbone.Model
   paramRoot: 'task'
 
-  url: 'tasks'
-
   defaults:
     objective: null
 
   initialize: ->
-    @on 'change:id', @checkState, @
-    @checkState(this, @id, silent: true)
+    @on 'change:id', @onChangeId, @
+    @on 'destroy', @onDestroy, @
+
+    @onChangeId(this, @id, silent: true)
 
   getState: ->
     @state
 
-  checkState: (model, value, options = {})->
-    @state = if @id then 'persisted' else 'new'
-    @trigger 'changeState', model, @state, options
+  onDestroy: (model, collection, options = {}) ->
+    @setState 'deleted', options
+
+  onChangeId: (model, value, options = {})->
+    state = if @id then 'persisted' else 'new'
+    @setState state, options
+
+  setState: (state, options = {}) ->
+    @state = state
+    @trigger 'changeState', this, state, options
 
   parse: (response) ->
     # TODO: Make proper sync

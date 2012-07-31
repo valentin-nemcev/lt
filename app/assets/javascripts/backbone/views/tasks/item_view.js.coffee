@@ -9,17 +9,20 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     'click [control=deselect]'     : -> @select(off);    false
     'click [control=toggle-select]': -> @toggleSelect(); false
     'submit form': (ev) -> ev.preventDefault(); @save()
+    'click [control=delete]': (ev) -> @delete(); false
 
   initialize: ->
     @model.bind 'change', @render, @
     @model.bind 'changeState', @updateState, @
-    @model.bind 'all', -> console.log arguments
 
   edit: (ev) ->
     ev.preventDefault()
     ev.stopPropagation()
     $(@el).trigger('editItem', [@model.cid])
     return
+
+  delete: ->
+    @model.destroy()
 
   save: ->
     attrs = {}

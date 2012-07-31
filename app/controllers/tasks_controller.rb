@@ -1,5 +1,7 @@
 class TasksController < ApplicationController
 
+  rescue_from Task::Mapper::TaskNotFoundError,
+    with: -> { head :status => :not_found }
 
   def index
     @tasks = mapper.fetch_all
@@ -13,6 +15,17 @@ class TasksController < ApplicationController
     mapper.store @task
 
     render 'task', :status => :created
+  end
+
+  def destroy
+    @task = mapper.fetch params[:id]
+    mapper.destroy @task
+    head :status => :ok
+  end
+
+  def show
+    @task = mapper.fetch params[:id]
+    render 'task'
   end
 
 
