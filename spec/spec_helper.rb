@@ -46,20 +46,34 @@ Spork.prefork do
       pause_if_failed example
     end
 
-    config.before(:suite, :acceptance) do
-      DatabaseCleaner.strategy = :deletion
+
+    DatabaseCleaner.logger = Rails.logger
+
+    config.before(:suite) do
       DatabaseCleaner.clean_with(:truncation)
     end
 
-    config.before(:each, :acceptance) do
+    config.before(:each) do |example|
+      metadata = example.example.metadata
+      DatabaseCleaner.strategy = if metadata[:acceptance]
+                                   :deletion
+                                 else
+                                   :transaction
+                                 end
       DatabaseCleaner.start
     end
 
-    config.after(:each, :acceptance) do
+    config.after(:each) do
       DatabaseCleaner.clean
     end
+  end
 
+  RSpec::Matchers.define(:eq_up_to_sec) do |expected|
+    match do |actual|
+      actual.change(usec: 0) == expected.change(usec: 0)
+    end
 
+    diffable
   end
 end
 
