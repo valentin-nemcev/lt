@@ -18,7 +18,8 @@ module Task
       self.nodes.parent = attrs.fetch :supertask
       self.nodes.child = attrs.fetch :subtask
       @type = attrs.fetch :type
-      @added_on = attrs[:on] || attrs[:added_on] || Time.current
+      now = attrs.fetch(:clock, Time).current
+      @added_on = attrs[:on] || attrs[:added_on] || now
       remove on: attrs[:removed_on]
     end
 

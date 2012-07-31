@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-# TODO: Use new rspec named subject everywhere
 describe Task::RelationMethods do
   class TaskWithRelationMethods < Task::Core
     include Task::RelationMethods

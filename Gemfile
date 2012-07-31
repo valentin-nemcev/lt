@@ -33,9 +33,5 @@ group :development, :test do
   gem 'capybara',    '~> 1.1.2'
   gem 'database_cleaner', '~> 0.8.0'
   gem 'spork-rails', '~> 3.2.0'
-
-
-  # ↓ TODO: Get rid of this in tests
-  gem 'timecop', '~> 0.3.5'
 end
 

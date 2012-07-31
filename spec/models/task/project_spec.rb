@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-# TODO: Use new rspec named subject everywhere
 describe Task::Project do
 
   def create_project(attrs={})
@@ -8,8 +7,7 @@ describe Task::Project do
     described_class.new attrs
   end
 
-  let(:project) { create_project }
-  subject { project }
+  subject(:project) { create_project }
 
   it { should_not be_actionable }
 

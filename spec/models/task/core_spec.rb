@@ -6,13 +6,14 @@ describe Task::Core do
     described_class.new attrs
   end
 
-  # TODO: Use new rspec named subject everywhere
   context 'new' do
-    let(:task) { create_task }
-    subject { task }
+    let(:current_time) { Time.current }
+    let(:clock) { stub('Clock', current: current_time) }
+    subject(:task) { create_task clock: clock }
 
-    it 'should have creation date', :with_frozen_time do
-      task.created_on.should eq(Time.current)
+
+    it 'should have current time as creation date' do
+      task.created_on.should eq(current_time)
     end
 
     it 'should have effective date same as creation date' do
@@ -24,32 +25,36 @@ describe Task::Core do
     end
 
     context 'seen from past' do
-      subject { task.as_of(1.second.ago) }
+      subject { create_task.as_of(1.second.ago) }
       it {should be_nil}
     end
 
-    # TODO: Replace date "literals" with lets
     context 'created in past' do
-      subject { create_task on: 2.days.ago }
-      it 'should have creation date in past', :with_frozen_time do
-        subject.created_on.should eq(2.days.ago)
+      let(:task_creation_date) { 2.days.ago }
+      subject(:task) { create_task on: task_creation_date, clock: clock }
+
+      it 'should have creation date in past' do
+        task.created_on.should eq(task_creation_date)
       end
-      it 'should have effective date set to now', :with_frozen_time do
-        subject.effective_date.should eq(Time.current)
+
+      it 'should have effective date set to now' do
+        task.effective_date.should eq(current_time)
       end
     end
 
     context 'created in past with created_on' do
-      subject { create_task created_on: 2.days.ago }
-      it 'should have creation date in past', :with_frozen_time do
-        subject.created_on.should eq(2.days.ago)
+      let(:task_creation_date) { 2.days.ago }
+      subject(:task) { create_task created_on: task_creation_date }
+      it 'should have creation date in past' do
+        task.created_on.should eq(task_creation_date)
       end
     end
 
     context 'created in future' do
-      subject { create_task on: 2.days.from_now }
-      it 'should have effective date in future', :with_frozen_time do
-        subject.effective_date.should eq(2.days.from_now)
+      let(:task_creation_date) { 2.days.from_now }
+      subject(:task) { create_task on: task_creation_date }
+      it 'should have effective date in future' do
+        task.effective_date.should eq(task_creation_date)
       end
     end
 
@@ -98,3 +103,4 @@ describe Task::Core do
     end
   end
 end
+

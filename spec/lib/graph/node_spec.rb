@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-# TODO: Use new rspec named subject everywhere
 describe Graph::Node do
 
   class TestNode
     include Graph::Node
   end
 
+  subject(:node)
   it 'should have only one instance method: #edges' do
-    subject.public_instance_methods.should eq([:edges])
+    node.public_instance_methods.should eq([:edges])
   end
 
   specify 'new nodes should have edges' do

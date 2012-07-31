@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-# TODO: Use new rspec named subject everywhere
 describe Task::ObjectiveMethods do
   class TaskWithObjectiveMethods < Task::Core
     include Task::ObjectiveMethods
@@ -39,96 +38,104 @@ describe Task::ObjectiveMethods do
     end
   end
 
-  # TODO: Replace date "literals" with lets
   context 'with objective revisions passed on creation' do
+    let(:task_creation_date) { 4.hours.ago }
+    let(:task_update_date) { 3.hours.ago }
     let(:revisions) do
       [
-        Task::ObjectiveRevision.new('first', 4.hours.ago),
-        Task::ObjectiveRevision.new('second', 3.hours.ago),
+        Task::ObjectiveRevision.new('first', task_creation_date),
+        Task::ObjectiveRevision.new('second', task_update_date),
       ]
     end
     let(:with_objective_revisions) do
-      create_task_without_objective(objective_revisions: revisions, on: 4.hours.ago)
+      create_task_without_objective(objective_revisions: revisions,
+                                    on: task_creation_date)
     end
 
-    it 'should have objective revision history', :with_frozen_time do
+    it 'should have objective revision history' do
       with_objective_revisions.objective_revisions.to_a.should =~ revisions
     end
 
     it 'should not allow objective updates before task was created' do
-      revision = Task::ObjectiveRevision.new 'rev', 1.hour.ago
+      revision = Task::ObjectiveRevision.new 'rev',
+        1.hour.until(task_creation_date)
       expect do
-        task = create_task_without_objective objective_revisions: [revision]
+       create_task_without_objective objective_revisions: [revision],
+         on: task_creation_date
       end.to raise_error Task::InvalidTaskError
     end
 
     it 'should explicitly check objective revision type' do
       revision = Object.new
       expect do
-        task = create_task_without_objective objective_revisions: [revision]
+        create_task_without_objective objective_revisions: [revision]
       end.to raise_error Task::InvalidTaskError
     end
 
     it 'should not allow empty revision list' do
       expect do
-        task = create_task_without_objective objective_revisions: []
+        create_task_without_objective objective_revisions: []
       end.to raise_error Task::InvalidTaskError
     end
 
     it 'should check that creation dates of task and first revision are same' do
       expect do
-        task = create_task_without_objective(objective_revisions: revisions,
-                                             on: 5.hours.ago)
+        create_task_without_objective(objective_revisions: revisions,
+                                      on: 1.hour.since(task_creation_date))
       end.to raise_error Task::InvalidTaskError
     end
 
   end
 
   context 'with objective revisions' do
+    let(:task_creation_date) { 4.hours.ago }
+    let(:date_between_creation_and_update) { 3.hours.ago }
+    let(:task_update_date) { 2.hours.from_now }
     let(:with_objective_revisions) do
-      create_task(objective: 'first', on: 4.hours.ago).tap do |t|
-        t.update_objective 'second', on: 2.hours.from_now
+      create_task(objective: 'first', on: task_creation_date).tap do |t|
+        t.update_objective 'second', on: task_update_date
       end
     end
-    subject { with_objective_revisions }
+    subject(:task) { with_objective_revisions }
 
-    it 'should have objective revision history', :with_frozen_time do
-      revs = subject.objective_revisions
+    it 'should have objective revision history' do
+      revs = task.objective_revisions
       revs.should have(2).revisions
 
       rev = revs.next
       rev.objective.should eq('first')
-      rev.updated_on.should eq(4.hours.ago)
+      rev.updated_on.should eq(task_creation_date)
 
       rev = revs.next
       rev.objective.should eq('second')
-      rev.updated_on.should eq(2.hours.from_now)
+      rev.updated_on.should eq(task_update_date)
     end
 
     context 'seen from now' do
-      subject { with_objective_revisions }
+      subject(:task) { with_objective_revisions }
       it 'should have old objective' do
-        subject.objective.should eq('first')
+        task.objective.should eq('first')
       end
 
       it 'should have all revisions' do
-        subject.objective_revisions.should have(2).revisions
+        task.objective_revisions.should have(2).revisions
       end
     end
 
     context 'seen from future date' do
-      subject { with_objective_revisions.as_of 2.hours.from_now }
+      subject(:task) { with_objective_revisions.as_of task_update_date }
       it 'should have new objective' do
-        subject.objective.should eq('second')
+        task.objective.should eq('second')
       end
     end
 
 
     it 'should not allow objective updates in achronological order' do
-      task = subject
       expect do
-        task.update_objective 'before first', on: 5.hours.ago
-        task.update_objective 'between first and second', on: 3.hours.ago
+        task.update_objective 'before first',
+          on: 1.hour.until(task_creation_date)
+        task.update_objective 'between first and second',
+          on: date_between_creation_and_update
       end.to raise_error Task::InvalidTaskError
     end
 

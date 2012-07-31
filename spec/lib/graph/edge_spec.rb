@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-# TODO: Use new rspec named subject everywhere
 describe Graph::Edge do
+  subject(:edge)
   it 'should have only one instance method: #nodes' do
-    subject.instance_methods.should eq([:nodes])
+    edge.instance_methods.should eq([:nodes])
   end
 
   specify '#nodes should return nodes of extended edge' do

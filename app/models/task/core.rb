@@ -20,7 +20,7 @@ module Task
 
     def initialize(attrs={})
       @fields = {}
-      now = Time.current
+      now = attrs.fetch(:clock, Time).current
       fields[:created_on] = attrs[:on] || attrs[:created_on] || now
       @effective_date = [created_on, now].max
       super

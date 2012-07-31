@@ -68,13 +68,6 @@ Spork.prefork do
     end
   end
 
-  RSpec::Matchers.define(:eq_up_to_sec) do |expected|
-    match do |actual|
-      actual.change(usec: 0) == expected.change(usec: 0)
-    end
-
-    diffable
-  end
 end
 
 Spork.each_run do

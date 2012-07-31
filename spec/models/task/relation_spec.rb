@@ -31,10 +31,12 @@ describe Task::Relation do
     end
   end
   context 'created without addition date' do
-    let(:relation) { create_relation }
+    let(:current_time) { Time.current }
+    let(:clock) { stub('Clock', current: current_time) }
+    let(:relation) { create_relation clock: clock }
 
-    it 'should have default addition date', :with_frozen_time do
-      relation.added_on.should eq(Time.current)
+    it 'should have default addition date' do
+      relation.added_on.should eq(current_time)
     end
   end
 

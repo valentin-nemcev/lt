@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-# TODO: Use new rspec named subject everywhere
 describe Task::Action do
 
   def create_action(attrs={})
@@ -8,7 +7,14 @@ describe Task::Action do
     described_class.new attrs
   end
 
-  let(:single_action) { create_action.tap{ |a| a.stub subtasks: [] } }
+  let(:current_time) { Time.current }
+  let(:clock) { stub('Clock', current: current_time) }
+  let(:creation_date) { Time.current }
+  let(:single_action) do
+    create_action(on: creation_date, clock: clock).tap{ |a|
+      a.stub subtasks: []
+    }
+  end
   subject { single_action }
 
   context 'new' do
@@ -22,23 +28,26 @@ describe Task::Action do
   end
 
   context 'new with completion date' do
-    subject { create_action created_on: 2.days.ago, completed_on: 1.day.ago }
+    let(:creation_date) { 2.days.ago }
+    let(:completion_date) { 1.days.ago }
+    subject(:completed_task) do
+      create_action created_on: creation_date, completed_on: completion_date
+    end
     it { should_not be_actionable }
     it { should     be_completed }
 
-    # TODO: Replace date "literals" with lets
-    it 'should have completion date', :with_frozen_time do
-      subject.completed_on.should eq(1.day.ago)
+    it 'should have completion date' do
+      completed_task.completed_on.should eq(completion_date)
     end
 
   end
 
   context 'completed' do
-    subject { single_action.complete! }
+    subject(:completed_task) { single_action.complete! }
     it { should be_completed }
     it { should_not be_actionable }
-    it 'should have completion date', :with_frozen_time do
-      subject.completed_on.should eq(Time.current)
+    it 'should have completion date' do
+      completed_task.completed_on.should eq(current_time)
     end
 
     context 'as of different date' do
@@ -57,7 +66,9 @@ describe Task::Action do
 
   context 'completed before created' do
     it 'should raise error' do
-      expect { single_action.complete! on: 1.day.ago }.to raise_error
+      expect {
+        single_action.complete! on: 1.day.until(creation_date)
+      }.to raise_error
     end
   end
 
@@ -86,8 +97,8 @@ describe Task::Action do
     context 'seen from now' do
       subject { completed_in_future }
       it { should_not be_completed }
-      it 'should have completion date in the future', :with_frozen_time do
-        subject.completed_on.should eq(future_date)
+      it 'should have completion date in the future' do
+        completed_in_future.completed_on.should eq(future_date)
       end
     end
 
