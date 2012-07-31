@@ -10,6 +10,7 @@ describe Task::Mapper do
   let(:another_user_fixture) { User.create! login: 'another_test_user' }
 
   let(:mapper) { described_class.new user: user_fixture }
+  let(:mapper_for_another_user) { described_class.new user: another_user_fixture }
 
   class TaskDouble
     attr_accessor :id
@@ -77,6 +78,14 @@ describe Task::Mapper do
   end
 
   describe '#fetch_all' do
+    it 'fetches tasks for correct user' do
+      Task::Action.should_receive(:new).and_return(double('Action'))
+      record = action_records.create! created_on: task_created_on,
+        user: user_fixture
+
+      mapper.fetch_all.should have(1).task
+      mapper_for_another_user.fetch_all.should have(0).task
+    end
   end
 
   describe '#store' do

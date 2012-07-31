@@ -1,2 +1,2 @@
-$(document).on 'change', '#user_selector select', ->
+$(document).on 'change', '[widget=user-selector] [control=current-user]', ->
     $(this).closest('form').submit()

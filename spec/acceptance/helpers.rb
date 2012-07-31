@@ -46,8 +46,9 @@ module AcceptanceHelpers
   end
 
 
-  def create_test_user
-    User.create login: 'test', name: 'Test user'
+  def create_test_user(login = 'test_user')
+    user = User.create! login: login, name: login.humanize
+    return user.id
   end
 
 end

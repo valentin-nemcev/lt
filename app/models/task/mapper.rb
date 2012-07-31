@@ -29,7 +29,7 @@ module Task
     end
 
     def fetch_all
-      records = Records::Task
+      records = scope_records Records::Task
       @task_objects = {}
       tasks = records.all.map do |task_record|
         @task_objects[task_record.id] = map_record_to_task task_record
