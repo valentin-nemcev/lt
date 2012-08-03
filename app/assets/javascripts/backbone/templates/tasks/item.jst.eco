@@ -1,6 +1,10 @@
-<div field="objective" control="select">
-  <%= @objective %>
+<div class="fields">
+  <div field="objective" control="select">
+    <%= @objective %>
+  </div>
 </div>
+
 <div class="additional-controls">
+  <button control="update" class="">Обновить цель</button>
   <button control="delete" class="right destructive">Удалить</button>
 </div>

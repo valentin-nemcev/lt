@@ -1,25 +1,18 @@
-<form name="task">
+<form form='<%= @form %>'>
+  <% if @showActionControl: %>
+    <div class='field-group minor'>
+      <label>
+        <input name="type" input="type" type="radio" value="action" checked> Действие
+      </label>
+      <label>
+        <input name="type" input="type" type="radio" value="project"> Проект
+      </label>
+    </div>
+  <% end %>
   <div class='field-group'>
-    <input type="text" name="objective" autocomplete="off"
-           value="<%- @escape('objective') %>" >
+    <input name="objective" input="objective" type="text" autocomplete="off">
   </div>
   <div class='field-group minor'>
-    <% unless @isNew(): %>
-      <% if @isCompleted(): %>
-        <button class="undo-complete control">Не сделано</button>
-      <% else: %>
-        <button class="complete control">Сделано!</button>
-      <% end %>
-    <% end %>
-  </div>
-
-  <div class='field-group minor'>
-    <button name="submit" class="control">Сохранить</button>
-    <a class="cancel control" href="#">Отменить</a>
-    <% unless @isNew(): %>
-      <a class="new-subtask control" href="#">Добавить</a>
-      <button class="delete control">Удалить</button>
-    <% end %>
+    <input type="submit" control="save" value="Сохранить">
   </div>
 </form>
-

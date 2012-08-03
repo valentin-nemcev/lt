@@ -4,30 +4,14 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   template  : JST['backbone/templates/tasks/form']
 
   tagName   : 'div'
-  className : 'task-form'
+  className : 'form'
 
   events:
-    'submit form'          : 'update'
-    'click .new-subtask'   : 'newSubtask'
-    'click .delete'        : 'delete'
-    'click .cancel'        : 'cancel'
-    'click .complete'      : (ev) -> ev.preventDefault(); @action 'complete'
-    'click .undo-complete' : (ev) -> ev.preventDefault(); @action 'undoComplete'
-    'focus'                : 'focus'
+    'submit form': (ev) -> ev.preventDefault(); @save()
 
   initialize: ->
-    @model.bind 'change', @render, @
+    @model.bind 'change', @change, @
 
-  newSubtask: (ev) ->
-    ev.preventDefault()
-    @triggerDomEv 'newModel'
-    @triggerDomEv 'closeEditItem'
-    return
-
-  delete: (ev) ->
-    ev.preventDefault()
-    @model.destroy()
-    return
 
   cancel: (ev) ->
     ev.preventDefault()
@@ -39,25 +23,29 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
     return
 
-  update: (ev) ->
-    ev.preventDefault()
+  save: ->
+    attrs = {}
+    for {name: name, value: value} in @$('form').serializeArray()
+      attrs[name] = value
+    @model.save(attrs)
+    @trigger('close')
+    return this
 
-    attrs =
-      objective: @$('[name="objective"]').val()
-
-    @model.save attrs, success: (task) => @triggerDomEv 'closeEditItem'
-
-    return
-
-  action: (action) ->
-    @model[action] success: (task) => @triggerDomEv 'closeEditItem'
 
   focus: (ev) ->
     @$('[name="objective"]').focus()
     return
 
-  triggerDomEv: (evName) -> $(@el).trigger(evName, [@model.cid])
+  change: ->
+    for input in @$(':input')
+      $input = $(input)
+      $input.attr value: @model.get($input.attr('name'))
 
   render : ->
-    $(@el).html @template(@model)
+    data =
+      form: if @model.isNew() then 'new-task' else 'update-task'
+      showActionControl: @model.isNew()
+
+    $(@el).html @template(data)
+    @change()
     return this

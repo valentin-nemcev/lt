@@ -8,6 +8,9 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     'click [control=select]'       : -> @select(on);     false
     'click [control=deselect]'     : -> @select(off);    false
     'click [control=toggle-select]': -> @toggleSelect(); false
+
+    'click [control=update]'       : -> @form(on);       false
+
     'submit form': (ev) -> ev.preventDefault(); @save()
     'click [control=delete]': (ev) -> @delete(); false
 
@@ -31,17 +34,38 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @model.save(attrs)
     return this
 
+
+  isFormActive: -> @formActive ?= no
+
+  initFormView: ->
+    view = new Lt.Views.Tasks.FormView model: @model
+    view.on 'close', => @form(off)
+    view
+
+  form: (activate) ->
+    if not activate and @isFormActive()
+      @render()
+      @formActive = no
+    else if activate
+      @formView ?= @initFormView()
+      @$('.fields').hide()
+      @formView.render().$el.insertAfter(@$('.fields'))
+      @formActive = yes
+
+    return this
+
+
   isSelected: -> @selected ?= no
 
   toggleSelect: ->
     @select(not @isSelected())
 
-  select: (state) ->
-    @$el.toggleClass('selected', state)
+  select: (activate) ->
+    @$el.toggleClass('selected', activate)
     @$('[control=select],[control=deselect]')
-      .attr control: if state then 'deselect' else 'select'
-    @$('.additional-controls').toggle(state)
-    @selected = state
+      .attr control: if activate then 'deselect' else 'select'
+    @$('.additional-controls').toggle(activate)
+    @selected = activate
 
     return this
 
@@ -52,12 +76,8 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   render: ->
     @updateState()
 
-    if @model.isNew()
-      $(@el).html @newFormTemplate(@model.toJSON())
-    else
-      $(@el).html @itemTemplate(@model.toJSON())
+    @$el.html @itemTemplate(@model.toJSON())
+    @form(on) if @model.isNew()
 
-
-    @select(@isSelected())
-    $(@el).toggleClass('completed', @model.isCompleted())
+    @select @isSelected()
     return this
