@@ -1,6 +1,8 @@
 module Task
   class Action < Base
 
+    def type; :action; end
+
     def initialize(attrs={})
       super
 

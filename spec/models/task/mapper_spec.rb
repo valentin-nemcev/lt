@@ -14,6 +14,10 @@ describe Task::Mapper do
 
   class TaskDouble
     attr_accessor :id
+
+    def type
+      :action
+    end
   end
 
   let(:task_created_on) { 2.days.ago }
@@ -25,8 +29,8 @@ describe Task::Mapper do
 
   let(:non_existent_task_id) { 666 }
 
-  def create_task_record
-    task_records.create! created_on: task_created_on, user_id: user_fixture.id
+  def create_task_record(records = task_records)
+    records.create! created_on: task_created_on, user: user_fixture
   end
 
   describe '#fetch' do
@@ -56,18 +60,37 @@ describe Task::Mapper do
     end
 
     describe 'task fields' do
+      let(:record) do
+        action_records.create! created_on: task_created_on, user: user_fixture
+      end
+
       before(:each) do
-        record = action_records.create! created_on: task_created_on,
-          user: user_fixture
         Task::Action.should_receive(:new) { |a| @task_attrs = OpenStruct.new a }
-        mapper.fetch record.id
       end
       attr_accessor :task_attrs
 
 
       it 'stores task creation date' do
+        mapper.fetch record.id
         task_attrs.created_on.should eq_up_to_sec(task_created_on)
       end
+
+      let(:task_objective_revisions) { [:rev1, :rev2] }
+      let(:o_revs_mapper) { double('ObjectiveRevisionsMapper') }
+
+      it 'delegates fetching objective revisions to another mapper' do
+        Task::ObjectiveRevisionsMapper.should_receive(:new) do |task_record|
+          @received_task_record = task_record
+          o_revs_mapper
+        end
+        o_revs_mapper.should_receive(:fetch_all)
+          .and_return(task_objective_revisions)
+
+        mapper.fetch record.id
+        task_attrs.objective_revisions.should eq(task_objective_revisions)
+        @received_task_record.should eq(record)
+      end
+
     end
 
     it 'raises error when task record in not found' do
@@ -89,6 +112,22 @@ describe Task::Mapper do
   end
 
   describe '#store' do
+
+    context 'not persisted task' do
+      subject(:not_persisted_task) { task.id = nil; task }
+      before(:each) { mapper.store not_persisted_task }
+
+      its(:id) { should_not be_nil }
+    end
+
+    context 'persisted task' do
+      let(:record_id) { create_task_record(action_records).id }
+      subject(:persisted_task) { task.id = record_id; task }
+      before(:each) { persisted_task.should_not_receive(:'id=') }
+      before(:each) { mapper.store persisted_task }
+
+      its(:id) { should eq(record_id) }
+    end
 
     describe 'task fields' do
       before(:each) do

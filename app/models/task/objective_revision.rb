@@ -1,4 +1,5 @@
 module Task
+  class InvalidTaskError; end
   class InvalidObjectiveError < InvalidTaskError; end
   class ObjectiveRevision
     include PersistenceMethods

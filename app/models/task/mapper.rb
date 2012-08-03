@@ -50,12 +50,9 @@ module Task
     end
 
     def store(task)
-      attrs = { created_on: task.created_on }
-      task_record = scope_records(Records::Action).new attrs
-      o_revs_mapper = ObjectiveRevisionsMapper.new task_record
-      o_revs_mapper.store_all task.objective_revisions
+      task_record = map_task_to_record task
       task_record.save!
-      task.id = task_record.id
+      task.id = task_record.id unless task.id.present?
       return self
     end
 
@@ -88,15 +85,15 @@ module Task
     end
 
     def get_task_record(task)
-      records = case task
-                when Project then Records::Project
-                when Action  then Records::Action
+      records = case task.type
+                when :project then Records::Project
+                when :action  then Records::Action
                 else fail TaskMapperError, "Unknown task type: #{task.class}"
                 end
 
       records = scope_records records
-      if task.persisted?
-        records.find task.id
+      if task.id.present?
+        records.find_by_id! task.id
       else
         records.new
       end
@@ -109,28 +106,26 @@ module Task
         if task.respond_to? :completed_on
           task_r.completed_on = task.completed_on
         end
-        task_r.objective_revisions = task.objective_revisions.map { |rev|
-          map_objective_revision_to_record task_r, rev
-        }
+        o_revs_mapper = ObjectiveRevisionsMapper.new task_r
+        o_revs_mapper.store_all task.objective_revisions
       end
     end
 
-    def map_record_to_task(task_record)
-      task_type = case task_record
+    def map_record_to_task(task_r)
+      task_type = case task_r
                   when Records::Project then Project
                   when Records::Action  then Action
                   else fail TaskMapperError,
-                    "Unknown task record type: #{task_record.class}"
+                    "Unknown task record type: #{task_r.class}"
                   end
+      o_revs_mapper = ObjectiveRevisionsMapper.new task_r
       task = task_type.new(
-        id: task_record.id,
-        created_on: task_record.created_on,
-        objective_revisions: task_record.objective_revisions.map { |rev_r|
-          map_record_to_objective_revision rev_r
-        }
+        id: task_r.id,
+        created_on: task_r.created_on,
+        objective_revisions: o_revs_mapper.fetch_all
       )
       if task.respond_to? :completed_on
-        task.completed_on = task_record.completed_on
+        task.completed_on = task_r.completed_on
       end
       return task
 

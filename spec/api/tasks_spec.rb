@@ -66,6 +66,29 @@ describe '/tasks', :type => :api do
   end
 
   describe '/:task_id' do
+    let(:task) { create_task }
+    let(:task_url) { "/tasks/#{task.id}" }
+
+    describe 'PUT' do
+      describe 'objective update' do
+        before(:each) do
+          task.objective = 'New objective'
+          put task_url, :task => task.marshal_dump, :format => :json
+        end
+
+        let(:returned_task) { OpenStruct.new response.body_json.fetch 'task' }
+
+        it 'returns updated task' do
+          returned_task.objective.should eq('New objective')
+        end
+
+        it 'persists updated task' do
+          get task_url, :format => :json
+          returned_task.objective.should eq('New objective')
+        end
+      end
+    end
+
     describe 'DELETE' do
       let(:task) { create_task }
       let(:task_url) { "/tasks/#{task.id}" }

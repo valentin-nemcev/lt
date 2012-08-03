@@ -9,13 +9,24 @@ module Task
 
     def store_all(objective_revisions)
       objective_revisions.each do |rev|
-        task_record.objective_revisions.build do |rec|
-          rec.objective = rev.objective
-          rec.updated_on = rev.updated_on
-        end
+        recs = task_record.objective_revisions
+        rec = if rev.persisted?
+                recs.find_or_initialize_by_id(rev.id)
+              else
+                recs.build
+              end
+
+        rec.objective = rev.objective
+        rec.updated_on = rev.updated_on
+        rec.save!
+        rev.id = rec.id unless rev.persisted?
       end
     end
 
-
+    def fetch_all
+      task_record.objective_revisions.map do |rec|
+        ObjectiveRevision.new rec.objective, rec.updated_on
+      end
+    end
   end
 end

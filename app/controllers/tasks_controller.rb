@@ -17,15 +17,27 @@ class TasksController < ApplicationController
     render 'task', :status => :created
   end
 
+  def show
+    @task = mapper.fetch params[:id]
+    render 'task'
+  end
+
+  def update
+    @task = mapper.fetch params[:id]
+    p params
+    params[:task][:objective].try do |objective|
+      task.update_objective objective
+    end
+
+    mapper.store @task
+
+    render 'task'
+  end
+
   def destroy
     @task = mapper.fetch params[:id]
     mapper.destroy @task
     head :status => :ok
-  end
-
-  def show
-    @task = mapper.fetch params[:id]
-    render 'task'
   end
 
 
