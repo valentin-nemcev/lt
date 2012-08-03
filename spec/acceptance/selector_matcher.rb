@@ -10,6 +10,8 @@ module Capybara
         end
       rescue Capybara::ExpectationNotMet
         return false
+      rescue ::Selenium::WebDriver::Error::StaleElementReferenceError
+        return true
       end
 
       def matches_selector?(*args)
@@ -19,6 +21,8 @@ module Capybara
           end or raise ExpectationNotMet
         end
       rescue Capybara::ExpectationNotMet
+        return false
+      rescue ::Selenium::WebDriver::Error::StaleElementReferenceError
         return false
       end
 
