@@ -1,7 +1,5 @@
 <div class="fields">
-  <div field="objective" control="select">
-    <%= @objective %>
-  </div>
+  <div field="objective" control="select"> </div>
 </div>
 
 <div class="additional-controls">

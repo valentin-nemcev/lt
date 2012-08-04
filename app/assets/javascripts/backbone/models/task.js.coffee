@@ -28,12 +28,6 @@ class Lt.Models.Task extends Backbone.Model
     # TODO: Make proper sync
     return response[@paramRoot] ? response
 
-  toJSON: ->
-    attributes = {}
-    for key in ['objective', 'deadline', 'parent_id', 'position']
-      attributes[key] = @attributes[key]
-    return attributes
-
   getParent: ->
     @collection.get @get('parent_id')
 

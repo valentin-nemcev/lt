@@ -1,14 +1,12 @@
-<form form='<%= @form %>'>
-  <% if @showActionControl: %>
-    <div class='field-group minor'>
-      <label>
-        <input name="type" input="type" type="radio" value="action" checked> Действие
-      </label>
-      <label>
-        <input name="type" input="type" type="radio" value="project"> Проект
-      </label>
-    </div>
-  <% end %>
+<form>
+  <div class='field-group minor action-input'>
+    <label>
+      <input name="type" input="type" type="radio" value="action" checked> Действие
+    </label>
+    <label>
+      <input name="type" input="type" type="radio" value="project"> Проект
+    </label>
+  </div>
   <div class='field-group'>
     <input name="objective" input="objective" type="text" autocomplete="off">
   </div>

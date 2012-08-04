@@ -7,11 +7,11 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   className : 'form'
 
   events:
-    'submit form': (ev) -> ev.preventDefault(); @save()
+    'submit form': -> @save(); false
 
   initialize: ->
     @model.bind 'change', @change, @
-
+    @model.bind 'changeState', @changeState, @
 
   cancel: (ev) ->
     ev.preventDefault()
@@ -29,23 +29,31 @@ class Lt.Views.Tasks.FormView extends Backbone.View
       attrs[name] = value
     @model.save(attrs)
     @trigger('close')
-    return this
 
+    return this
 
   focus: (ev) ->
     @$('[name="objective"]').focus()
     return
 
+  changeState: ->
+    isNew = @model.getState() is 'new'
+    @$('form').attr form: if isNew then 'new-task' else 'update-task'
+    @$('.action-input').toggle(isNew)
+
+    return this
+
   change: ->
     for input in @$(':input')
       $input = $(input)
-      $input.attr value: @model.get($input.attr('name'))
+      name = $input.attr('name')
+      $input.val @model.get(name) if @model.has(name)
+
+    return this
 
   render : ->
-    data =
-      form: if @model.isNew() then 'new-task' else 'update-task'
-      showActionControl: @model.isNew()
-
-    $(@el).html @template(data)
+    $(@el).html @template()
     @change()
+    @changeState()
+
     return this

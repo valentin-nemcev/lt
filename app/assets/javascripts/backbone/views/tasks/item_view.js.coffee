@@ -1,83 +1,57 @@
 Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.ItemView extends Backbone.View
-  itemTemplate    : JST['backbone/templates/tasks/item']
-  newFormTemplate : JST['backbone/templates/tasks/new_form']
+  template: JST['backbone/templates/tasks/item']
 
   events:
-    'click [control=select]'       : -> @select(on);     false
-    'click [control=deselect]'     : -> @select(off);    false
-    'click [control=toggle-select]': -> @toggleSelect(); false
+    'click [control=select]'       : -> @toggleSelect(on)  ; false
+    'click [control=deselect]'     : -> @toggleSelect(off) ; false
+    'click [control=toggle-select]': -> @toggleSelect()    ; false
 
-    'click [control=update]'       : -> @form(on);       false
-
-    'submit form': (ev) -> ev.preventDefault(); @save()
-    'click [control=delete]': (ev) -> @delete(); false
+    'click [control=update]'       : -> @toggleForm(on)   ; false
+    'click [control=delete]'       : -> @delete()          ; false
 
   initialize: ->
-    @model.bind 'change', @render, @
-    @model.bind 'changeState', @updateState, @
+    @model.bind 'change', @change, @
+    @model.bind 'changeState', @changeState, @
 
-  edit: (ev) ->
-    ev.preventDefault()
-    ev.stopPropagation()
-    $(@el).trigger('editItem', [@model.cid])
-    return
+    @formView = new Lt.Views.Tasks.FormView model: @model
+    @formView.on 'close', => @toggleForm(off)
 
   delete: ->
     @model.destroy()
 
-  save: ->
-    attrs = {}
-    for {name: name, value: value} in @$('form').serializeArray()
-      attrs[name] = value
-    @model.save(attrs)
-    return this
-
-
-  isFormActive: -> @formActive ?= no
-
-  initFormView: ->
-    view = new Lt.Views.Tasks.FormView model: @model
-    view.on 'close', => @form(off)
-    view
-
-  form: (activate) ->
-    if not activate and @isFormActive()
-      @render()
-      @formActive = no
-    else if activate
-      @formView ?= @initFormView()
-      @$('.fields').hide()
-      @formView.render().$el.insertAfter(@$('.fields'))
-      @formActive = yes
+  toggleForm: (toggled = not @formToggled) ->
+    @formView.$el.toggle(toggled)
+    @$('.fields').toggle(not toggled)
+    @formToggled = toggled
 
     return this
 
-
-  isSelected: -> @selected ?= no
-
-  toggleSelect: ->
-    @select(not @isSelected())
-
-  select: (activate) ->
-    @$el.toggleClass('selected', activate)
+  toggleSelect: (toggled = not @selectToggled) ->
+    @$el.toggleClass('selected', toggled)
     @$('[control=select],[control=deselect]')
-      .attr control: if activate then 'deselect' else 'select'
-    @$('.additional-controls').toggle(activate)
-    @selected = activate
+      .attr control: if toggled then 'deselect' else 'select'
+    @$('.additional-controls').toggle(toggled)
+    @selectToggled = toggled
 
     return this
 
 
-  updateState: ->
+  changeState: ->
     @$el.attr 'record-id': @model.id, 'record-state': @model.getState()
 
+  change: ->
+    @$('[field=objective]').text @model.get('objective')
+    @$el.attr 'task-type': @model.get('type')
+
   render: ->
-    @updateState()
+    @$el.html @template()
+    @changeState()
+    @change()
 
-    @$el.html @itemTemplate(@model.toJSON())
-    @form(on) if @model.isNew()
+    @formView.render().$el.insertAfter(@$('.fields'))
+    @toggleForm @model.isNew()
 
-    @select @isSelected()
+    @toggleSelect off
     return this
