@@ -11,7 +11,8 @@ class TasksController < ApplicationController
 
   def create
     task_params = params.fetch :task
-    @task = Task::Action.new objective: task_params[:objective]
+    @task = Task.new_subtype task_params[:type],
+      objective: task_params[:objective]
     mapper.store @task
 
     render 'task', :status => :created
