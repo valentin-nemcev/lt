@@ -84,15 +84,17 @@ describe Task::ObjectiveRevisionsMapper do
       revisions.size.should eq(expected_size)
     end
 
+    # TODO: Add spec for saving sequence numbers
     it 'fetches revision fields' do
       task_record.objective_revisions.create! do |rec|
         rec.objective = test_objective
         rec.updated_on = test_updated_on
       end
 
-      Task::ObjectiveRevision.should_receive(:new) do |objective, updated_on|
-        objective.should  eq(test_objective)
-        updated_on.should eq_up_to_sec(test_updated_on)
+      Task::ObjectiveRevision.should_receive(:new) do |attrs|
+        attrs = OpenStruct.new attrs
+        attrs.objective.should  eq(test_objective)
+        attrs.updated_on.should eq_up_to_sec(test_updated_on)
       end
       revision = mapper.fetch_all.fetch 0
     end

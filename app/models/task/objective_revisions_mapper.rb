@@ -24,8 +24,12 @@ module Task
     end
 
     def fetch_all
-      task_record.objective_revisions.map do |rec|
-        ObjectiveRevision.new rec.objective, rec.updated_on
+      task_record.objective_revisions.map.with_index do |rec, i|
+        ObjectiveRevision.new(
+          objective: rec.objective,
+          updated_on: rec.updated_on,
+          sequence_number: i + 1
+        )
       end
     end
   end

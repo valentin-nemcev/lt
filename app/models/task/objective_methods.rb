@@ -13,6 +13,15 @@ module Task
       end
     end
 
+    def objective_revisions
+      fields[:objective_revisions].each
+    end
+
+    def objective
+      effective_objective_revision.objective
+    end
+
+
     def set_objective_revisions(o_revs)
       if o_revs.empty?
         raise InvalidTaskError,
@@ -24,28 +33,48 @@ module Task
     end
     protected :set_objective_revisions
 
+    def last_sequence_number
+      last_objective_revision.try(:sequence_number) || 0
+    end
+
+    def last_updated_on
+      last_objective_revision.try(:updated_on)
+    end
+
+    def last_objective_revision
+      fields[:objective_revisions].last
+    end
+
     def update_objective objective, opts={}
       updated_on = opts.fetch :on, effective_date
-      obj_last_updated_on = objective_revisions.map(&:updated_on).max
-      if obj_last_updated_on && updated_on < obj_last_updated_on
-        raise InvalidTaskError,
-          'Objective updates should be in chronological order'
-      end
-      add_objective_revision ObjectiveRevision.new(objective, updated_on)
+      last_sequence_number = last_objective_revision.try(:sequence_number) || 0
+      attrs = {
+        objective: objective,
+        updated_on: updated_on,
+        sequence_number: last_sequence_number + 1,
+      }
+      add_objective_revision ObjectiveRevision.new(attrs)
       return self
     end
 
-    def add_objective_revision revision
-      unless revision.kind_of? ObjectiveRevision
-        raise InvalidTaskError,
-          "#{revision.class} given instead of objective revision"
-      end
+    protected
 
+    def add_objective_revision revision
       if fields[:objective_revisions].empty? &&
           revision.updated_on != self.created_on
         raise InvalidTaskError,
           'First objective revision date should be same as task creation date'\
           " (#{revision.updated_on} != #{self.created_on})"
+      end
+
+      if last_updated_on.try :>, revision.updated_on
+        raise InvalidTaskError,
+          'Objective updates should be in chronological order'
+      end
+
+      if last_sequence_number >= revision.sequence_number
+        raise InvalidTaskError,
+          'Objective sequence_number should be in ascending order'
       end
 
       if revision.updated_on < created_on
@@ -56,17 +85,9 @@ module Task
       return self
     end
 
-    def objective_revisions
-      fields[:objective_revisions].each
-    end
-
-    def effective_objective_revisions
+    def effective_objective_revision
       objective_revisions.select { |r| r.updated_on <= effective_date }
+        .max_by{ |r| r.sequence_number }
     end
-
-    def objective
-      effective_objective_revisions.max_by{ |r| r.updated_on }.objective
-    end
-
   end
 end

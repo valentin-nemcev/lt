@@ -43,8 +43,30 @@ describe Task::ObjectiveMethods do
     let(:task_update_date) { 3.hours.ago }
     let(:revisions) do
       [
-        Task::ObjectiveRevision.new('first', task_creation_date),
-        Task::ObjectiveRevision.new('second', task_update_date),
+        Task::ObjectiveRevision.new(
+          objective: 'first',
+          updated_on: task_creation_date,
+          sequence_number: 1,
+        ),
+        Task::ObjectiveRevision.new(
+          objective: 'second',
+          updated_on: task_update_date,
+          sequence_number: 2,
+        ),
+      ]
+    end
+    let(:revisions_with_invalid_sns) do
+      [
+        Task::ObjectiveRevision.new(
+          objective: 'first',
+          updated_on: task_creation_date,
+          sequence_number: 2,
+        ),
+        Task::ObjectiveRevision.new(
+          objective: 'second',
+          updated_on: task_update_date,
+          sequence_number: 1,
+        ),
       ]
     end
     let(:with_objective_revisions) do
@@ -57,24 +79,29 @@ describe Task::ObjectiveMethods do
     end
 
     it 'should not allow objective updates before task was created' do
-      revision = Task::ObjectiveRevision.new 'rev',
-        1.hour.until(task_creation_date)
+      revision = Task::ObjectiveRevision.new(
+        objective: 'rev',
+        updated_on: 1.hour.until(task_creation_date),
+        sequence_number: 1,
+      )
       expect do
        create_task_without_objective objective_revisions: [revision],
          on: task_creation_date
       end.to raise_error Task::InvalidTaskError
     end
 
-    it 'should explicitly check objective revision type' do
-      revision = Object.new
-      expect do
-        create_task_without_objective objective_revisions: [revision]
-      end.to raise_error Task::InvalidTaskError
-    end
-
     it 'should not allow empty revision list' do
       expect do
         create_task_without_objective objective_revisions: []
+      end.to raise_error Task::InvalidTaskError
+    end
+
+    it 'should not allow revision list with incorrect sequence numbers' do
+      expect do
+        create_task_without_objective(
+          objective_revisions: revisions_with_invalid_sns,
+          on: task_creation_date
+        )
       end.to raise_error Task::InvalidTaskError
     end
 
@@ -105,10 +132,12 @@ describe Task::ObjectiveMethods do
       rev = revs.next
       rev.objective.should eq('first')
       rev.updated_on.should eq(task_creation_date)
+      rev.sequence_number.should eq(1)
 
       rev = revs.next
       rev.objective.should eq('second')
       rev.updated_on.should eq(task_update_date)
+      rev.sequence_number.should eq(2)
     end
 
     context 'seen from now' do
@@ -129,11 +158,18 @@ describe Task::ObjectiveMethods do
       end
     end
 
+    it 'should keep order for revisions made on same date' do
+      task.update_objective 'second 2', on: task_update_date
+      task.as_of(task_update_date).objective.should eq('second 2')
+    end
 
     it 'should not allow objective updates in achronological order' do
       expect do
         task.update_objective 'before first',
           on: 1.hour.until(task_creation_date)
+      end.to raise_error Task::InvalidTaskError
+
+      expect do
         task.update_objective 'between first and second',
           on: date_between_creation_and_update
       end.to raise_error Task::InvalidTaskError
