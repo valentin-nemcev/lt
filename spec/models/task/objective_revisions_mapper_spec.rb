@@ -95,6 +95,7 @@ describe Task::ObjectiveRevisionsMapper do
         attrs = OpenStruct.new attrs
         attrs.objective.should  eq(test_objective)
         attrs.updated_on.should eq_up_to_sec(test_updated_on)
+        attrs.id.should_not be_nil
       end
       revision = mapper.fetch_all.fetch 0
     end
