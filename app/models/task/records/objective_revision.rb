@@ -5,7 +5,7 @@ module Task
       belongs_to :task
       attr_accessible :objective, :updated_on, :sequence_number
 
-      record_timestamps = false
+      self.record_timestamps = false
     end
   end
 end

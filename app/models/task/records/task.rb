@@ -8,7 +8,7 @@ module Task
 
       attr_accessible :user, :created_on
 
-      record_timestamps = false
+      self.record_timestamps = false
     end
   end
 end

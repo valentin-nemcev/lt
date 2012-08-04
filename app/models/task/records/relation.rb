@@ -6,7 +6,7 @@ module Task
       belongs_to :supertask, class_name: Task
       attr_accessible :added_on, :removed_on
 
-      record_timestamps = false
+      self.record_timestamps = false
     end
   end
 end
