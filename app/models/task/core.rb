@@ -3,6 +3,8 @@ module Task
 
   class Core
     # TODO: Consitent names for exceptions
+    # TODO: Task ID in exception
+    # TODO: Different exception classes for different errors
     class TaskDateInvalid < InvalidTaskError; end;
 
     include PersistenceMethods

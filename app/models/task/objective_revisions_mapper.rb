@@ -18,18 +18,20 @@ module Task
 
         rec.objective = rev.objective
         rec.updated_on = rev.updated_on
+        rec.sequence_number = rev.sequence_number
         rec.save!
         rev.id = rec.id unless rev.persisted?
       end
     end
 
     def fetch_all
-      task_record.objective_revisions.map.with_index do |rec, i|
+      task_record.objective_revisions.order(:sequence_number)
+        .map.with_index do |rec, i|
         ObjectiveRevision.new(
           id: rec.id,
           objective: rec.objective,
           updated_on: rec.updated_on,
-          sequence_number: i + 1
+          sequence_number: rec.sequence_number
         )
       end
     end

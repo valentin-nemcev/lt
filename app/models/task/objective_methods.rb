@@ -74,7 +74,7 @@ module Task
 
       if last_sequence_number >= revision.sequence_number
         raise InvalidTaskError,
-          'Objective sequence_number should be in ascending order'
+          'Objective sequence numbers should be in ascending order'
       end
 
       if revision.updated_on < created_on

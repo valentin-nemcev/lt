@@ -7,6 +7,8 @@ module Task
         :dependent => :destroy
 
       attr_accessible :user, :created_on
+
+      record_timestamps = false
     end
   end
 end
