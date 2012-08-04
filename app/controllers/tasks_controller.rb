@@ -24,7 +24,6 @@ class TasksController < ApplicationController
 
   def update
     @task = mapper.fetch params[:id]
-    p params
     params[:task][:objective].try do |objective|
       task.update_objective objective
     end

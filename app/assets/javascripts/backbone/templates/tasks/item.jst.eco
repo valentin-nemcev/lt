@@ -5,6 +5,6 @@
 </div>
 
 <div class="additional-controls">
-  <button control="update" class="">Обновить цель</button>
+  <button control="update" class="">Обновить</button>
   <button control="delete" class="right destructive">Удалить</button>
 </div>
