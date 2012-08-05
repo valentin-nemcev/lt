@@ -20,7 +20,7 @@ module AcceptanceHelpers
     tasks.find('[control=new]').click
     task = tasks.find('[record=task][record-state=new]')
     task.find('[form=new-task]').tap do |form|
-      form.find('[input=type]').set(fields[:type])
+      form.find("[input=type][value=#{fields[:type]}]").set(true)
       form.find('[input=objective]').set(fields[:objective])
       form.find('[control=save]').click
     end
