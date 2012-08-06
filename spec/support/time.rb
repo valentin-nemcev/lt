@@ -3,7 +3,7 @@
 
 RSpec::Matchers.define(:eq_up_to_sec) do |expected|
   match do |actual|
-    actual.change(usec: 0) == expected.change(usec: 0)
+    actual.try(:change, usec: 0) == expected.try(:change, usec: 0)
   end
 
   diffable
