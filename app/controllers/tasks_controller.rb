@@ -1,10 +1,10 @@
 class TasksController < ApplicationController
 
-  rescue_from Task::Mapper::TaskNotFoundError,
+  rescue_from Task::Storage::TaskNotFoundError,
     with: -> { head :status => :not_found }
 
   def index
-    @tasks = mapper.fetch_all
+    @tasks = storage.fetch_all
 
     render :list
   end
@@ -13,30 +13,35 @@ class TasksController < ApplicationController
     task_params = params.fetch :task
     @task = Task.new_subtype task_params[:type],
       objective: task_params[:objective]
-    mapper.store @task
+
+    task_params[:project_id].try do |project_id|
+      project = storage.fetch project_id
+      @task.add_project project
+    end
+    storage.store @task
 
     render 'task', :status => :created
   end
 
   def show
-    @task = mapper.fetch params[:id]
+    @task = storage.fetch params[:id]
     render 'task'
   end
 
   def update
-    @task = mapper.fetch params[:id]
+    @task = storage.fetch params[:id]
     params[:task][:objective].try do |objective|
       task.update_objective objective
     end
 
-    mapper.store @task
+    storage.store @task
 
     render 'task'
   end
 
   def destroy
-    @task = mapper.fetch params[:id]
-    mapper.destroy @task
+    @task = storage.fetch params[:id]
+    storage.destroy @task
     head :status => :ok
   end
 
@@ -55,9 +60,9 @@ class TasksController < ApplicationController
   end
   helper_method :task
 
-  def mapper
-    @mapper ||= Task::Mapper.new user: current_user
+  def storage
+    @storage ||= Task::Storage.new user: current_user
   end
-  protected :mapper
+  protected :storage
 
 end
