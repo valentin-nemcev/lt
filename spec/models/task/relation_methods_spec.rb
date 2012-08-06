@@ -35,6 +35,8 @@ describe Task::RelationMethods do
         }.each do |collection, contents|
           subject.public_send(collection).to_a.should =~ contents
         end
+
+        subject.project.should == project1
       end
     end
 
@@ -50,6 +52,10 @@ describe Task::RelationMethods do
         }.each do |collection, contents|
           subject.public_send(collection).to_a.should =~ contents
         end
+
+        expect do
+          subject.project
+        end.to raise_error Task::InvalidTaskError
       end
     end
 

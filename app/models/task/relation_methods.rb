@@ -109,6 +109,11 @@ module Task
       edges.effective.incoming.filter(&:composition?).nodes
     end
 
+    def project
+      raise InvalidTaskError, 'Task has more than one project' if projects.many?
+      projects.first
+    end
+
     def component_tasks
       edges.effective.outgoing.filter(&:composition?).nodes
     end
