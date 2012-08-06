@@ -32,7 +32,7 @@ describe '/tasks', :type => :api do
   describe 'POST' do
     let(:test_ojective) { 'Test objective!' }
 
-    context 'with new action' do
+    describe 'single action creation' do
       before(:each) do
         post '/tasks/', :task => {
           :type => 'action',
@@ -61,6 +61,38 @@ describe '/tasks', :type => :api do
 
       specify 'stored action should equal returned action' do
         stored_action.should eq(returned_action)
+      end
+    end
+
+    describe 'subtask creation' do
+      let(:project) { create_task type: 'project' }
+      let(:project_url) { "/tasks/#{project.id}" }
+
+      before(:each) do
+        post '/tasks/', :task => {
+          :type => 'action',
+          :objective => test_ojective,
+          :project_id => project.id,
+        }, :format => :json
+
+        @returned_subtask = OpenStruct.new response.body_json.fetch 'task'
+      end
+      attr_accessor :returned_subtask
+
+      let(:returned_task) { OpenStruct.new response.body_json.fetch 'task' }
+
+      describe 'returned subtask' do
+        subject { returned_subtask }
+        its(:project_id) { should eq(project.id) }
+      end
+
+      describe 'persisted subtask' do
+        subject do
+          get "/tasks/#{returned_subtask.id}", :format => :json
+          OpenStruct.new response.body_json.fetch 'task'
+        end
+
+        its(:project_id) { should eq(project.id) }
       end
     end
   end
