@@ -1,23 +1,21 @@
 require 'spec_helper'
 
 describe Task::PersistenceMethods do
-  module Task
-    class ObjectWithPersistence
-      include PersistenceMethods
-      def fields
-        @fields
-      end
-      protected :fields
-
-      def initialize(attrs={})
-        @fields = {}
-        super
-      end
+  class ObjectWithPersistence
+    include Task::PersistenceMethods
+    def fields
+      @fields
     end
+    protected :fields
 
+    def initialize(attrs={})
+      @fields = {}
+      super
+    end
   end
 
-  class_with_persistence = Task::ObjectWithPersistence
+
+  class_with_persistence = ObjectWithPersistence
   let(:test_id)         { 1 }
   let(:another_test_id) { 2 }
 
@@ -48,8 +46,7 @@ describe Task::PersistenceMethods do
     it 'should not allow change of id' do
       expect {
         persisted.id = another_test_id
-      }.to raise_error #(Task::InvalidTaskError)
-      # TODO: Find out why this ↑ is not working
+      }.to raise_error(Task::PersistenceMethods::AlreadyPersistedError)
     end
 
     context 'with removed id' do
