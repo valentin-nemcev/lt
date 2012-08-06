@@ -6,12 +6,20 @@ class Lt.Models.Task extends Backbone.Model
 
   initialize: ->
     @on 'change:id', @onChangeId, @
+    @onChangeId(this, @id, silent: true)
+
     @on 'destroy', @onDestroy, @
 
-    @onChangeId(this, @id, silent: true)
+    @on 'add', @onAdd, @
+    @onAdd(this, @collection)
 
   getState: ->
     @state
+
+  onAdd: (model, collection, options = {}) ->
+    return unless collection?
+    model.subtasksCollection ?=
+      new Lt.Collections.Subtasks collection, model.id
 
   onDestroy: (model, collection, options = {}) ->
     @setState 'deleted', options
@@ -76,14 +84,13 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
 
 class Backbone.FilteredCollection extends Backbone.Collection
   constructor: (@sourceCollection, params)->
-    super(null, params)
-
-  initialize: ->
+    super(@sourceCollection.models, params)
     @sourceCollection.bind 'add'    , @add    , @
-    @sourceCollection.bind 'change' , @change    , @
+    @sourceCollection.bind 'change' , @change , @
     @sourceCollection.bind 'remove' , @remove , @
     @sourceCollection.bind 'reset'  , @reset  , @
-    @reset @sourceCollection.models
+
+  initialize: ->
 
   change: (model) ->
     included = @get model
@@ -104,3 +111,13 @@ class Lt.Collections.ActionableTasks extends Backbone.FilteredCollection
 
   modelFilter: (task) ->
     task.isActionable()
+
+class Lt.Collections.Subtasks extends Backbone.FilteredCollection
+
+  initialize: (models, options) ->
+    @projectId = options.projectId
+
+
+  modelFilter: (task) ->
+    task.get('project_id') == @projectId
+
