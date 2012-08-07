@@ -2,7 +2,7 @@ module Task
   class InvalidRelationError < StandardError; end;
   class Relation
 
-    include Graph::Edge
+    include ::Graph::Edge
     include PersistenceMethods
 
 

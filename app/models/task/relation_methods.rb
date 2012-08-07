@@ -1,7 +1,7 @@
 module Task
   module RelationMethods
 
-    include Graph::Node
+    include ::Graph::Node
 
     module EffectiveEdges
       def effective
