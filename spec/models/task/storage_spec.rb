@@ -61,7 +61,7 @@ describe Task::Storage do
       relation_scope.should_receive(:load_relations)
         .with({task_id => task}).and_return([relation])
 
-      Task::Graph.should_receive(:new)
+      Task::Graph.should_receive(:new_from_records)
         .with(tasks: [task], relations: [relation]).and_return(graph)
 
       graph.stub(tasks: [task])

@@ -40,7 +40,7 @@ module Task
     def fetch_scope(task_scope)
       tasks = task_scope.load_tasks
       relations = task_scope.relations.load_relations(tasks.index_by(&:id))
-      Task::Graph.new tasks: tasks, relations: relations
+      Task::Graph.new_from_records tasks: tasks, relations: relations
     end
 
     def task_base
