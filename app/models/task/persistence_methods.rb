@@ -22,7 +22,9 @@ module Task
     end
 
     def id=(id)
-      raise AlreadyPersistedError.new fields[:id], id if persisted? && id
+      if persisted? && id && self.id != id
+        raise AlreadyPersistedError.new self.id, id
+      end
       fields[:id] = id
       return self
     end

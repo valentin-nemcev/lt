@@ -47,6 +47,10 @@ describe Task::PersistenceMethods do
       expect {
         persisted.id = another_test_id
       }.to raise_error(Task::PersistenceMethods::AlreadyPersistedError)
+
+      expect {
+        persisted.id = persisted.id
+      }.to_not raise_error(Task::PersistenceMethods::AlreadyPersistedError)
     end
 
     context 'with removed id' do
