@@ -5,6 +5,14 @@ module Graph
       @edge = edge
     end
 
+    def other(node)
+      if child == node
+        parent
+      elsif parent == node
+        child
+      end
+    end
+
     def child
       @child
     end

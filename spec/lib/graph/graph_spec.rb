@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe Graph do
   context 'two nodes' do
-    let(:edge)   { Object.new.extend Graph::Edge }
-    let(:parent) { Object.new.extend Graph::Node }
-    let(:child)  { Object.new.extend Graph::Node }
+    let(:edge)   { stub('edge').extend Graph::Edge }
+    let(:parent) { stub('parent').extend Graph::Node }
+    let(:child)  { stub('child').extend Graph::Node }
 
     shared_examples 'two connected nodes' do
       describe 'edge' do
@@ -16,16 +16,32 @@ describe Graph do
 
       describe 'parent' do
         it 'should have reference to child via edge' do
-          parent.edges.nodes.should include(child)
-          parent.edges.outgoing.nodes.should include(child)
+          parent.edges.nodes.to_a.should match_array([child])
+
+          nodes = parent.edges.with_indirect.nodes
+          nodes.to_a.should match_array([child])
+
+          parent.edges.outgoing.nodes.to_a.should match_array([child])
+
+          nodes = parent.edges.outgoing.with_indirect.nodes
+          nodes.to_a.should match_array([child])
+
           parent.edges.incoming.nodes.should be_empty
         end
       end
 
       describe 'child' do
         it 'should have reference to parent via edge' do
-          child.edges.nodes.should include(parent)
-          child.edges.incoming.nodes.should include(parent)
+          child.edges.nodes.to_a.should match_array([parent])
+
+          nodes = child.edges.with_indirect.nodes
+          nodes.to_a.should match_array([parent])
+
+          child.edges.incoming.nodes.to_a.should match_array([parent])
+
+          nodes = child.edges.incoming.with_indirect.nodes
+          nodes.to_a.should match_array([parent])
+
           child.edges.outgoing.nodes.should be_empty
         end
       end
@@ -42,6 +58,7 @@ describe Graph do
       describe 'parent' do
         it 'should have no reference to child via edge' do
           parent.edges.nodes.should be_empty
+          parent.edges.with_indirect.nodes.should be_empty
           parent.edges.outgoing.nodes.should be_empty
           parent.edges.incoming.nodes.should be_empty
         end
@@ -50,6 +67,7 @@ describe Graph do
       describe 'child' do
         it 'should have no reference to parent via edge' do
           child.edges.nodes.should be_empty
+          child.edges.with_indirect.nodes.should be_empty
           child.edges.incoming.nodes.should be_empty
           child.edges.outgoing.nodes.should be_empty
         end
@@ -94,5 +112,63 @@ describe Graph do
         include_examples 'two disconnected nodes'
       end
     end
+  end
+
+  context 'chain of three connected nodes' do
+    let(:edge12) { stub('edge12').extend Graph::Edge }
+    let(:edge23) { stub('edge23').extend Graph::Edge }
+    let(:node1)  { stub('node1').extend Graph::Node }
+    let(:node2)  { stub('node2').extend Graph::Node }
+    let(:node3)  { stub('node3').extend Graph::Node }
+
+    before(:each) do
+      edge12.nodes.parent = node1
+      edge12.nodes.child  = node2
+      edge23.nodes.parent = node2
+      edge23.nodes.child  = node3
+    end
+
+    describe 'node 1' do
+      it 'should have references to indirectly connected edges' do
+        node1.edges.with_indirect.to_a.should match_array([edge12, edge23])
+        node1.edges.to_a.should match_array([edge12])
+        node1.edges.outgoing
+          .with_indirect.to_a.should match_array([edge12, edge23])
+        node1.edges.incoming.with_indirect.should be_empty
+      end
+
+      it 'should have references to indirectly connected nodes' do
+        nodes = node1.edges.with_indirect.nodes
+        nodes.to_a.should match_array([node2, node3])
+      end
+    end
+
+    context 'with loop' do
+      let(:edge31) { stub('edge31').extend Graph::Edge }
+      before(:each) do
+        edge31.nodes.parent = node3
+        edge31.nodes.child  = node1
+      end
+
+      describe 'node 1' do
+        it 'should have indirect reference to child nodes' do
+          edges = node1.edges.with_indirect
+          edges.to_a.should match_array([edge12, edge23, edge31])
+
+          edges = node1.edges.outgoing.with_indirect
+          edges.to_a.should match_array([edge12, edge23, edge31])
+
+          edges = node1.edges.incoming.with_indirect
+          edges.to_a.should match_array([edge12, edge23, edge31])
+
+          node1.edges.to_a.should match_array([edge12, edge31])
+        end
+        it 'should have references to indirectly connected nodes and self' do
+          nodes = node1.edges.with_indirect.nodes.to_a
+          nodes.should match_array([node1, node2, node3])
+        end
+      end
+    end
+
   end
 end

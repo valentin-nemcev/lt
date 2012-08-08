@@ -2,7 +2,6 @@ module Graph
   class NodeEdges
 
     attr_reader :node
-    attr_accessor :direction, :filters
 
     def initialize(node, filters=[])
       @node = node
@@ -19,20 +18,72 @@ module Graph
       clone.tap { |c| c.instance_variable_set :@node, node }
     end
 
-    include Enumerable
 
-    def each(*args, &block)
-      es = @edges.clone
+    def unfiltered
+      @edges.clone
+    end
+
+    def filter_edges!(es, current_node)
       case direction
-      when :outgoing then es.select!{ |e| e.nodes.parent == self.node }
-      when :incoming then es.select!{ |e| e.nodes.child  == self.node }
+      when :outgoing then es.select!{ |e| e.nodes.parent == current_node }
+      when :incoming then es.select!{ |e| e.nodes.child  == current_node }
       end
 
       filters.each do |filter|
         es.select! &filter
       end
+      return es
+    end
 
-      es.each *args, &block
+    def nodes_and_edges
+      visited_edges, visited_nodes = Set.new, Set.new
+
+      paths_to_visit = [[:start, self.node]]
+      until paths_to_visit.empty? do
+        current_edge, current_node = paths_to_visit.pop # Depth first
+        current_edges = current_node.edges
+
+        unless current_edge == :start
+          visited_nodes << current_node
+          visited_edges << current_edge
+        end
+
+        edges = if current_node == self.node || with_indirect?
+                  filter_edges!(current_edges.unfiltered, current_node)
+                else [] end
+
+        connected_paths = edges.map { |e| [e, e.nodes.other(current_node)] }
+        unvisited_paths = connected_paths.reject do |e, n|
+          visited_edges.include? e
+        end
+
+        paths_to_visit.concat unvisited_paths
+      end
+
+      [visited_nodes, visited_edges]
+    end
+
+
+    def to_set
+      nodes_and_edges[1]
+    end
+
+    def to_a
+      nodes_and_edges[1].to_a
+    end
+
+    def empty?
+      to_set.empty?
+    end
+
+    include Enumerable
+
+    def each(*args, &block)
+      nodes_and_edges[1].each *args, &block
+    end
+
+    def nodes
+      nodes_and_edges[0]
     end
 
 
@@ -61,26 +112,43 @@ module Graph
     end
 
 
+    attr_reader :direction
+    def incoming!
+      @direction = :incoming
+    end
+
+    def outgoing!
+      @direction = :outgoing
+    end
+
+    attr_reader :filters
+    def filter!(&filter)
+      @filters << filter
+    end
+
+    def with_indirect?
+      !!@with_indirect
+    end
+
+    def with_indirect!
+      @with_indirect = true
+    end
+
+
+    def with_indirect
+      self.clone.tap { |c| c.with_indirect! }
+    end
+
     def filter(&filter)
-      self.clone.tap { |c| c.filters << filter }
+      self.clone.tap { |c| c.filter! &filter }
     end
 
     def incoming
-      self.clone.tap { |c| c.direction = :incoming }
+      self.clone.tap { |c| c.incoming! }
     end
 
     def outgoing
-      self.clone.tap { |c| c.direction = :outgoing }
-    end
-
-    def nodes
-      self.flat_map do |e|
-        case direction
-        when :outgoing then e.nodes.child
-        when :incoming then e.nodes.parent
-        else [e.nodes.child, e.nodes.parent]
-        end
-      end.uniq
+      self.clone.tap { |c| c.outgoing! }
     end
   end
 end
