@@ -12,11 +12,11 @@ describe Graph::Node do
   end
 
   specify 'new nodes should have edges' do
-    TestNode.new.edges.should be_present
+    TestNode.new.edges.should_not be_nil
   end
 
-  specify 'dinamically extended nodes should have edges' do
-    Object.new.extend(Graph::Node).edges.should be_present
+  specify 'dynamically extended nodes should have edges' do
+    Object.new.extend(Graph::Node).edges.should_not be_nil
   end
 
   describe '#edges' do
@@ -34,7 +34,7 @@ describe Graph::Node do
       end
     end
 
-    context 'for dinamically extended cloned node' do
+    context 'for dynamically extended cloned node' do
       let(:original_node) { Object.new.extend(Graph::Node) }
       let(:cloned_node) { original_node.clone }
 
