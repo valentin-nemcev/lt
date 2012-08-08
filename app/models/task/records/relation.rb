@@ -7,6 +7,12 @@ module Task
       attr_accessible :added_on, :removed_on
 
       self.record_timestamps = false
+
+
+      def self.load_relations(tasks)
+        []
+      end
+
     end
   end
 end
