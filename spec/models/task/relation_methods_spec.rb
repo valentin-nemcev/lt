@@ -32,8 +32,12 @@ describe Task::RelationMethods do
           subtasks:        [blocking1, component1],
           blocking_tasks:  [blocking1],
           component_tasks: [component1],
-        }.each do |collection, contents|
-          subject.public_send(collection).to_a.should =~ contents
+        }.each do |collection, expected|
+          actual = subject.public_send(collection).to_a
+          actual.should match_array(expected)
+          actual.each do |task|
+            task.effective_date.should eq(subject.effective_date)
+          end
         end
 
         subject.project.should == project1
@@ -49,8 +53,12 @@ describe Task::RelationMethods do
           subtasks:        [blocking1, blocking2, component1, component2],
           blocking_tasks:  [blocking1, blocking2],
           component_tasks: [component1, component2],
-        }.each do |collection, contents|
-          subject.public_send(collection).to_a.should =~ contents
+        }.each do |collection, expected|
+          actual = subject.public_send(collection).to_a
+          actual.should match_array(expected)
+          actual.each do |task|
+            task.effective_date.should eq(subject.effective_date)
+          end
         end
 
         expect do
@@ -60,6 +68,9 @@ describe Task::RelationMethods do
     end
 
     context 'added on creation' do
+
+
+
       subject { with_related_on_creation }
 
       it 'has #relations' do

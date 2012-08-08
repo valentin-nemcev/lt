@@ -3,12 +3,17 @@ module Task
 
     include ::Graph::Node
 
+    # TODO: Better way to extend NodeEdges
     module EffectiveEdges
       def effective
         ed = node.effective_date
         filter do |edge|
           edge.added_on <= ed && (!edge.removed_on || edge.removed_on > ed)
         end
+      end
+
+      def effective_tasks
+        nodes.map{ |n| n.as_of node.effective_date }
       end
     end
 
@@ -17,14 +22,13 @@ module Task
 
       edges.extend EffectiveEdges
 
-      if project = attrs[:project]
-        add_project project
-      end
-      attrs.fetch(:projects        , []).each { |t| add_project t }
-      attrs.fetch(:dependent_tasks , []).each { |t| add_dependent_task t }
-      attrs.fetch(:blocking_tasks  , []).each { |t| add_blocking_task t }
-      attrs.fetch(:component_tasks , []).each { |t| add_component_task t }
+      # Shortcuts
+      attrs[:project].try { |p| add_project p }
 
+      attrs.fetch(:projects        , []).each { |t| add_project        t }
+      attrs.fetch(:dependent_tasks , []).each { |t| add_dependent_task t }
+      attrs.fetch(:blocking_tasks  , []).each { |t| add_blocking_task  t }
+      attrs.fetch(:component_tasks , []).each { |t| add_component_task t }
     end
 
 
@@ -42,15 +46,27 @@ module Task
 
     def remove_related_task(opts)
       if supertask = opts.delete(:supertask)
-        rel = edges.incoming.find{ |e| e.nodes.parent.equal? supertask }
+        rel = edges.incoming.find{ |e| e.nodes.parent == supertask }
       elsif subtask = opts.delete(:subtask)
-        rel = edges.outgoing.find{ |e| e.nodes.child.equal? subtask }
+        rel = edges.outgoing.find{ |e| e.nodes.child == subtask }
       else
         raise ArgumentError, 'Sub or supertask is missing'
       end
       rel.remove opts if rel.present?
     end
 
+    def relations
+      edges.to_a
+    end
+
+    def with_connected_tasks_and_relations
+      tasks, relations = edges.nodes_and_edges
+      tasks << self
+      [tasks, relations]
+    end
+
+
+    # Shortcuts
 
     def add_project project, opts={}
       add_related_task opts.merge supertask: project, :type => :composition
@@ -85,28 +101,24 @@ module Task
     end
 
 
-    def relations
-      edges.outgoing.to_set + edges.incoming.to_set
-    end
-
     def subtasks
-      edges.effective.outgoing.nodes
+      edges.effective.outgoing.effective_tasks
     end
 
     def supertasks
-      edges.effective.incoming.nodes
+      edges.effective.incoming.effective_tasks
     end
 
     def blocking_tasks
-      edges.effective.outgoing.filter(&:dependency?).nodes
+      edges.effective.outgoing.filter(&:dependency?).effective_tasks
     end
 
     def dependent_tasks
-      edges.effective.incoming.filter(&:dependency?).nodes
+      edges.effective.incoming.filter(&:dependency?).effective_tasks
     end
 
     def projects
-      edges.effective.incoming.filter(&:composition?).nodes
+      edges.effective.incoming.filter(&:composition?).effective_tasks
     end
 
     def project
@@ -115,9 +127,8 @@ module Task
     end
 
     def component_tasks
-      edges.effective.outgoing.filter(&:composition?).nodes
+      edges.effective.outgoing.filter(&:composition?).effective_tasks
     end
-
 
   end
 end
