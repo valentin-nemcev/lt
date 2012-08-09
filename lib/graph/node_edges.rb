@@ -41,15 +41,14 @@ module Graph
       paths_to_visit = [[:start, self.node]]
       until paths_to_visit.empty? do
         current_edge, current_node = paths_to_visit.pop # Depth first
-        current_edges = current_node.edges
 
         unless current_edge == :start
           visited_nodes << current_node
           visited_edges << current_edge
         end
 
-        edges = if current_node == self.node || with_indirect?
-                  filter_edges!(current_edges.unfiltered, current_node)
+        edges = if current_node && (current_node == self.node || with_indirect?)
+                  filter_edges!(current_node.edges.unfiltered, current_node)
                 else [] end
 
         connected_paths = edges.map { |e| [e, e.nodes.other(current_node)] }

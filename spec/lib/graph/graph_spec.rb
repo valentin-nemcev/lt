@@ -169,6 +169,23 @@ describe Graph do
         end
       end
     end
+  end
 
+  context 'node with dangling connection' do
+    let(:edge) { stub('edge').extend Graph::Edge }
+    let(:node) { stub('node').extend Graph::Node }
+
+    before(:each) { edge.nodes.parent = node }
+
+    describe 'node' do
+      it 'should return its edges without errors' do
+        node.edges.to_a.should match_array([edge])
+      end
+
+      it 'should return connected nodes without errors' do
+        node.edges.nodes.to_a.should match_array([nil])
+        node.edges.with_indirect.nodes.to_a.should match_array([nil])
+      end
+    end
   end
 end
