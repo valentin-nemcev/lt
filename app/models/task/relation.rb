@@ -9,7 +9,6 @@ module Task
     def fields
       @fields
     end
-    protected :fields
 
     attr_reader :type, :added_on, :removed_on
     def initialize(attrs={})
@@ -17,7 +16,7 @@ module Task
       super
       self.nodes.parent = attrs.fetch :supertask
       self.nodes.child = attrs.fetch :subtask
-      @type = attrs.fetch :type
+      @type = attrs.fetch(:type).to_sym
       now = attrs.fetch(:clock, Time).current
       @added_on = attrs[:on] || attrs[:added_on] || now
       remove on: attrs[:removed_on]
@@ -48,6 +47,10 @@ module Task
 
     def composition?
       type == :composition
+    end
+
+    def inspect
+      "<#{self.class}:#{self.id.inspect} #{self.type} of #{self.supertask.inspect} - #{self.subtask.inspect}>"
     end
 
   end
