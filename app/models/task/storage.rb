@@ -1,7 +1,7 @@
 module Task
   class Storage
-    class TaskNotFoundError < StandardError
-    end
+    class TaskNotFoundError < StandardError; end
+    class IncompleteGraphError < StandardError; end
 
     attr_reader :user
     def initialize(opts = {})
@@ -15,20 +15,19 @@ module Task
 
     def store_graph(graph)
       task_records = graph.tasks.map do |task|
-        task_base.save_task(task).tap { |rec| task.id = rec.id }
+        fail IncompleteGraphError if task.nil?
+        task_base.save_task(task)
       end
 
+      task_records_map = task_records.index_by(&:id)
       relation_records = graph.relations.map do |relation|
-        relation_base.save_relation(relation, task_records.index_by(&:id))
-          .tap { |rec| relation.id = rec.id }
+        relation_base.save_relation(relation, task_records_map)
       end
       graph
     end
 
     def fetch(task_id)
-      fetch_scope(task_base.graph_scope(task_id)).tasks.find do |task|
-        task.id == task_id
-      end
+      fetch_scope(task_base.graph_scope(task_id)).find_task_by_id(task_id)
     end
 
     def fetch_all
@@ -48,7 +47,7 @@ module Task
     end
 
     def relation_base
-      Task::Records::Relation
+      Task::Records::TaskRelation
     end
 
   end

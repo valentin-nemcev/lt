@@ -14,10 +14,10 @@ describe Task::Storage do
     Task::Records::Task.should_receive(:for_user).at_most(:once)
       .with(user).and_return(task_base)
   end
-  before(:each) { stub_const('Task::Records::Relation', stub('relation_base')) }
+  before(:each) { stub_const('Task::Records::TaskRelation', stub('relation_base')) }
 
   let(:task_base) { stub('task_base') }
-  let(:relation_base) { Task::Records::Relation }
+  let(:relation_base) { Task::Records::TaskRelation }
 
 
   describe '#store' do
@@ -32,21 +32,28 @@ describe Task::Storage do
   let(:task_id) { 54 }
   let(:relation_id) { 25 }
   describe '#store_graph' do
+    let(:task_record    ) { stub('task_record'     , id: task_id    ) }
+    let(:relation_record) { stub('relation_record' , id: relation_id) }
+
+    before(:each) do
+      task_base.should_receive(:save_task).with(task).and_return(task_record)
+    end
 
     it 'maps tasks and relations to records' do
       graph.stub(:tasks => [task], :relations => [relation])
 
-      task_record     = stub('task_record'     , id: task_id)
-      relation_record = stub('relation_record' , id: relation_id)
-
-      task_base.should_receive(:save_task).with(task).and_return(task_record)
       relation_base.should_receive(:save_relation)
           .with(relation, {task_id => task_record}).and_return(relation_record)
 
-      task.should_receive(:'id=').with(task_id)
-      relation.should_receive(:'id=').with(relation_id)
-
       storage.store_graph(graph)
+    end
+
+    it 'raises error on incomplete graphs' do
+      graph.stub(:tasks => [task, nil], :relations => [relation])
+
+      expect {
+        storage.store_graph(graph)
+      }.to raise_error Task::Storage::IncompleteGraphError
     end
   end
 
@@ -71,6 +78,7 @@ describe Task::Storage do
       it 'returns single task' do
         task_base.should_receive(:graph_scope).with(task_id)
           .and_return(task_scope)
+        graph.should_receive(:find_task_by_id).with(task_id).and_return(task)
         storage.fetch(task_id).should eq(task)
       end
     end

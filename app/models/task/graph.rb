@@ -20,6 +20,10 @@ module Task
       tasks_and_relations[0]
     end
 
+    def find_task_by_id(id)
+      tasks.find{ |task| task.id.to_s == id.to_s }
+    end
+
     def relations
       tasks_and_relations[1]
     end

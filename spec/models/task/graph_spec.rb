@@ -77,4 +77,17 @@ describe Task::Graph do
       graph.relations.to_a.should match_array(relations)
     end
   end
+
+  describe 'find_task_by_id' do
+    let(:task1) { stub('task1', id: 1) }
+    let(:task2) { stub('task2', id: '2') }
+
+    subject(:graph) do
+      described_class.new_from_records tasks: [task1, task2]
+    end
+    it 'should find task by id comparing ids as strings' do
+      graph.find_task_by_id('1').should eq(task1)
+      graph.find_task_by_id( 2 ).should eq(task2)
+    end
+  end
 end
