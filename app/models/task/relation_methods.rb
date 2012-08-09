@@ -33,9 +33,9 @@ module Task
 
 
     def add_related_task(opts)
-      if opts.has_key?(:supertask)
+      if opts[:supertask]
         opts[:subtask] = self
-      elsif opts.has_key?(:subtask)
+      elsif opts[:subtask]
         opts[:supertask] = self
       else
         raise ArgumentError, 'Sub or supertask is missing'
