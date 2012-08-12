@@ -1,6 +1,6 @@
 include ActionView::Helpers::TextHelper
 
-deleted = Task::Records::Relation.delete_all
+deleted = Task::Records::TaskRelation.delete_all
 puts "Deleted #{pluralize(deleted, 'relation')} from DB"
 
 deleted = Task::Records::Task.delete_all
@@ -14,14 +14,11 @@ User.all.each do |user|
 
   puts "Fetched #{pluralize(tasks.length, 'task')} with legacy mapper"
 
-  mapper = Task::Mapper.new user: user
+  storage = Task::Storage.new user: user
 
   puts "Storing tasks with new mapper..."
-  stats = mapper.store_all tasks
-  puts "Stored. Stats:"
-  stats.each_pair do |f, v|
-    puts "#{f}: #{v}"
-  end
+  tasks.each{ |task| storage.store task }
+  puts "Stored."
 
 end
 puts "Stored task records:"
