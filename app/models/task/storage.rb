@@ -27,7 +27,8 @@ module Task
     end
 
     def fetch(task_id)
-      fetch_scope(task_base.graph_scope(task_id)).find_task_by_id(task_id)
+      graph = fetch_scope(task_base.graph_scope(task_id))
+      graph.find_task_by_id(task_id) or fail TaskNotFoundError
     end
 
     def fetch_all

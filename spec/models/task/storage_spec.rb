@@ -30,6 +30,7 @@ describe Task::Storage do
   end
 
   let(:task_id) { 54 }
+  let(:non_existend_task_id) { 666 }
   let(:relation_id) { 25 }
   describe '#store_graph' do
     let(:task_record    ) { stub('task_record'     , id: task_id    ) }
@@ -80,6 +81,17 @@ describe Task::Storage do
           .and_return(task_scope)
         graph.should_receive(:find_task_by_id).with(task_id).and_return(task)
         storage.fetch(task_id).should eq(task)
+      end
+
+      it 'raises error when fetching non-existent task' do
+        task_base.should_receive(:graph_scope)
+          .with(non_existend_task_id).and_return(task_scope)
+        graph.should_receive(:find_task_by_id)
+          .with(non_existend_task_id).and_return(nil)
+
+        expect do
+          storage.fetch(non_existend_task_id)
+        end.to raise_error Task::Storage::TaskNotFoundError
       end
     end
 
