@@ -34,6 +34,13 @@ module Task
       fetch_scope(task_base.all_graph_scope).tasks
     end
 
+    def destroy_task(task)
+      task_base.destroy_task(task)
+      task.destroy_relations
+      task.freeze
+      nil
+    end
+
     protected
 
     def fetch_scope(task_scope)

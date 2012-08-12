@@ -137,7 +137,7 @@ describe '/tasks', :type => :api do
       end
 
       let(:deleted_task_response) do
-        get task_url
+        get task_url, :format => :json
         response
       end
 

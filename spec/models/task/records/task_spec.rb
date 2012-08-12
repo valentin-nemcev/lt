@@ -100,6 +100,15 @@ describe Task::Records::Task do
       task.objective_revisions.should eq(task_objective_revisions)
       @received_task_record.should eq(task_record)
     end
+  end
 
+  describe '.destroy_task' do
+    let(:record_id) { task_records.create!.id }
+    let(:persisted_task) { task.id = record_id; task }
+
+    it 'destroys task record' do
+      task_records.destroy_task(persisted_task)
+      task_records.find_by_id(record_id).should be_nil
+    end
   end
 end

@@ -90,4 +90,17 @@ describe Task::Storage do
       end
     end
   end
+
+  describe '#destroy_task' do
+    before(:each) do
+      task.stub(:id => task_id)
+    end
+
+    it 'destroys single task and its relations' do
+      task_base.should_receive(:destroy_task).with(task)
+      task.should_receive(:destroy_relations)
+      task.should_receive(:freeze)
+      storage.destroy_task(task).should be_nil
+    end
+  end
 end

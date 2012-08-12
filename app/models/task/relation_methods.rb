@@ -55,6 +55,7 @@ module Task
       rel.remove opts if rel.present?
     end
 
+
     def relations
       edges.to_a
     end
@@ -63,6 +64,11 @@ module Task
       tasks, relations = edges.nodes_and_edges
       tasks << self
       [tasks, relations]
+    end
+
+
+    def destroy_relations
+      relations.each(&:destroy)
     end
 
 

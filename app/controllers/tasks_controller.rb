@@ -41,7 +41,7 @@ class TasksController < ApplicationController
 
   def destroy
     @task = storage.fetch params[:id]
-    storage.destroy @task
+    storage.destroy_task @task
     head :status => :ok
   end
 

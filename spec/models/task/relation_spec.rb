@@ -72,5 +72,15 @@ describe Task::Relation do
     end
   end
 
+
+  describe '#destroy' do
+    subject(:relation) { create_relation }
+    it 'disconnects relation from its sub- and supertasks' do
+      relation.destroy
+      relation.subtask.should be_nil
+      relation.supertask.should be_nil
+    end
+  end
+
   # TODO: Spec loop check
 end

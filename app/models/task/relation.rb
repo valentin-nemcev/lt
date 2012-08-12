@@ -49,6 +49,13 @@ module Task
       type == :composition
     end
 
+
+    def destroy
+      self.nodes.parent = nil
+      self.nodes.child = nil
+    end
+
+
     def inspect
       "<#{self.class}:#{self.id.inspect} #{self.type} of #{self.supertask.inspect} - #{self.subtask.inspect}>"
     end

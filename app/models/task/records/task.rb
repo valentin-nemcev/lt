@@ -9,6 +9,7 @@ module Task
         :class_name => ::Task::Records::TaskObjectiveRevision,
         :dependent => :destroy
 
+
       attr_accessible :user, :type, :created_on
 
 
@@ -51,6 +52,11 @@ module Task
           created_on: self.created_on,
           objective_revisions: TaskObjectiveRevision.load_revisions(self)
         )
+      end
+
+      def self.destroy_task(task)
+        record = self.find_by_id! task.id
+        record.destroy
       end
     end
   end
