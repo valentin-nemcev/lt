@@ -10,7 +10,8 @@ end
 def create_task(fields = {})
   post '/tasks/', :task => {
     :type => fields.fetch(:type, 'action'),
-    :objective => fields.fetch(:objective, 'Test objective')
+    :objective => fields.fetch(:objective, 'Test objective'),
+    :project_id => fields[:project_id],
   }, :format => :json
   OpenStruct.new response.body_json.fetch 'task'
 end
@@ -122,28 +123,50 @@ describe '/tasks', :type => :api do
     end
 
     describe 'DELETE' do
-      let(:task) { create_task }
-      let(:task_url) { "/tasks/#{task.id}" }
-
-      before(:each) do
-        delete task_url
-        @delete_response = response
-      end
-      attr_accessor :delete_response
-
       let(:task_list) do
         get '/tasks/', :format => :json
         response.body_json
       end
 
-      let(:deleted_task_response) do
-        get task_url, :format => :json
-        response
+      context 'single task' do
+        let(:task) { create_task }
+        let(:task_url) { "/tasks/#{task.id}" }
+
+        before(:each) do
+          delete task_url
+          @delete_response = response
+        end
+        attr_accessor :delete_response
+
+        let(:deleted_task_response) do
+          get task_url, :format => :json
+          response
+        end
+
+        specify { delete_response.should be_successful }
+        specify { task_list.should be_empty }
+        specify { deleted_task_response.should be_not_found }
       end
 
-      specify { delete_response.should be_successful }
-      specify { task_list.should be_empty }
-      specify { deleted_task_response.should be_not_found }
+      context 'task with relations' do
+        let(:task) { create_task type: 'project' }
+        let(:action) { create_task type: 'action', project_id: task.id }
+        before(:each) do
+          task; action
+          delete task_url
+          @delete_response = response
+        end
+        attr_accessor :delete_response
+
+        let(:action_response) do
+          get "/tasks/#{action.id}", :format => :json
+          OpenStruct.new response.body_json.fetch 'task'
+        end
+
+        specify { delete_response.should be_successful }
+        specify { task_list.should have(1).task }
+        specify { action_response.project_id.should be_nil }
+      end
     end
   end
 end
