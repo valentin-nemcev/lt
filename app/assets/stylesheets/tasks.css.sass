@@ -4,7 +4,7 @@
 
 @import compass/utilities/general/clearfix
 
-ul[collection=tasks]
+ul.tasks
   li > ul
     padding-left: 1.5em
     margin-bottom: 0.5em
@@ -23,7 +23,7 @@ ul[collection=tasks]
 
     &.selected
       border: 1px dashed #999
-    &[task-type=project] [field=objective]
+    &[task-type=project] > .fields > [field=objective]
       font-weight: bold
       color: #484848
 

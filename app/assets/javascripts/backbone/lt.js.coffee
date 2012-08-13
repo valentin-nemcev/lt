@@ -33,12 +33,12 @@ window.Lt =
 
     @taskViewState = new Lt.Models.TaskViewState taskViewState
 
-    @taskPlanView = new Lt.Views.Tasks.ListView
+    @taskView = new Lt.Views.Tasks.MainView
       collection: @tasks
       state: @taskViewState
       el: $(selector)[0]
 
-    @taskPlanView.render()
+    @taskView.render()
 
 
 

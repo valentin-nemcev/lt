@@ -1,34 +1,53 @@
 Views = Lt.Views.Tasks ||= {}
 
-class Views.ListView extends Lt.Views.List.EditableListView
-  Views: Views
+class Views.ListView extends Backbone.View
 
-  itemName: 'task'
-
-  attributes:
-    widget: 'tasks'
+  tagName: 'ul'
+  className: 'tasks'
 
   initialize: ->
-    super
-    @state = @options.state
-    @state.bind 'change:show_completed', @showCompleted, @
+    @collection.bind 'reset'  , @reset,   @
+    @collection.bind 'add'    , @add,     @
+    @collection.bind 'remove' , @remove,  @
 
-  events: ->
-    _.extend super,
-      'change .show-completed input' : (ev) =>
-        @state.save show_completed: $(ev.currentTarget).prop('checked')
+    @items = {}
 
-  buildItem: (model) ->
-    @toggleCompletedVisibility(model, super)
+  updateEmptyItem: ->
+    return unless @$emptyItem?
+    if @collection.length == 0
+      @$emptyItem.appendTo(@$el)
+    else
+      @$emptyItem.detach()
 
-  showCompleted: (state, showingCompleted) ->
-    @$('.show-completed input').prop('checked', showingCompleted)
-    for task in @collection.models
-      @toggleCompletedVisibility(task, @getItem(task))
+  reset: ->
+    @remove cid for cid of @items
+    @add model for model in @collection.models
+    @updateEmptyItem()
+    return
+
+  add: (model) ->
+    itemView = new Views.ItemView
+      model: model
+      tagName: 'li'
+      attributes:
+        record: 'task'
+      id: 'task' + '-' + model.cid
+
+    itemView.render().$el.appendTo(@$el)
+    @items[model.cid] = itemView
+    @updateEmptyItem()
 
     return
 
-  toggleCompletedVisibility: (model, item) ->
-    $(item).toggle(not model.isCompleted() or @state.get('show_completed'))
+  remove: (model) ->
+    cid = model.cid ? model
+    @items[cid].$el.remove()
+    @updateEmptyItem()
 
 
+  render: (opts = {})->
+    if $emptyItem = opts.$emptyItem
+      @$emptyItem = $('<li/>', class: 'empty').append($emptyItem.contents())
+    @reset(@collection)
+
+    return this

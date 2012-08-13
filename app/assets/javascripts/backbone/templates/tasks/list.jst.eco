@@ -1,9 +1,0 @@
-<a href="#" control="new">Добавить</a>
-<label class="show-completed minor" control="show-completed">
-  <input type="checkbox" <%= 'checked' if @state.get('show_completed') %>/>
-  Показать выполненные
-</label>
-<ul collection="tasks" class="tasks">
-  <li class="empty">Нет задач</li>
-</ul>
-

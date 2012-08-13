@@ -55,13 +55,14 @@ feature "Task creation", :acceptance do
           form.find('[input=objective]').set('Test subtask objective')
           form.find('[control=save]').click
         end
-        subtask_id = subtask['record-id']
+        subtask.should match_selector('[record-state!=new]')
+        @subtask_id = subtask['record-id']
       end
     end
     reload_page
     project = find("[record=task][record-id='#{project_id}']")
     subtasks = project.find('[records=subtasks]')
-    subtasks.should have_selector("[record=task][record-id='#{subtask_id}']")
+    subtasks.should have_selector("[record=task][record-id='#{@subtask_id}']")
   end
 
   # TODO: scenario 'Creating task without objective', :pending

@@ -8,3 +8,4 @@
   <button control="new-subtask">Добавить подзадачу</button>
   <button control="delete" class="right destructive">Удалить</button>
 </div>
+<span class="empty">Нет подзадач</span>

@@ -19,7 +19,7 @@ class Lt.Models.Task extends Backbone.Model
   onAdd: (model, collection, options = {}) ->
     return unless collection?
     model.subtasksCollection ?=
-      new Lt.Collections.Subtasks collection, model.id
+      new Lt.Collections.Subtasks collection, project: model
 
   onDestroy: (model, collection, options = {}) ->
     @setState 'deleted', options
@@ -60,6 +60,9 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
   url: '/tasks'
 
   sortable: yes
+
+  initialize: ->
+    @rootTasksCollection = new Lt.Collections.RootTasks(this)
 
   addChild: (model, parent) ->
     if parent = @getByCid parent
@@ -115,9 +118,13 @@ class Lt.Collections.ActionableTasks extends Backbone.FilteredCollection
 class Lt.Collections.Subtasks extends Backbone.FilteredCollection
 
   initialize: (models, options) ->
-    @projectId = options.projectId
-
+    @project = options.project
 
   modelFilter: (task) ->
-    task.get('project_id') == @projectId
+    task.has('project_id') and task.get('project_id') == @project.id
+
+class Lt.Collections.RootTasks extends Backbone.FilteredCollection
+
+  modelFilter: (task) ->
+    not task.has('project_id')
 

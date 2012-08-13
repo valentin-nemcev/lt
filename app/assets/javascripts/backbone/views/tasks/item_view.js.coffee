@@ -1,4 +1,4 @@
-Lt.Views.Tasks ||= {}
+Views = Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.ItemView extends Backbone.View
   template: JST['backbone/templates/tasks/item']
@@ -17,10 +17,13 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @model.bind 'change', @change, @
     @model.bind 'changeState', @changeState, @
 
-    @model.bind 'change changeState', @updateIds, @
-
-    @formView = new Lt.Views.Tasks.FormView model: @model
+    @formView = new Views.FormView model: @model
     @formView.on 'close', => @toggleForm(off)
+
+    @subtasksView = new Views.ListView
+      collection: @model.subtasksCollection
+      attributes:
+        records: 'subtasks'
 
   newSubtask: ->
     @model.collection.add project_id: @model.id
@@ -30,7 +33,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   toggleForm: (toggled = not @formToggled) ->
     @formView.$el.toggle(toggled)
-    @$('.fields').toggle(not toggled)
+    @$fields.toggle(not toggled)
     @formToggled = toggled
 
     return this
@@ -44,27 +47,26 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
     return this
 
-  updateIds: =>
-      id = @model.id
-      project_id = @model.get('project_id')
-      @$('.ids').text (project_id and "#{project_id} → " or "") + (id or "new")
-
-
   changeState: ->
     @$el.attr 'record-id': @model.id, 'record-state': @model.getState()
 
   change: ->
-    @$('[field=objective]').text @model.get('objective')
+    @$fields.find('[field=objective]').text @model.get('objective')
     @$el.attr 'task-type': @model.get('type')
+    @subtasksView.$el.toggle @model.get('type') is 'project'
 
   render: ->
     @$el.html @template()
+    @$fields = @$el.children('.fields')
+
+    @formView.render().$el.insertAfter(@$fields)
+    @toggleForm @model.isNew()
+
+    $emptyItem = @$el.children('.empty').detach()
+    @subtasksView.render($emptyItem: $emptyItem).$el.appendTo @$el
+
     @changeState()
     @change()
-    @updateIds()
-
-    @formView.render().$el.insertAfter(@$('.fields'))
-    @toggleForm @model.isNew()
 
     @toggleSelect off
     return this
