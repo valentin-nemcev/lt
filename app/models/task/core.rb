@@ -17,7 +17,7 @@ module Task
     protected :fields
 
     def ==(other)
-      fields.equal? other.fields
+      fields.equal? other.try(:fields)
     end
 
     def initialize(attrs={})

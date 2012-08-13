@@ -1,19 +1,33 @@
 module Task
   class Graph
 
+    class IncompleteGraphError < StandardError
+      def initialize(incomplete)
+        @incomplete = incomplete
+      end
+
+      def message
+        "Incomplete relations: " + @incomplete.map(&:inspect).join(', ')
+      end
+    end
+
 
     def self.new_from_records(records = {})
       allocate.tap{ |o| o.initialize_with_records(records) }
     end
 
-    def initialize(opts = {})
-      @given_tasks = opts.fetch :tasks, []
-      @given_relations = []
+    def initialize_with_records(opts = {})
+      relations = opts.fetch(:relations, [])
+
+      incomplete = relations.select(&:incomplete?)
+      fail IncompleteGraphError, incomplete if incomplete.present?
+
+      @tasks_and_relations = [opts.fetch(:tasks, []), relations]
     end
 
-    def initialize_with_records(opts = {})
-      @tasks_and_relations = [opts.fetch(:tasks, []),
-        opts.fetch(:relations, [])]
+
+    def initialize(opts = {})
+      @given_tasks = opts.fetch :tasks, []
     end
 
     def tasks

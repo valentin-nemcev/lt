@@ -38,8 +38,8 @@ module Task
         ::Task::Relation.new(
           id:         self.id,
           type:       self.type,
-          supertask:  task_map[self.supertask.id],
-          subtask:    task_map[self.subtask.id],
+          supertask:  task_map[self.supertask_id],
+          subtask:    task_map[self.subtask_id],
           added_on:   self.added_on,
           removed_on: self.removed_on,
         )

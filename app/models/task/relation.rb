@@ -41,6 +41,10 @@ module Task
     end
 
 
+    def incomplete?
+      supertask.nil? or subtask.nil?
+    end
+
     def dependency?
       type == :dependency
     end

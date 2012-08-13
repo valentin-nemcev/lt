@@ -9,6 +9,12 @@ module Task
         :class_name => ::Task::Records::TaskObjectiveRevision,
         :dependent => :destroy
 
+      has_many :incoming_relations,
+        class_name: ::Task::Records::TaskRelation, foreign_key: 'subtask_id',
+        :dependent => :destroy
+      has_many :outgoing_relations,
+        class_name: ::Task::Records::TaskRelation, foreign_key: 'supertask_id',
+        :dependent => :destroy
 
       attr_accessible :user, :type, :created_on
 
@@ -19,7 +25,9 @@ module Task
       scope :graph_scope
 
       def self.relations
-        TaskRelation.scoped
+        ids = all.map(&:id)
+        TaskRelation
+          .where('supertask_id IN (:ids) AND subtask_id IN (:ids)', ids: ids)
       end
 
 

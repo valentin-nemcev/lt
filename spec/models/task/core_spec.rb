@@ -66,6 +66,10 @@ describe Task::Core do
         as_of_different_date.should == original
       end
     end
+
+    it 'should not equal to nil' do
+      create_task.should_not eq(nil)
+    end
   end
 
 
