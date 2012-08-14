@@ -3,6 +3,7 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
 @import compass/utilities/general/clearfix
+@import compass/css3/box-sizing
 
 ul.tasks
   li > ul
@@ -12,8 +13,9 @@ ul.tasks
   .sort-placeholder
     outline: 1px dashed gray
   li
-    margin: 0.3em 0
-  [record=task]
+    margin: 0.15em 0
+  .task
+    padding: 0.15em
     cursor: default
     +clearfix
 
@@ -21,16 +23,20 @@ ul.tasks
       text-decoration: line-through
       color: #666
 
+    border: 1px solid white
     &.selected
       border: 1px dashed #999
-    &[task-type=project] > .fields > [field=objective]
-      font-weight: bold
-      color: #484848
+
+    .additional-controls
+      margin-top: 0.15em
+
+  [task-type=project] > .task [field=objective]
+    font-weight: bold
+    color: #484848
 
   [form]
-    margin: 0.8em 0
-
     input[name=objective]
+      +box-sizing(border-box)
       width: 100%
     input[name=deadline]
       width: 10ex

@@ -39,25 +39,29 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     return this
 
   toggleSelect: (toggled = not @selectToggled) ->
-    @$el.toggleClass('selected', toggled)
-    @$('[control=select],[control=deselect]')
+    @$task.toggleClass('selected', toggled)
+    @$task.find('[control=select],[control=deselect]')
       .attr control: if toggled then 'deselect' else 'select'
-    @$('.additional-controls').toggle(toggled)
+    showControls = toggled and @model.getState() isnt 'new'
+    @$task.find('.additional-controls').toggle(showControls)
     @selectToggled = toggled
 
     return this
 
   changeState: ->
     @$el.attr 'record-id': @model.id, 'record-state': @model.getState()
+    @toggleSelect(@model.getState() is 'new')
 
   change: ->
     @$fields.find('[field=objective]').text @model.get('objective')
     @$el.attr 'task-type': @model.get('type')
+    @$task.find('[control=new-subtask]').toggle(@model.get('type') is 'project')
     @subtasksView.$el.toggle @model.get('type') is 'project'
 
   render: ->
     @$el.html @template()
-    @$fields = @$el.children('.fields')
+    @$task = @$el.children('.task')
+    @$fields = @$task.children('.fields')
 
     @formView.render().$el.insertAfter(@$fields)
     @toggleForm @model.isNew()
@@ -65,8 +69,8 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     $emptyItem = @$el.children('.empty').detach()
     @subtasksView.render($emptyItem: $emptyItem).$el.appendTo @$el
 
+    @toggleSelect off
     @changeState()
     @change()
 
-    @toggleSelect off
     return this
