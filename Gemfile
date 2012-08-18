@@ -11,7 +11,7 @@ gem 'unicorn' , '~> 4.3.0'
 
 gem 'jbuilder', '~> 0.4.0'
 
-gem 'jquery-rails',    '~> 2.0.0'
+gem 'jquery-rails',    '~> 2.1.0'
 gem 'rails-backbone',  '~> 0.7.0'
 
 group :assets do
@@ -25,7 +25,7 @@ group :assets do
 end
 
 group :development, :test do
-  gem 'capistrano',        '~> 2.12.0'
+  gem 'capistrano',        '~> 2.13.0'
   gem 'capistrano_colors', '~> 0.5.5'
   gem 'rvm-capistrano',    '~> 1.2.0'
 
