@@ -7,19 +7,20 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   className : 'form'
 
   events:
-    'submit form': -> @save(); false
+    'submit form'            : -> @save(); false
+    'click [control=save]'   : -> @save(); false
+    'click [control=cancel]' : -> @cancel(); false
 
   initialize: ->
-    @model.bind 'change', @change, @
+    @model.bind 'change'     , @change     , @
     @model.bind 'changeState', @changeState, @
 
-  cancel: (ev) ->
-    ev.preventDefault()
+  cancel: ->
     if @model.isNew()
-      @delete(ev)
+      @model.destroy()
     else
-      @triggerDomEv 'closeEditItem'
-      @render()
+      @trigger 'close'
+      @change()
 
     return
 
@@ -31,10 +32,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     @trigger('close')
 
     return this
-
-  focus: (ev) ->
-    @$('[name="objective"]').focus()
-    return
 
   changeState: ->
     isNew = @model.getState() is 'new'

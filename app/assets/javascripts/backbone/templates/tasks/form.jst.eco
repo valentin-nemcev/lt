@@ -12,5 +12,6 @@
   </div>
   <div class='field-group minor'>
     <input type="submit" control="save" value="Сохранить">
+    <input type="submit" control="cancel" value="Отменить">
   </div>
 </form>
