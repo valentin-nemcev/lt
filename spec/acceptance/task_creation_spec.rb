@@ -9,19 +9,22 @@ feature "Task creation", :acceptance do
     tasks.find('[control=new]').click
     task = tasks.find('[record=task][record-state=new]')
     task.find('[form=new-task]').tap do |form|
-      form.find('[input=type][value=action]').set(true)
+      form.find('[input=type]').set_option('action')
+      form.find('[input=state]').tap do |state|
+        state.options.should match_array(%w{considered underway})
+        state.set_option('underway')
+      end
       form.find('[input=objective]').set('Test objective')
       form.find('[control=save]').click
     end
 
     task.should match_selector('[record-state!=new]')
     task.should match_selector('[task-type=action]')
+    task.should match_selector('[task-state=underway]')
     task_id = task['record-id']
     task_id.should_not be_nil
 
-    task.tap do |task|
-      task.find('[field=objective]').should have_content('Test objective')
-    end
+    task.find('[field=objective]').should have_content('Test objective')
 
     reload_page
     tasks.should have_selector("[record=task][record-id='#{task_id}']")
@@ -31,7 +34,10 @@ feature "Task creation", :acceptance do
     tasks.find('[control=new]').click
     task = tasks.find('[record=task][record-state=new]')
     task.find('[form=new-task]').tap do |form|
-      form.find('[input=type][value=project]').set(true)
+      form.find('[input=type]').set_option('project')
+      form.find('[input=state]').tap do |state|
+        state.options.should match_array(%w{considered underway})
+      end
       form.find('[input=objective]').set('Test project objective')
       form.find('[control=save]').click
     end
@@ -46,21 +52,22 @@ feature "Task creation", :acceptance do
 
   scenario 'Creating a project subtask' do
     project_id = create_task type: 'project'
-    tasks.find("[record=task][record-id='#{project_id}']").tap do |project|
-      project.find('[control=select]').click
-      project.find('[control=new-subtask]').click
-      project.find('[records=subtasks]').tap do |subtasks|
-        subtask = subtasks.find('[record=task][record-state=new]')
-        subtask.find('[form=new-task]').tap do |form|
-          form.find('[input=objective]').set('Test subtask objective')
-          form.find('[control=save]').click
-        end
-        subtask.should match_selector('[record-state!=new]')
-        @subtask_id = subtask['record-id']
+    project = tasks.find("[record=task][record-id='#{project_id}']")
+
+    project.find('[control=select]').click
+    project.find('[control=new-subtask]').click
+    project.find('[records=subtasks]').tap do |subtasks|
+      subtask = subtasks.find('[record=task][record-state=new]')
+      subtask.find('[form=new-task]').tap do |form|
+        form.find('[input=objective]').set('Test subtask objective')
+        form.find('[control=save]').click
       end
+      subtask.should match_selector('[record-state!=new]')
+      @subtask_id = subtask['record-id']
     end
+
     reload_page
-    project = find("[record=task][record-id='#{project_id}']")
+    project = tasks.find("[record=task][record-id='#{project_id}']")
     subtasks = project.find('[records=subtasks]')
     subtasks.should have_selector("[record=task][record-id='#{@subtask_id}']")
   end

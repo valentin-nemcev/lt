@@ -10,7 +10,8 @@ module AcceptanceHelpers
   def create_task(fields = {})
     fields = {
       type: 'action',
-      objective: 'Test task'
+      state: 'considered',
+      objective: 'Test task',
     }.merge fields
 
     visit_unless_current tasks_page
@@ -20,7 +21,8 @@ module AcceptanceHelpers
     tasks.find('[control=new]').click
     task = tasks.find('[record=task][record-state=new]')
     task.find('[form=new-task]').tap do |form|
-      form.find("[input=type][value=#{fields[:type]}]").set(true)
+      form.find('[input=type]').set_option fields[:type]
+      form.find('[input=state]').set_option fields[:state]
       form.find('[input=objective]').set(fields[:objective])
       form.find('[control=save]').click
     end

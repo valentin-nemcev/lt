@@ -72,6 +72,7 @@ end
 
 Spork.each_run do
   load 'acceptance/selector_matcher.rb'
+  load 'acceptance/input_options.rb'
   load 'acceptance/helpers.rb'
   Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 end
