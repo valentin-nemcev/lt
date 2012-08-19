@@ -1,17 +1,31 @@
 <form>
-  <div class='field-group minor action-input'>
-    <label>
-      <input name="type" input="type" type="radio" value="action" checked> Действие
-    </label>
-    <label>
-      <input name="type" input="type" type="radio" value="project"> Проект
-    </label>
+  <div class='field-group minor'>
+    <span class="field" input="type">
+      <label>
+        <input name="type" type="radio" value="action" checked>
+        Действие
+      </label>
+      <label>
+        <input name="type" type="radio" value="project">
+        Проект
+      </label>
+    </span>
+    <span class="field" input="state">
+      <label>
+        <input name="state" type="radio" value="considered" checked>
+        Рассматривается
+      </label>
+      <label>
+        <input name="state" type="radio" value="underway">
+        В работе
+      </label>
+    </span>
   </div>
   <div class='field-group'>
     <input name="objective" input="objective" type="text" autocomplete="off">
   </div>
   <div class='field-group minor'>
     <input type="submit" control="save" value="Сохранить">
-    <input type="submit" control="cancel" value="Отменить">
+    <button control="cancel">Отменить</button>
   </div>
 </form>

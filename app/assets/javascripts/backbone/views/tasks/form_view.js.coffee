@@ -36,7 +36,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   changeState: ->
     isNew = @model.getState() is 'new'
     @$('form').attr form: if isNew then 'new-task' else 'update-task'
-    @$('.action-input').toggle(isNew)
+    @$('[input=type]').toggle(isNew)
 
     return this
 
