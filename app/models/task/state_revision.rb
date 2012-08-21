@@ -5,6 +5,17 @@ module Task
   class StateRevision
     include Persistable
 
+    VALID_STATES = {
+        new_task: [:considered, :underway],
+        project:  [:considered, :underway, :canceled],
+        action:   [:considered, :underway, :canceled, :completed],
+      }.freeze
+
+    def self.valid_next_states_for(what)
+      what = what.type if what != :new_task
+      VALID_STATES.fetch(what)
+    end
+
     attr_reader :state, :updated_on
 
     def fields

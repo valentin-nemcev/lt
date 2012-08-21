@@ -34,7 +34,7 @@ describe '/tasks', :type => :api do
 
       it 'should return valid new task states' do
         states = response.body_json.fetch 'valid_new_task_states'
-        states.should_not be_empty
+        states.should match_array(%w{considered underway})
       end
     end
   end
@@ -69,6 +69,10 @@ describe '/tasks', :type => :api do
         its(:state)      { should eq('considered') }
         its(:objective)  { should eq(test_ojective) }
         its(:project_id) { should be_nil }
+
+        its(:valid_next_states)  {
+          should match_array(%w{considered underway completed canceled})
+        }
       end
 
       specify 'stored action should equal returned action' do

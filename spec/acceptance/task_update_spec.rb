@@ -23,7 +23,7 @@ feature 'Task update', :acceptance do
     task.find('[field=objective]').should have_content('Test objective updated')
   end
 
-  scenario 'Updating task state' do
+  scenario 'Updating action state' do
     visit tasks_page
     task_id = create_task :type => 'action', :state => 'underway'
     task = tasks.find("[record=task][record-id='#{task_id}']")
@@ -43,6 +43,21 @@ feature 'Task update', :acceptance do
 
     reload_page
     task.should match_selector('[task-state=considered]')
+  end
 
+  scenario 'Updating project state' do
+    visit tasks_page
+    task_id = create_task :type => 'project', :state => 'underway'
+    task = tasks.find("[record=task][record-id='#{task_id}']")
+
+    task.find("[control=select]").click
+    task.find("[control=update]").click
+    task.find("[form=update-task]").tap do |form|
+      form.find('[input=state]').tap do |state|
+        state.option_set.should eq('underway')
+        available_options = %w{considered underway canceled}
+        state.options.should match_array(available_options)
+      end
+    end
   end
 end

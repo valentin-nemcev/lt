@@ -5,7 +5,7 @@ module Task
 
     module ClassMethods
       def valid_new_task_states
-        ['considered', 'underway']
+        StateRevision.valid_next_states_for :new_task
       end
     end
 
@@ -38,6 +38,10 @@ module Task
       }
       revs.add_revision StateRevision.new(attrs)
       return self
+    end
+
+    def valid_next_states
+      StateRevision.valid_next_states_for self
     end
   end
 end
