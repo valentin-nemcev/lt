@@ -11,7 +11,11 @@ module Task
     protected :fields
 
     def ==(other)
-      fields.equal? other.try(:fields)
+      if other.respond_to? :fields
+        fields.equal? other.fields
+      else
+        other == self
+      end
     end
 
     def initialize(attrs={})
@@ -43,7 +47,7 @@ module Task
 
 
     def inspect
-      "<#{self.class}:#{id || object_id} #{objective} as of #{effective_date}>"
+      "<#{self.class}:#{id || object_id} as of #{effective_date}>"
     end
 
     def as_json(options=nil)
