@@ -43,7 +43,7 @@ module Task
 
 
     def inspect
-      "<#{self.class}:#{self.id.inspect} #{self.objective} as of #{self.effective_date}>"
+      "<#{self.class}:#{id || object_id} #{objective} as of #{effective_date}>"
     end
 
     def as_json(options=nil)

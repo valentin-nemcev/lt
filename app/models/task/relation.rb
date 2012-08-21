@@ -61,7 +61,8 @@ module Task
 
 
     def inspect
-      "<#{self.class}:#{self.id.inspect} #{self.type} of #{self.supertask.inspect} - #{self.subtask.inspect}>"
+      "<#{self.class}:#{id || object_id} #{type}" \
+      " of #{supertask.inspect} - #{subtask.inspect}>"
     end
 
   end
