@@ -38,11 +38,15 @@ module Task
       fields = {
         id: record.id,
         created_on: record.created_on,
-        completed_on: record.completed_on,
         objective: record.body,
+        state: 'underway'
       }
       cls = record.leaf? ? Action : Project
-      cls.new fields
+      cls.new(fields).tap do |task|
+        if record.completed_on && record.leaf?
+          task.update_state 'completed', on: record.completed_on
+        end
+      end
     end
 
   end
