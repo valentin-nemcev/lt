@@ -11,6 +11,7 @@ def create_task(fields = {})
   post '/tasks/', :task => {
     :type => fields.fetch(:type, 'action'),
     :objective => fields.fetch(:objective, 'Test objective'),
+    :state => fields.fetch(:state, 'considered'),
     :project_id => fields[:project_id],
   }, :format => :json
   OpenStruct.new response.body_json.fetch 'task'
@@ -37,7 +38,8 @@ describe '/tasks', :type => :api do
       before(:each) do
         post '/tasks/', :task => {
           :type => 'action',
-          :objective => test_ojective
+          :objective => test_ojective,
+          :state => 'considered',
         }, :format => :json
 
         @returned_action = OpenStruct.new response.body_json.fetch 'task'
@@ -56,6 +58,7 @@ describe '/tasks', :type => :api do
 
         its(:id)         { should_not be_nil }
         its(:type)       { should eq('action') }
+        its(:state)      { should eq('considered') }
         its(:objective)  { should eq(test_ojective) }
         its(:project_id) { should be_nil }
       end
@@ -74,6 +77,7 @@ describe '/tasks', :type => :api do
           :type => 'action',
           :objective => test_ojective,
           :project_id => project.id,
+          :state => 'considered',
         }, :format => :json
 
         @returned_subtask = OpenStruct.new response.body_json.fetch 'task'
@@ -118,6 +122,24 @@ describe '/tasks', :type => :api do
         it 'persists updated task' do
           get task_url, :format => :json
           returned_task.objective.should eq('New objective')
+        end
+      end
+
+      describe 'state update' do
+        before(:each) do
+          task.state = 'underway'
+          put task_url, :task => task.marshal_dump, :format => :json
+        end
+
+        let(:returned_task) { OpenStruct.new response.body_json.fetch 'task' }
+
+        it 'returns updated task' do
+          returned_task.state.should eq('underway')
+        end
+
+        it 'persists updated task' do
+          get task_url, :format => :json
+          returned_task.state.should eq('underway')
         end
       end
     end

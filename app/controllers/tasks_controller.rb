@@ -12,7 +12,8 @@ class TasksController < ApplicationController
   def create
     task_params = params.fetch :task
     @task = Task.new_subtype task_params[:type],
-      objective: task_params[:objective]
+      objective: task_params[:objective],
+      state:     task_params[:state]
 
     task_params[:project_id].try do |project_id|
       project = storage.fetch project_id
@@ -33,6 +34,10 @@ class TasksController < ApplicationController
     params[:task][:objective].try do |objective|
       task.update_objective objective
     end
+    params[:task][:state].try do |state|
+      task.update_state state
+    end
+
 
     storage.store @task
 
