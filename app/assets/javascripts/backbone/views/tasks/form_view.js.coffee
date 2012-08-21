@@ -49,6 +49,9 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     $f("[input=state] [value=#{@model.get('state')}]").prop(checked: true)
     $f('[input=objective]').val(@model.get('objective'))
 
+    $f('[input=state] input').each (i, el)=>
+      $(el).closest('[item]').toggle @model.isValidNextState($(el).val())
+
     return this
 
   render : ->

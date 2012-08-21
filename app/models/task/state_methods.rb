@@ -1,6 +1,14 @@
 module Task
   class NoStateRevisionsError < TaskError; end
   module StateMethods
+    extend ActiveSupport::Concern
+
+    module ClassMethods
+      def valid_new_task_states
+        ['considered', 'underway']
+      end
+    end
+
     def initialize(attrs={})
       super
 

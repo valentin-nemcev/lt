@@ -11,13 +11,21 @@
       </label>
     </span>
     <span class="field" input="state">
-      <label>
+      <label item>
         <input name="state" type="radio" value="considered" checked>
         Рассматривается
       </label>
-      <label>
+      <label item>
         <input name="state" type="radio" value="underway">
         В работе
+      </label>
+      <label item>
+        <input name="state" type="radio" value="completed">
+        Выполнена
+      </label>
+      <label item>
+        <input name="state" type="radio" value="canceled">
+        Отменена
       </label>
     </span>
   </div>

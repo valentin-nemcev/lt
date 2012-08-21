@@ -39,6 +39,9 @@ class Lt.Models.Task extends Backbone.Model
   getParent: ->
     @collection.get @get('parent_id')
 
+  isValidNextState: (state) ->
+    _(@get('valid_next_states')).include(state)
+
   isCompleted: -> !!@get('completed')
 
   isActionable: -> !!@get('actionable')
@@ -63,6 +66,10 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
 
   initialize: ->
     @rootTasksCollection = new Lt.Collections.RootTasks(this)
+
+  parse: (response) ->
+    @model.prototype.defaults['valid_next_states'] = response.valid_new_task_states
+    response.tasks
 
   addChild: (model, parent) ->
     if parent = @getByCid parent

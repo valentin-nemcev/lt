@@ -65,6 +65,11 @@ class TasksController < ApplicationController
   end
   helper_method :task
 
+  def valid_new_task_states
+    Task::Base.valid_new_task_states
+  end
+  helper_method :valid_new_task_states
+
   def storage
     @storage ||= Task::Storage.new user: current_user
   end

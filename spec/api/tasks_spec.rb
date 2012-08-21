@@ -25,10 +25,16 @@ describe '/tasks', :type => :api do
 
   describe 'GET' do
     context 'no tasks' do
+      before(:each) { get '/tasks/', :format => :json }
+
       it 'should return empty list of tasks' do
-        get '/tasks/', :format => :json
-        tasks = response.body_json
+        tasks = response.body_json.fetch 'tasks'
         tasks.should be_empty
+      end
+
+      it 'should return valid new task states' do
+        states = response.body_json.fetch 'valid_new_task_states'
+        states.should_not be_empty
       end
     end
   end
@@ -50,7 +56,7 @@ describe '/tasks', :type => :api do
 
       let(:stored_action) do
         get '/tasks/', :format => :json
-        OpenStruct.new response.body_json.fetch 0
+        OpenStruct.new response.body_json.fetch('tasks').fetch 0
       end
 
       specify { response.should be_successful }
@@ -149,7 +155,7 @@ describe '/tasks', :type => :api do
     describe 'DELETE' do
       let(:task_list) do
         get '/tasks/', :format => :json
-        response.body_json
+        response.body_json.fetch 'tasks'
       end
 
       context 'single task' do
