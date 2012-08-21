@@ -3,7 +3,7 @@ module Task
   class Relation
 
     include ::Graph::Edge
-    include PersistenceMethods
+    include Persistable
 
 
     def fields

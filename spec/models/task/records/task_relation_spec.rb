@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class RelationDouble
-  include Task::PersistenceMethods
+  include Persistable
 
   def fields
     @fields ||= {}

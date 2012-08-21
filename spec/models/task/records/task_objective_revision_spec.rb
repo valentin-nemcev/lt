@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class ObjectiveRevisionDouble
-  include Task::PersistenceMethods
+  include Persistable
 
   def fields
     @fields ||= {}

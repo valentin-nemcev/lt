@@ -1,8 +1,10 @@
-require 'spec_helper'
+require 'lib/spec_helper'
 
-describe Task::PersistenceMethods do
-  class ObjectWithPersistence
-    include Task::PersistenceMethods
+require 'persistable'
+
+describe Persistable do
+  class PersistableObject
+    include Persistable
     def fields
       @fields
     end
@@ -15,13 +17,12 @@ describe Task::PersistenceMethods do
   end
 
 
-  class_with_persistence = ObjectWithPersistence
   let(:test_id)         { 1 }
   let(:another_test_id) { 2 }
 
 
   context 'not persisted' do
-    let(:not_persisted) { class_with_persistence.new }
+    let(:not_persisted) { PersistableObject.new }
     specify { not_persisted.id.should be_nil }
     specify { not_persisted.should_not be_persisted }
 
@@ -37,7 +38,7 @@ describe Task::PersistenceMethods do
 
   context 'persisted' do
     let(:persisted) do
-      class_with_persistence.new id: test_id
+      PersistableObject.new id: test_id
     end
 
     specify { persisted.id.should eq(test_id) }
@@ -46,11 +47,11 @@ describe Task::PersistenceMethods do
     it 'should not allow change of id' do
       expect {
         persisted.id = another_test_id
-      }.to raise_error(Task::PersistenceMethods::AlreadyPersistedError)
+      }.to raise_error(Persistable::AlreadyPersistedError)
 
       expect {
         persisted.id = persisted.id
-      }.to_not raise_error(Task::PersistenceMethods::AlreadyPersistedError)
+      }.to_not raise_error(Persistable::AlreadyPersistedError)
     end
 
     context 'with removed id' do
@@ -63,7 +64,7 @@ describe Task::PersistenceMethods do
 
   context 'persisted clone' do
     it 'should be persisted if original is persisted' do
-      original = class_with_persistence.new
+      original = PersistableObject.new
       clone = original.clone
       original.id = 1
       clone.id.should eq(1)

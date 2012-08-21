@@ -3,7 +3,7 @@ module Task
   class InvalidStateError < InvalidTaskError; end
   #TODO: Remove duplication with ObjectiveRevision
   class StateRevision
-    include PersistenceMethods
+    include Persistable
 
     attr_reader :state, :updated_on
 

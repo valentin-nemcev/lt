@@ -7,7 +7,7 @@ module Task
     # TODO: Different exception classes for different errors
     class TaskDateInvalid < InvalidTaskError; end;
 
-    include PersistenceMethods
+    include Persistable
 
     attr_reader :effective_date
 

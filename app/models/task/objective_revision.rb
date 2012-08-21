@@ -2,7 +2,7 @@ module Task
   class InvalidTaskError < StandardError; end
   class InvalidObjectiveError < InvalidTaskError; end
   class ObjectiveRevision
-    include PersistenceMethods
+    include Persistable
 
     attr_reader :objective, :updated_on
 
