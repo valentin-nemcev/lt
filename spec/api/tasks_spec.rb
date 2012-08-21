@@ -7,6 +7,8 @@ class ActionDispatch::TestResponse
   end
 end
 
+#TODO: Create request-response helpers
+
 def create_task(fields = {})
   post '/tasks/', :task => {
     :type => fields.fetch(:type, 'action'),

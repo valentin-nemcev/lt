@@ -1,6 +1,7 @@
 module Task
   class InvalidTaskError < StandardError; end
   class InvalidStateError < InvalidTaskError; end
+  #TODO: Remove duplication with ObjectiveRevision
   class StateRevision
     include PersistenceMethods
 
@@ -30,6 +31,7 @@ module Task
       fields[:sequence_number] = attrs.fetch :sequence_number
     end
 
+    #TODO: Whitelisting states, validation of state for tasks and projects
     def validate_state(state)
       if state.blank?
         raise InvalidStateError, "State is empty"

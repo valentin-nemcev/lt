@@ -1,5 +1,6 @@
 module Task
   module Records
+    #TODO: Remove duplication with TaskObjectiveRevision
     class TaskStateRevision < ActiveRecord::Base
       belongs_to :task
       attr_accessible :state, :updated_on, :sequence_number
