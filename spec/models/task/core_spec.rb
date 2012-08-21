@@ -1,4 +1,8 @@
-require 'spec_helper'
+require 'lib/spec_helper'
+
+require 'persistable'
+require 'models/task'
+require 'models/task/core'
 
 describe Task::Core do
   def create_task(attrs={})
@@ -25,7 +29,7 @@ describe Task::Core do
     end
 
     context 'seen from past' do
-      subject { create_task.as_of(1.second.ago) }
+      subject { create_task.as_of(1.second.until current_time) }
       it {should be_nil}
     end
 
