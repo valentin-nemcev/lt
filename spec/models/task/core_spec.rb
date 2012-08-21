@@ -71,40 +71,5 @@ describe Task::Core do
       create_task.should_not eq(nil)
     end
   end
-
-
-  context 'with blocking tasks' do
-    let(:no_completed_tasks) do
-      [double('task1', :completed? => false),
-        double('task1', :completed? => false)]
-    end
-
-    let(:some_completed_tasks) do
-      [double('task1', :completed? => true),
-        double('task1', :completed? => false)]
-    end
-
-    let(:all_completed_tasks) do
-      [double('task1', :completed? => true),
-        double('task1', :completed? => true)]
-    end
-
-    let(:blocked_task) do
-      create_task.tap { |t| t.stub subtasks: no_completed_tasks }
-    end
-
-    subject { create_task.tap { |t| t.stub subtasks: no_completed_tasks } }
-    it { should be_blocked }
-
-    context 'with some blocking tasks completed' do
-      subject { create_task.tap { |t| t.stub subtasks: some_completed_tasks } }
-      it { should be_blocked }
-    end
-
-    context 'with all blocking tasks completed' do
-      subject { create_task.tap { |t| t.stub subtasks: all_completed_tasks } }
-      it { should_not be_blocked }
-    end
-  end
 end
 

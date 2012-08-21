@@ -42,11 +42,6 @@ module Task
     end
 
 
-    def blocked?
-      not subtasks.all?(&:completed?)
-    end
-
-
     def inspect
       "<#{self.class}:#{self.id.inspect} #{self.objective} as of #{self.effective_date}>"
     end
