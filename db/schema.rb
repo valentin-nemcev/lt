@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120808163404) do
+ActiveRecord::Schema.define(:version => 20120821022831) do
 
   create_table "legacy_tasks", :force => true do |t|
     t.text     "body",         :null => false
@@ -51,6 +51,13 @@ ActiveRecord::Schema.define(:version => 20120808163404) do
 
   add_index "task_relations", ["subtask_id"], :name => "index_task_relations_on_subtask_id"
   add_index "task_relations", ["supertask_id"], :name => "index_task_relations_on_supertask_id"
+
+  create_table "task_state_revisions", :force => true do |t|
+    t.integer  "task_id"
+    t.string   "state"
+    t.datetime "updated_on"
+    t.integer  "sequence_number", :null => false
+  end
 
   create_table "tasks", :force => true do |t|
     t.integer  "user_id"
