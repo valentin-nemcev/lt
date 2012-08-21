@@ -1,12 +1,6 @@
 module Task
-  class InvalidTaskError < StandardError;   end;
-
+  class IncorrectEffectiveDateError < TaskError; end;
   class Core
-    # TODO: Consitent names for exceptions
-    # TODO: Task ID in exception
-    # TODO: Different exception classes for different errors
-    class TaskDateInvalid < InvalidTaskError; end;
-
     include Persistable
 
     attr_reader :effective_date
@@ -32,15 +26,16 @@ module Task
       fields[:created_on]
     end
 
+
     def as_of(date)
       clone.tap { |t| t.effective_date = date }
-    rescue TaskDateInvalid
+    rescue IncorrectEffectiveDateError
       nil
     end
 
     def effective_date=(date)
       if date < self.created_on
-        raise TaskDateInvalid, "Task didn't exist as of #{date}"
+        raise IncorrectEffectiveDateError, "Task didn't exist as of #{date}"
       end
       @effective_date = date
       return self
