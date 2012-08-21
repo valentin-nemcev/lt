@@ -25,9 +25,12 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     return
 
   save: ->
-    attrs = {}
-    for {name: name, value: value} in @$('form').serializeArray()
-      attrs[name] = value
+    $f = _.bind($.fn.find, @$('form'))
+    attrs =
+      type:      $f('[input=type] :checked').val(),
+      state:     $f('[input=state] :checked').val(),
+      objective: $f('[input=objective]').val(),
+
     @model.save(attrs)
     @trigger('close')
 
@@ -41,10 +44,10 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     return this
 
   change: ->
-    for input in @$(':input')
-      $input = $(input)
-      name = $input.attr('name')
-      $input.val @model.get(name) if @model.has(name)
+    $f = _.bind($.fn.find, @$('form'))
+    $f("[input=type]  [value=#{@model.get('type')}]").prop(checked: true)
+    $f("[input=state] [value=#{@model.get('state')}]").prop(checked: true)
+    $f('[input=objective]').val(@model.get('objective'))
 
     return this
 

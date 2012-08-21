@@ -54,7 +54,10 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   change: ->
     @$fields.find('[field=objective]').text @model.get('objective')
-    @$el.attr 'task-type': @model.get('type')
+    @$el.attr
+      'task-type':  @model.get('type')
+      'task-state': @model.get('state')
+
     @$task.find('[control=new-subtask]').toggle(@model.get('type') is 'project')
     @subtasksView.$el.toggle @model.get('type') is 'project'
 

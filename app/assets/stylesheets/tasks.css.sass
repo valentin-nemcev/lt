@@ -19,10 +19,6 @@ ul.tasks
     cursor: default
     +clearfix
 
-    &.completed
-      text-decoration: line-through
-      color: #666
-
     border: 1px solid white
     &.selected
       border: 1px dashed #999
@@ -33,6 +29,11 @@ ul.tasks
   [task-type=project] > .task [field=objective]
     font-weight: bold
     color: #484848
+
+  [task-state=completed], [task-state=canceled] 
+    & > .task [field=objective]
+      text-decoration: line-through
+      color: #666
 
   [form]
     input[name=objective]
