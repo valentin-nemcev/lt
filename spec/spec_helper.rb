@@ -12,8 +12,10 @@ Spork.prefork do
   require 'capybara/rails'
   require 'capybara/rspec'
 
+  require 'config.rb'
   require 'acceptance/helpers.rb'
 
+  # TODO: Create acceptance/config.rb
   Capybara.javascript_driver = :selenium
   Capybara.server_port = 9000
   Capybara.app_host = 'http://lt.dev.lan:9000'
@@ -26,6 +28,7 @@ Spork.prefork do
   Capybara.default_driver = :selenium
   Capybara.ignore_hidden_elements = true
 
+
   RSpec.configure do |config|
     # If you're not using ActiveRecord, or you'd prefer not to run each of your
     # examples within a transaction, remove the following line or assign false
@@ -36,8 +39,6 @@ Spork.prefork do
     # automatically. This will be the default behavior in future versions of
     # rspec-rails.
     config.infer_base_class_for_anonymous_controllers = false
-
-    config.treat_symbols_as_metadata_keys_with_true_values = true
 
     config.include RSpec::Rails::RequestExampleGroup, :type => :api
     config.include AcceptanceHelpers, :acceptance
