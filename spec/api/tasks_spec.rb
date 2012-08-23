@@ -1,206 +1,148 @@
 require 'spec_helper'
 
-class ActionDispatch::TestResponse
-  def body_json
-    body.present? or fail 'response body is empty'
-    JSON.parse body
+class JSONStruct < OpenStruct
+  def as_json
+    marshal_dump
   end
 end
 
-#TODO: Create request-response helpers
+class ActionDispatch::TestResponse
+  def json_body(response_field = nil)
+    body.present? or fail 'response body is empty'
+    resp = JSON.parse body
+    resp = resp.fetch(response_field) if response_field
+    JSONStruct.new resp
+  end
+end
+
+def request(method, uri, data = {})
+  unless method.in? [:get, :post, :put, :delete]
+    raise ArgumentError, "Invalid method #{method}"
+  end
+  data = data.as_json
+  params = data.merge :format => :json
+  public_send method, uri, params
+  response
+end
 
 def create_task(fields = {})
-  post '/tasks/', :task => {
-    :type => fields.fetch(:type, 'action'),
-    :objective => fields.fetch(:objective, 'Test objective'),
-    :state => fields.fetch(:state, 'considered'),
-    :project_id => fields[:project_id],
-  }, :format => :json
-  OpenStruct.new response.body_json.fetch 'task'
+  fields.reverse_merge!({
+    type:      'action',
+    objective: 'Test objective',
+    state:     'considered',
+  })
+  request(:post, '/tasks/', :task => fields).json_body('task')
 end
 
-describe '/tasks', :type => :api do
-  before(:all) { User.delete_all; User.create! }
-  let(:user_fixture) { User.first! }
+# TODO: Use url helpers
+describe 'tasks', :type => :api do
+  attr_accessor :user_fixture
+  before(:all) do
+    User.delete_all;
+    user_fixture = User.create!
+  end
 
-  describe 'GET' do
+  describe 'get list of tasks' do
+    subject(:list) { request(:get, '/tasks/').json_body }
+
     context 'no tasks' do
-      before(:each) { get '/tasks/', :format => :json }
-
-      it 'should return empty list of tasks' do
-        tasks = response.body_json.fetch 'tasks'
-        tasks.should be_empty
-      end
-
-      it 'should return valid new task states' do
-        states = response.body_json.fetch 'valid_new_task_states'
-        states.should match_array(%w{considered underway})
-      end
+      its(:tasks) { should be_empty }
     end
+
+    its(:valid_new_task_states) { should_not be_empty }
   end
 
-  describe 'POST' do
+  describe 'post a task' do
     let(:test_ojective) { 'Test objective!' }
+    let(:task_fields) {{
+      type:      'action',
+      objective: test_ojective,
+      state:     'considered',
+    }}
 
-    describe 'single action creation' do
-      before(:each) do
-        post '/tasks/', :task => {
-          :type => 'action',
-          :objective => test_ojective,
-          :state => 'considered',
-        }, :format => :json
-
-        @returned_action = OpenStruct.new response.body_json.fetch 'task'
-      end
-      attr_accessor :returned_action
-
-      let(:stored_action) do
-        get '/tasks/', :format => :json
-        OpenStruct.new response.body_json.fetch('tasks').fetch 0
-      end
-
-      specify { response.should be_successful }
-
-      describe 'returned action' do
-        subject { returned_action }
-
-        its(:id)         { should_not be_nil }
-        its(:type)       { should eq('action') }
-        its(:state)      { should eq('considered') }
-        its(:objective)  { should eq(test_ojective) }
-        its(:project_id) { should be_nil }
-
-        its(:valid_next_states)  {
-          should match_array(%w{considered underway completed canceled})
-        }
-      end
-
-      specify 'stored action should equal returned action' do
-        stored_action.should eq(returned_action)
-      end
+    let(:post_response) { request :post, '/tasks/', :task => task_fields }
+    let(:returned_action) { post_response.json_body 'task' }
+    let(:persisted_action) do
+      request(:get, "/tasks/#{returned_action.id}").json_body 'task'
     end
 
-    describe 'subtask creation' do
+    specify { post_response.should be_successful }
+    specify { persisted_action.should eq(returned_action) }
+
+    subject { returned_action }
+
+    its(:id)         { should_not be_nil }
+    its(:type)       { should eq('action') }
+    its(:state)      { should eq('considered') }
+    its(:objective)  { should eq(test_ojective) }
+
+    its(:valid_next_states) { should_not be_empty }
+
+    context 'with no other tasks' do
+      before(:each) { task_fields.delete :project_id }
+
+      its(:project_id) { should be_nil }
+    end
+
+    context 'with a parent project' do
       let(:project) { create_task type: 'project' }
-      let(:project_url) { "/tasks/#{project.id}" }
+      before(:each) { task_fields[:project_id] = project.id }
 
-      before(:each) do
-        post '/tasks/', :task => {
-          :type => 'action',
-          :objective => test_ojective,
-          :project_id => project.id,
-          :state => 'considered',
-        }, :format => :json
-
-        @returned_subtask = OpenStruct.new response.body_json.fetch 'task'
-      end
-      attr_accessor :returned_subtask
-
-      let(:returned_task) { OpenStruct.new response.body_json.fetch 'task' }
-
-      describe 'returned subtask' do
-        subject { returned_subtask }
-        its(:project_id) { should eq(project.id) }
-      end
-
-      describe 'persisted subtask' do
-        subject do
-          get "/tasks/#{returned_subtask.id}", :format => :json
-          OpenStruct.new response.body_json.fetch 'task'
-        end
-
-        its(:project_id) { should eq(project.id) }
-      end
+      its(:project_id) { should eq(project.id) }
     end
   end
 
-  describe '/:task_id' do
+  describe 'put a task' do
     let(:task) { create_task }
     let(:task_url) { "/tasks/#{task.id}" }
+    let(:returned_task) do
+      request(:put, task_url, :task => task).json_body 'task'
+    end
+    let(:persisted_task) { request(:get, task_url).json_body 'task' }
 
-    describe 'PUT' do
-      describe 'objective update' do
-        before(:each) do
-          task.objective = 'New objective'
-          put task_url, :task => task.marshal_dump, :format => :json
-        end
+    specify { persisted_task.should eq(returned_task) }
 
-        let(:returned_task) { OpenStruct.new response.body_json.fetch 'task' }
-
-        it 'returns updated task' do
-          returned_task.objective.should eq('New objective')
-        end
-
-        it 'persists updated task' do
-          get task_url, :format => :json
-          returned_task.objective.should eq('New objective')
-        end
+    describe 'with updated fields' do
+      before(:each) do
+        task.objective = 'New objective'
+        task.state = 'underway'
       end
+      subject { returned_task }
 
-      describe 'state update' do
-        before(:each) do
-          task.state = 'underway'
-          put task_url, :task => task.marshal_dump, :format => :json
-        end
+      its(:objective) { should eq('New objective') }
+      its(:state)     { should eq('underway') }
+    end
+  end
 
-        let(:returned_task) { OpenStruct.new response.body_json.fetch 'task' }
+  describe 'delete a task' do
+    let(:task) { create_task type: 'action' }
+    let(:task_url) { "/tasks/#{task.id}" }
+    let(:task_list) { request(:get, '/tasks/').json_body.tasks }
 
-        it 'returns updated task' do
-          returned_task.state.should eq('underway')
-        end
+    let!(:delete_response) { request :delete, task_url }
+    let(:deleted_task_response) { request :get, task_url }
 
-        it 'persists updated task' do
-          get task_url, :format => :json
-          returned_task.state.should eq('underway')
-        end
-      end
+    context 'without subtasks' do
+      specify { delete_response.should be_successful }
+      specify { task_list.should be_empty }
+      specify { deleted_task_response.should be_not_found }
     end
 
-    describe 'DELETE' do
-      let(:task_list) do
-        get '/tasks/', :format => :json
-        response.body_json.fetch 'tasks'
+    context 'with subtasks' do
+      let(:task) do
+        create_task(type: 'project').tap do |task|
+          self.action = create_task type: 'action', project_id: task.id
+        end
+      end
+      attr_accessor :action
+
+      let(:action_response) do
+        request(:get, "/tasks/#{action.id}").json_body 'task'
       end
 
-      context 'single task' do
-        let(:task) { create_task }
-        let(:task_url) { "/tasks/#{task.id}" }
-
-        before(:each) do
-          delete task_url
-          @delete_response = response
-        end
-        attr_accessor :delete_response
-
-        let(:deleted_task_response) do
-          get task_url, :format => :json
-          response
-        end
-
-        specify { delete_response.should be_successful }
-        specify { task_list.should be_empty }
-        specify { deleted_task_response.should be_not_found }
-      end
-
-      context 'task with relations' do
-        let(:task) { create_task type: 'project' }
-        let(:action) { create_task type: 'action', project_id: task.id }
-        before(:each) do
-          task; action
-          delete task_url
-          @delete_response = response
-        end
-        attr_accessor :delete_response
-
-        let(:action_response) do
-          get "/tasks/#{action.id}", :format => :json
-          OpenStruct.new response.body_json.fetch 'task'
-        end
-
-        specify { delete_response.should be_successful }
-        specify { task_list.should have(1).task }
-        specify { action_response.project_id.should be_nil }
-      end
+      specify { delete_response.should be_successful }
+      specify { task_list.should have(1).task }
+      specify { action_response.project_id.should be_nil }
     end
   end
 end
