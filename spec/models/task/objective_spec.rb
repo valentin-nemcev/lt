@@ -18,7 +18,7 @@ describe Task::ObjectiveRevision do
       expect do
         described_class.new objective: empty_objective,
           updated_on: test_date, sequence_number: test_sn
-      end.to raise_error(Task::InvalidObjectiveError)
+      end.to raise_error(Task::EmptyObjectiveError)
     end
   end
 end

@@ -90,6 +90,14 @@ describe 'tasks', :type => :api do
 
       its(:project_id) { should eq(project.id) }
     end
+
+    context 'with invalid field' do
+      before(:each) { task_fields[:objective] = '' }
+      let(:task_errors) { post_response.json_body.task_errors }
+
+      specify { post_response.should be_bad_request}
+      specify { task_errors.should include('empty_objective') }
+    end
   end
 
   describe 'put a task' do

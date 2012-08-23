@@ -22,6 +22,8 @@ class TasksController < ApplicationController
     storage.store @task
 
     render 'task', :status => :created
+  rescue Task::TaskError => e
+    render :status => :bad_request, :json => {task_errors: [e]}
   end
 
   def show
@@ -38,10 +40,11 @@ class TasksController < ApplicationController
       task.update_state state
     end
 
-
     storage.store @task
 
     render 'task'
+  rescue Task::TaskError => e
+    render :status => :bad_request, :json => {task_errors: [e]}
   end
 
   def destroy

@@ -1,6 +1,10 @@
 module Task
-  class InvalidTaskError < StandardError; end
-  class InvalidObjectiveError < InvalidTaskError; end
+  class EmptyObjectiveError < TaskError;
+    def message
+      'Objective is empty'
+    end
+  end
+
   class ObjectiveRevision
     include Persistable
 
@@ -33,7 +37,7 @@ module Task
 
     def validate_objective(objective)
       if objective.blank?
-        raise InvalidObjectiveError, "Objective is empty"
+        raise EmptyObjectiveError
       else
         return objective
       end
