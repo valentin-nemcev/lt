@@ -2,9 +2,10 @@ module Revisions
   class Sequence
     def initialize(opts = {})
       @created_on = opts.fetch :created_on
+      @revision_class = opts[:revision_class]
       set_revisions opts[:revisions] || []
     end
-    attr_reader :created_on
+    attr_reader :created_on, :revision_class
 
     include Enumerable
     def each(*args, &block)
@@ -16,17 +17,8 @@ module Revisions
     end
 
 
-    def last_on(effective_date)
-      @revisions.select{ |r| r.updated_on <= effective_date }.last
-    end
-
-    def last_sequence_number
-      @revisions.last.try(:sequence_number) || 0
-    end
-
-    def clear_revisions
-      @revisions = []
-      return self
+    def last
+      @revisions.last
     end
 
     def set_revisions(revisions)
@@ -35,16 +27,34 @@ module Revisions
       return self
     end
 
+    def new_revision(revision_attrs)
+      attrs = revision_attrs.merge sequence_number: last_sequence_number + 1
+      add_revision revision_class.new(attrs)
+    end
+
+    protected
+
+    def last_sequence_number
+      @revisions.last.try(:sequence_number) || 0
+    end
+
+    def last_updated_on
+      @revisions.last.try(:updated_on) || created_on
+    end
+
     def add_revision(revision)
-      last_updated_on = @revisions.last.try(:updated_on) || created_on
-      last_sn = @revisions.last.try(:sequence_number) || 0
-      if last_sn >= revision.sequence_number
-        raise SequenceNumberError.new last_sn, revision.sequence_number
-      end
-      if last_updated_on > revision.updated_on
+       last_sequence_number < revision.sequence_number or
+         raise SequenceNumberError.new last_sequence_number,
+                                          revision.sequence_number
+      last_updated_on <= revision.updated_on or
         raise DateSequenceError.new last_updated_on, revision.updated_on
-      end
+
       @revisions << revision
+      return revision
+    end
+
+    def clear_revisions
+      @revisions = []
       return self
     end
   end

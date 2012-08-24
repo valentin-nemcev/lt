@@ -53,9 +53,9 @@ module Task
         self.type = task.type
         self.created_on = task.created_on
         self.state_revisions =
-          TaskStateRevision.save_revisions self, task.state_revisions
+          TaskStateRevision.save_revisions self, task.attribute_revisions[:state]
         self.objective_revisions =
-          TaskObjectiveRevision.save_revisions self, task.objective_revisions
+          TaskObjectiveRevision.save_revisions self, task.attribute_revisions[:objective]
         self
       end
 

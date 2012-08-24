@@ -7,7 +7,7 @@ class TaskDouble
   end
 end
 
-describe Task::Records::Task do
+describe Task::Records::Task, pending: 'simplify and factor out mapping' do
 
   let(:user_fixture) { User.create! login: 'test_user' }
 
@@ -56,7 +56,7 @@ describe Task::Records::Task do
     let(:task_o_rev_records) { [revision_records.new] }
 
     before(:each) do
-      task.stub objective_revisions: task_objective_revisions
+      task.stub(:attribute_revisions, {})
       revision_records.should_receive(:save_revisions) do |rec, revs|
         @received_task_record = rec
         revs.should eq(task_objective_revisions)

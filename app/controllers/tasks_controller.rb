@@ -11,9 +11,7 @@ class TasksController < ApplicationController
 
   def create
     task_params = params.fetch :task
-    @task = Task.new_subtype task_params[:type],
-      objective: task_params[:objective],
-      state:     task_params[:state]
+    @task = Task.new_subtype task_params[:type], updated_attrs(task_params)
 
     task_params[:project_id].try do |project_id|
       project = storage.fetch project_id
@@ -23,6 +21,7 @@ class TasksController < ApplicationController
 
     render 'task', :status => :created
   rescue Task::TaskError => e
+    logger.error e
     render :status => :bad_request, :json => {task_errors: [e]}
   end
 
@@ -33,12 +32,7 @@ class TasksController < ApplicationController
 
   def update
     @task = storage.fetch params[:id]
-    params[:task][:objective].try do |objective|
-      task.update_objective objective
-    end
-    params[:task][:state].try do |state|
-      task.update_state state
-    end
+    task.update_attributes updated_attrs(params[:task])
 
     storage.store @task
 
@@ -67,6 +61,10 @@ class TasksController < ApplicationController
     @task
   end
   helper_method :task
+
+  def updated_attrs(params)
+    params.symbolize_keys.slice(*Task::Base.revisable_attributes)
+  end
 
   def valid_new_task_states
     Task::Base.valid_new_task_states

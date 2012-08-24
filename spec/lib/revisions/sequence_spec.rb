@@ -5,129 +5,140 @@ require 'revisions/sequence'
 include Revisions
 
 describe Sequence do
+  before(:each) { stub_const('RevisionClass', stub()) }
+
   let(:creation_date) { 4.hours.ago }
-  let(:update_date) { 3.hours.ago }
+  let(:update_date)   { 3.hours.ago }
+
   let(:first_revision) do
     stub('first revision',  updated_on: creation_date, sequence_number: 1)
   end
   let(:second_revision) do
     stub('second revision', updated_on: update_date,   sequence_number: 2)
   end
-  let(:second_revision2) do
-    stub('second revision', updated_on: update_date,   sequence_number: 3)
+
+  let(:initial_arguments) do
+    { created_on: creation_date, revision_class: RevisionClass }
   end
 
-  let(:revision_before_creation) do
-    stub('revision_before_creation',
-         updated_on: 1.hour.until(creation_date),
-         sequence_number: 1,
-      )
+
+  subject(:sequence) { Sequence.new initial_arguments }
+
+  context 'no revisions' do
+    it { should be_empty }
+    its(:last) { should be_nil }
   end
-  let(:revisions_with_incorrect_dates) { [
-      stub('first revision',  updated_on: update_date,   sequence_number: 1),
-      stub('second revision', updated_on: creation_date, sequence_number: 2),
-  ] }
 
-  let(:revisions) { [first_revision, second_revision] }
+  context 'with revisions' do
+    before(:each) { sequence.set_revisions [first_revision, second_revision] }
 
-  subject(:sequence) do
-    Sequence.new(created_on: creation_date)
+    it { should_not be_empty }
+    its(:last) { should eq(second_revision) }
+  end
+
+  context 'with revisions passed on creation' do
+    before(:each) do
+      initial_arguments.merge! revisions: [first_revision, second_revision]
+    end
+
+    it { should_not be_empty }
   end
 
   describe '#set_revisions' do
-    it 'should set revision history' do
-      sequence.add_revision second_revision2
-      sequence.set_revisions revisions
-      sequence.to_a.should eq(revisions)
-    end
-
-    it 'should set revisions in correct order' do
-      sequence.set_revisions revisions.reverse
-      sequence.to_a.should eq(revisions)
-    end
-
-    it 'should not allow revision list with incorrect dates' do
-      expect do
-        sequence.set_revisions revisions_with_incorrect_dates
-      end.to raise_error DateSequenceError
-    end
-  end
-
-  describe '#add_revision' do
-    it 'should add to revision history' do
-      sequence.add_revision first_revision
-      sequence.add_revision second_revision
-      sequence.to_a.should eq(revisions)
-    end
-
-    it 'should not allow adding revisions in incorrect order' do
-      expect do
-        sequence.add_revision second_revision
-        sequence.add_revision first_revision
-      end.to raise_error SequenceNumberError
-    end
-
-    it 'should not allow revisions before sequence was created' do
-      expect do
-        sequence.add_revision revision_before_creation
-      end.to raise_error DateSequenceError
-    end
-
-    it 'should not allow adding revisions with incorrect date order' do
-      expect do
-        sequence.add_revision revisions_with_incorrect_dates.first
-        sequence.add_revision revisions_with_incorrect_dates.second
-      end.to raise_error DateSequenceError
-    end
-  end
-
-  describe '#last_sequence_number' do
-    context 'no revisions' do
-      its(:last_sequence_number) { should eq(0) }
-    end
-
-    context 'with revisions' do
-      before(:each) do
-        sequence.set_revisions revisions
+    context 'with no revisions' do
+      it 'should set revision sequence' do
+        sequence.set_revisions [first_revision, second_revision]
+        sequence.to_a.should eq([first_revision, second_revision])
       end
 
-      its(:last_sequence_number) { should eq(2) }
-    end
-  end
-
-  describe '#empty?' do
-    context 'no revisions' do
-      it { should be_empty }
-    end
-
-    context 'with revisions' do
-      before(:each) do
-        sequence.set_revisions revisions
+      it 'should set revisions in correct order' do
+        sequence.set_revisions [second_revision, first_revision]
+        sequence.to_a.should eq([first_revision, second_revision])
       end
 
-      it { should_not be_empty }
-    end
-  end
+      let(:revisions_with_incorrect_dates) { [
+        stub('first revision',  updated_on: update_date,   sequence_number: 1),
+        stub('second revision', updated_on: creation_date, sequence_number: 2),
+      ] }
+      it 'should not allow revision list with incorrect dates' do
+        expect do
+          sequence.set_revisions revisions_with_incorrect_dates
+        end.to raise_error DateSequenceError
+      end
 
-  describe '#last_on' do
-    context 'no revisions' do
-      it 'should return nil regardless of date' do
-        sequence.last_on(creation_date).should be_nil
-        sequence.last_on(update_date).should be_nil
+      let(:revisions_with_incorrect_sns) { [
+        stub('first revision',  updated_on: creation_date, sequence_number: 1),
+        stub('second revision', updated_on: update_date,   sequence_number: 1),
+      ] }
+      it 'should not allow revision list with incorrect sequence numbers' do
+        expect do
+          sequence.set_revisions revisions_with_incorrect_sns
+        end.to raise_error SequenceNumberError
       end
     end
 
     context 'with revisions' do
       before(:each) do
-        sequence.set_revisions revisions
+        sequence.set_revisions [first_revision, second_revision]
       end
 
-      specify { sequence.last_on(1.hour.until(creation_date))
-                                               .should be_nil              }
-      specify { sequence.last_on(creation_date).should eq(first_revision)  }
-      specify { sequence.last_on(update_date  ).should eq(second_revision) }
-      specify { sequence.last_on(1.hour.since(update_date))
-                                               .should eq(second_revision) }
+      it 'should replace existing revisions' do
+        sequence.set_revisions [first_revision]
+        sequence.to_a.should eq([first_revision])
+      end
+    end
+  end
+
+  describe '#new_revision' do
+    let(:revision_attrs) { {attr: :value, updated_on: creation_date} }
+    let(:new_sn) { 1 }
+    let(:new_revision) { stub('new revision', revision_attrs) }
+
+    before(:each) do
+      revision_attrs.update sequence_number: new_sn
+      RevisionClass.should_receive(:new)
+        .with(revision_attrs)
+        .and_return(new_revision)
+    end
+
+    context 'with no revisions' do
+      it 'should create new revision and add it to sequence' do
+        sequence.new_revision revision_attrs
+        sequence.to_a.should eq([new_revision])
+      end
+
+      it 'should not allow revisions before sequence was created' do
+        new_revision.stub updated_on: 1.second.until(creation_date)
+        expect do
+          sequence.new_revision revision_attrs
+        end.to raise_error DateSequenceError
+      end
+    end
+
+    context 'with revisions' do
+      before(:each) do
+        sequence.set_revisions [first_revision, second_revision]
+      end
+      let(:new_sn) { 3 }
+
+      it 'should create new revision and add it to sequence' do
+        new_revision.stub updated_on: 1.second.since(update_date)
+        sequence.new_revision revision_attrs
+        sequence.to_a.should eq([first_revision, second_revision, new_revision])
+      end
+
+      it 'should not allow adding revisions with incorrect date order' do
+        new_revision.stub updated_on: 1.second.until(update_date)
+        expect do
+          sequence.new_revision revision_attrs
+        end.to raise_error DateSequenceError
+      end
+
+      it 'should preserve order of revisions with same date' do
+        new_revision.stub updated_on: update_date
+        sequence.new_revision revision_attrs
+        sequence.to_a.should eq([first_revision, second_revision, new_revision])
+      end
     end
   end
 end
