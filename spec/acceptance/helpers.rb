@@ -54,3 +54,11 @@ module AcceptanceHelpers
   end
 
 end
+
+RSpec.configure do |config|
+  config.include AcceptanceHelpers, :acceptance
+
+  config.after(:each, :acceptance, :pause_if_failed) do
+    pause_if_failed example
+  end
+end

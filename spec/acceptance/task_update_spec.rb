@@ -60,4 +60,7 @@ feature 'Task update', :acceptance do
       end
     end
   end
+
+  scenario 'Completing a project' do
+  end
 end
