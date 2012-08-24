@@ -11,18 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120821022831) do
-
-  create_table "legacy_tasks", :force => true do |t|
-    t.text     "body",         :null => false
-    t.integer  "parent_id"
-    t.integer  "lft",          :null => false
-    t.integer  "rgt",          :null => false
-    t.integer  "depth"
-    t.datetime "created_on",   :null => false
-    t.datetime "completed_on"
-    t.integer  "user_id"
-  end
+ActiveRecord::Schema.define(:version => 20120824200933) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
