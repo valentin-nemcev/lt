@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'bundler', '~> 1.1.3'
+gem 'bundler', '~> 1.2.0'
 
 gem 'rails', '~> 3.2.2'
 
@@ -31,6 +31,7 @@ group :development, :test do
 
   gem 'rspec-rails', '~> 2.11.0'
   gem 'capybara',    '~> 1.1.2'
+  gem 'poltergeist', '~> 0.7.0'
   gem 'database_cleaner', '~> 0.8.0'
   gem 'spork-rails', '~> 3.2.0'
 end
