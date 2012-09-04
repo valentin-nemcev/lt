@@ -13,6 +13,12 @@ Capybara.register_driver :selenium do |app|
   }
   Capybara::Selenium::Driver.new app, opts
 end
+Capybara.register_driver :poltergeist do |app|
+  opts = {
+    :inspector => 'echo'
+  }
+  Capybara::Poltergeist::Driver.new(app, opts)
+end
 # Capybara.default_driver = :poltergeist
 Capybara.default_driver = :selenium
 

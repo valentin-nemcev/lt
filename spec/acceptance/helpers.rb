@@ -43,6 +43,8 @@ module AcceptanceHelpers
   end
 
   def pause
+    # page.driver.render('public/page.png')
+    # page.driver.debug
     print "Tests paused, press something to continue"
     STDIN.getc
   end
