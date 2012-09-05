@@ -32,11 +32,11 @@ class TasksController < ApplicationController
 
   def update
     @task = storage.fetch params[:id]
-    task.update_attributes updated_attrs(params[:task])
+    task_updates = task.update_attributes updated_attrs(params[:task])
 
     storage.store @task
 
-    render 'task'
+    render :json => {task_updates: task_updates}
   rescue Task::TaskError => e
     render :status => :bad_request, :json => {task_errors: [e]}
   end

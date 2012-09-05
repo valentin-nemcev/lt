@@ -100,25 +100,44 @@ describe 'tasks', :type => :api do
     end
   end
 
-  describe 'put a task' do
+  describe 'update' do
     let(:task) { create_task }
     let(:task_url) { "/tasks/#{task.id}" }
-    let(:returned_task) do
-      request(:put, task_url, :task => task).json_body 'task'
+    let(:update_response) do
+      request(:put, task_url, :task => task).json_body
     end
-    let(:persisted_task) { request(:get, task_url).json_body 'task' }
 
     specify { persisted_task.should eq(returned_task) }
 
-    describe 'with updated fields' do
+    describe 'task updates' do
       before(:each) do
         task.objective = 'New objective'
         task.state = 'underway'
       end
-      subject { returned_task }
 
-      its(:objective) { should eq('New objective') }
-      its(:state)     { should eq('underway') }
+      specify { task_updates.should have(2).updates }
+
+      shared_examples :attribute_update do
+        its(:task_id) { should eq(task.id) }
+      end
+
+      describe do
+        subject(:objective_update) { task_updates['objective'] }
+        its(:objective) { should eq('New objective') }
+        include_examples :attribute_update
+      end
+
+      describe do
+        subject(:state_update) { task_updates['state'] }
+        its(:state) { should eq('underway') }
+        include_examples :attribute_update
+      end
+
+      let(:task_updates) do
+        update_response.task_updates
+          .map{ |u| JSONStruct.new u }
+          .index_by(&:attribute)
+      end
     end
   end
 
