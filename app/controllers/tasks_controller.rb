@@ -19,7 +19,7 @@ class TasksController < ApplicationController
     end
     storage.store @task
 
-    render 'task', :status => :created
+    render :status => :created, :json => {task_creations: [], task_updates: []}
   rescue Task::TaskError => e
     logger.error e
     render :status => :bad_request, :json => {task_errors: [e]}

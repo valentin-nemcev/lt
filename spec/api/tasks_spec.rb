@@ -52,59 +52,85 @@ describe 'tasks', :type => :api do
     its(:valid_new_task_states) { should_not be_empty }
   end
 
-  describe 'post a task' do
-    let(:test_ojective) { 'Test objective!' }
+
+  describe 'create' do
+    let(:test_objective) { 'Test objective!' }
     let(:task_fields) {{
       type:      'action',
-      objective: test_ojective,
+      objective: test_objective,
       state:     'considered',
     }}
 
-    let(:post_response) { request :post, '/tasks/', :task => task_fields }
-    let(:returned_action) { post_response.json_body 'task' }
-    let(:persisted_action) do
-      request(:get, "/tasks/#{returned_action.id}").json_body 'task'
+    let(:task_creation) do
+      JSONStruct.new create_response.json_body.task_creations.first
     end
 
-    specify { post_response.should be_successful }
-    specify { persisted_action.should eq(returned_action) }
-
-    subject { returned_action }
-
-    its(:id)         { should_not be_nil }
-    its(:type)       { should eq('action') }
-    its(:state)      { should eq('considered') }
-    its(:objective)  { should eq(test_ojective) }
-
-    its(:valid_next_states) { should_not be_empty }
-
-    context 'with no other tasks' do
-      before(:each) { task_fields.delete :project_id }
-
-      its(:project_id) { should be_nil }
+    describe do
+      subject { task_creation }
+      its(:id)   { should_not be_nil }
+      its(:type) { should eq('action') }
     end
 
-    context 'with a parent project' do
-      let(:project) { create_task type: 'project' }
-      before(:each) { task_fields[:project_id] = project.id }
+    describe do
+      subject(:task_updates) do
+        create_response.json_body.task_updates
+          .map{ |u| JSONStruct.new u }
+          .index_by(&:attribute_name)
+      end
 
-      its(:project_id) { should eq(project.id) }
+      attribute_update_specs = Proc.new do
+        its(:task_id) { should eq(task_creation.id) }
+      end
+
+      describe do
+        subject(:objective_update) { task_updates['objective'] }
+        its(:updated_value) { should eq(test_objective) }
+        instance_eval &attribute_update_specs
+      end
+
+      describe do
+        subject(:state_update) { task_updates['state'] }
+        its(:updated_value) { should eq('considered') }
+        instance_eval &attribute_update_specs
+      end
     end
 
-    context 'with invalid field' do
-      before(:each) { task_fields[:objective] = '' }
-      let(:task_errors) { post_response.json_body.task_errors }
+    let(:create_response) { request :post, '/tasks/', :task => task_fields }
+    specify { create_response.should be_successful }
 
-      specify { post_response.should be_bad_request}
-      specify { task_errors.should include('empty_objective') }
-    end
+
+
+    # describe pending: 'TODO' do
+    #   its(:valid_next_states) { should_not be_empty }
+
+    #   context 'with no other tasks' do
+    #     before(:each) { task_fields.delete :project_id }
+
+    #     its(:project_id) { should be_nil }
+    #   end
+
+    #   context 'with a parent project' do
+    #     let(:project) { create_task type: 'project' }
+    #     before(:each) { task_fields[:project_id] = project.id }
+
+    #     its(:project_id) { should eq(project.id) }
+    #   end
+
+    #   context 'with invalid field' do
+    #     before(:each) { task_fields[:objective] = '' }
+    #     let(:task_errors) { post_response.json_body.task_errors }
+
+    #     specify { post_response.should be_bad_request}
+    #     specify { task_errors.should include('empty_objective') }
+    #   end
+    # end
   end
 
   describe 'update' do
     let(:task) { create_task }
     let(:task_url) { "/tasks/#{task.id}" }
     let(:update_response) do
-      request(:put, task_url, :task => task).json_body
+      request(:put, task_url, :task => task)
     end
 
     describe 'task updates' do
@@ -114,27 +140,27 @@ describe 'tasks', :type => :api do
       end
 
       subject(:task_updates) do
-        update_response.task_updates
+        update_response.json_body.task_updates
           .map{ |u| JSONStruct.new u }
           .index_by(&:attribute_name)
       end
 
       specify { task_updates.should have(2).updates }
 
-      shared_examples :attribute_update do
+      attribute_update_specs = Proc.new do
         its(:task_id) { should eq(task.id) }
       end
 
       describe do
         subject(:objective_update) { task_updates['objective'] }
         its(:updated_value) { should eq('New objective') }
-        include_examples :attribute_update
+        instance_eval &attribute_update_specs
       end
 
       describe do
         subject(:state_update) { task_updates['state'] }
         its(:updated_value) { should eq('underway') }
-        include_examples :attribute_update
+        instance_eval &attribute_update_specs
       end
 
     end
