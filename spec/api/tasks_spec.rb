@@ -107,8 +107,6 @@ describe 'tasks', :type => :api do
       request(:put, task_url, :task => task).json_body
     end
 
-    specify { persisted_task.should eq(returned_task) }
-
     describe 'task updates' do
       before(:each) do
         task.objective = 'New objective'
@@ -123,20 +121,20 @@ describe 'tasks', :type => :api do
 
       describe do
         subject(:objective_update) { task_updates['objective'] }
-        its(:objective) { should eq('New objective') }
+        its(:updated_value) { should eq('New objective') }
         include_examples :attribute_update
       end
 
       describe do
         subject(:state_update) { task_updates['state'] }
-        its(:state) { should eq('underway') }
+        its(:updated_value) { should eq('underway') }
         include_examples :attribute_update
       end
 
       let(:task_updates) do
         update_response.task_updates
           .map{ |u| JSONStruct.new u }
-          .index_by(&:attribute)
+          .index_by(&:attribute_name)
       end
     end
   end

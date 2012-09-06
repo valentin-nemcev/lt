@@ -1,4 +1,3 @@
-
 require 'lib/spec_helper'
 
 require 'persistable'
@@ -31,7 +30,9 @@ describe 'Object with revisable attributes' do
 
       specify do
         attr_revisions.should_receive(:new_revision)
-          .with(:attr_name => :attr_value, updated_on: effective_date)
+          .with(:updated_value => :attr_value, updated_on: effective_date)
+          .and_return(attr_revision)
+        base_class.any_instance.stub(:attribute_updated)
         subject
       end
     end
@@ -56,9 +57,15 @@ describe 'Object with revisable attributes' do
   describe '#update_attributes' do
     specify do
       attr_revisions.should_receive(:new_revision)
-        .with(:attr_name => :new_attr_value, updated_on: effective_date)
-      subject.update_attributes :attr_name => :new_attr_value
+        .with(:updated_value => :new_attr_value, updated_on: effective_date)
+        .and_return(attr_revision)
+      subject.should_receive(:attribute_updated)
+        .with(:attr_name, attr_revision).and_return(update)
+      updates = subject.update_attributes(:attr_name => :new_attr_value)
+      updates.should eq([update])
     end
+
+    let(:update) { stub('update') }
   end
 
   describe '#attr_name' do

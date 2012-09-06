@@ -29,7 +29,7 @@ module Task
         task_record.objective_revisions.map do |rec|
           ::Task::ObjectiveRevision.new(
             id:              rec.id,
-            objective:       rec.objective,
+            updated_value:   rec.objective,
             updated_on:      rec.updated_on,
             sequence_number: rec.sequence_number,
           )

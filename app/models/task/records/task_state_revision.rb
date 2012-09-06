@@ -30,7 +30,7 @@ module Task
         task_record.state_revisions.map do |rec|
           ::Task::StateRevision.new(
             id:              rec.id,
-            state:       rec.state,
+            updated_value:   rec.state,
             updated_on:      rec.updated_on,
             sequence_number: rec.sequence_number,
           )

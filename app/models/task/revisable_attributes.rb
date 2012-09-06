@@ -42,9 +42,11 @@ module Task
     attr_accessor :attribute_revisions
 
     def update_attributes(attrs = {})
-      attrs.each_pair do |name, val|
-        @attribute_revisions[name].new_revision name => val,
-          updated_on: effective_date
+      attrs.map do |name, val|
+        rev = @attribute_revisions[name].new_revision(
+          updated_value: val,
+          updated_on: effective_date)
+        attribute_updated name, rev
       end
     end
   end

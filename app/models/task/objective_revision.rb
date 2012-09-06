@@ -5,7 +5,7 @@ module Task
     end
   end
 
-  class ObjectiveRevision
+  class ObjectiveRevision < Revisions::Revision
     include Persistable
 
     attr_reader :objective, :updated_on
@@ -29,7 +29,7 @@ module Task
 
     def initialize(attrs)
       super
-      fields[:objective] = validate_objective attrs[:objective]
+      # fields[:objective] = validate_objective attrs[:objective]
       fields[:updated_on] = attrs.fetch :updated_on
       fields[:sequence_number] = attrs.fetch :sequence_number
     end

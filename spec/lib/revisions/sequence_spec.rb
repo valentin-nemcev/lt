@@ -1,4 +1,3 @@
-
 require 'lib/spec_helper'
 
 require 'revisions/sequence'
@@ -90,7 +89,7 @@ describe Sequence do
   end
 
   describe '#new_revision' do
-    let(:revision_attrs) { {attr: :value, updated_on: creation_date} }
+    let(:revision_attrs) { {updated_value: :value, updated_on: creation_date} }
     let(:new_sn) { 1 }
     let(:new_revision) { stub('new revision', revision_attrs) }
 
@@ -99,6 +98,10 @@ describe Sequence do
       RevisionClass.should_receive(:new)
         .with(revision_attrs)
         .and_return(new_revision)
+    end
+
+    it 'should return new revision' do
+      sequence.new_revision(revision_attrs).should be(new_revision)
     end
 
     context 'with no revisions' do

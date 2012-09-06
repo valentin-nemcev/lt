@@ -2,7 +2,7 @@ module Task
   class InvalidTaskError < StandardError; end
   class InvalidStateError < InvalidTaskError; end
   #TODO: Remove duplication with ObjectiveRevision
-  class StateRevision
+  class StateRevision < Revisions::Revision
     include Persistable
 
     VALID_STATES = {
@@ -37,7 +37,7 @@ module Task
 
     def initialize(attrs)
       super
-      fields[:state] = validate_state attrs[:state]
+      # fields[:state] = validate_state attrs[:state]
       fields[:updated_on] = attrs.fetch :updated_on
       fields[:sequence_number] = attrs.fetch :sequence_number
     end
