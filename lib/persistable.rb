@@ -12,6 +12,7 @@ module Persistable
 
 
   def initialize(attrs={})
+    super
     self.id = attrs[:id]
   end
 

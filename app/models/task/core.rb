@@ -1,8 +1,6 @@
 module Task
   class IncorrectEffectiveDateError < TaskError; end;
   class Core
-    include Persistable
-
     attr_reader :effective_date
 
     def fields
@@ -23,7 +21,6 @@ module Task
       now = attrs.fetch(:clock, Time).current
       fields[:created_on] = attrs[:on] || attrs[:created_on] || now
       @effective_date = [created_on, now].max
-      super
     end
 
     def created_on

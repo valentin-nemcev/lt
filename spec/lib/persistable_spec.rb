@@ -3,72 +3,72 @@ require 'lib/spec_helper'
 require 'persistable'
 
 describe Persistable do
-  class PersistableObject
-    include Persistable
-    def fields
-      @fields
-    end
-    protected :fields
-
-    def initialize(attrs={})
-      @fields = {}
-      super
-    end
-  end
-
-
-  let(:test_id)         { 1 }
-  let(:another_test_id) { 2 }
-
+  let(:initial_attrs) { Hash.new }
+  subject(:persistable) { persistable_class.new initial_attrs }
 
   context 'not persisted' do
-    let(:not_persisted) { PersistableObject.new }
-    specify { not_persisted.id.should be_nil }
-    specify { not_persisted.should_not be_persisted }
+    its(:id) { should be_nil }
+    it { should_not be_persisted }
 
     context 'with added id' do
-      let(:persisted) do
-        not_persisted.tap { |task| task.id = test_id }
-      end
+      before(:each) { persistable.id = :test_id }
 
-      specify { persisted.id.should eq(test_id) }
-      specify { not_persisted.should_not be_persisted }
+      its(:id) { should eq(:test_id) }
+      it { should be_persisted }
     end
   end
 
   context 'persisted' do
-    let(:persisted) do
-      PersistableObject.new id: test_id
-    end
+    let(:initial_attrs) { {id: :test_id} }
 
-    specify { persisted.id.should eq(test_id) }
-    specify { persisted.should be_persisted }
+    its(:id) { should eq(:test_id) }
+    it { should be_persisted }
 
-    it 'should not allow change of id' do
+    it 'should not allow id change' do
       expect {
-        persisted.id = another_test_id
+        persistable.id = :another_test_id
       }.to raise_error(Persistable::AlreadyPersistedError)
 
       expect {
-        persisted.id = persisted.id
+        persistable.id = persisted.id
       }.to_not raise_error(Persistable::AlreadyPersistedError)
     end
 
     context 'with removed id' do
-      let(:not_persisted) do
-        persisted.tap { |task| task.id = nil}
-      end
-      specify { not_persisted.should_not be_persisted }
+      before(:each) { persistable.id = nil }
+      it { should_not be_persisted }
     end
   end
 
   context 'persisted clone' do
     it 'should be persisted if original is persisted' do
-      original = PersistableObject.new
+      original = persistable_class.new
       clone = original.clone
       original.id = 1
       clone.id.should eq(1)
     end
   end
-end
 
+  let(:persistable_class) do
+    Class.new(base_class) do
+      include Persistable
+      def fields
+        @fields ||= {}
+      end
+    end
+  end
+
+  let(:base_class) do
+    Class.new do
+      def initialize *attrs
+        initial_attrs(*attrs)
+      end
+    end
+  end
+
+  before(:each) do
+    base_class.any_instance.tap do |b|
+      b.should_receive(:initial_attrs).with(initial_attrs)
+    end
+  end
+end
