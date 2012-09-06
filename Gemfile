@@ -29,6 +29,8 @@ group :development, :test do
   gem 'capistrano_colors', '~> 0.5.5'
   gem 'rvm-capistrano',    '~> 1.2.0'
 
+  # Fix for recursive subject, it should be released in 2.11.2
+  gem 'rspec-core',  '=  2.11.1', git: 'https://github.com/rspec/rspec-core.git'
   gem 'rspec-rails', '~> 2.11.0'
   gem 'capybara',    '~> 1.1.2'
   gem 'poltergeist', '~> 0.7.0'

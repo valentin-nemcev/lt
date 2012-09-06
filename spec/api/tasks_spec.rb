@@ -113,6 +113,12 @@ describe 'tasks', :type => :api do
         task.state = 'underway'
       end
 
+      subject(:task_updates) do
+        update_response.task_updates
+          .map{ |u| JSONStruct.new u }
+          .index_by(&:attribute_name)
+      end
+
       specify { task_updates.should have(2).updates }
 
       shared_examples :attribute_update do
@@ -131,11 +137,6 @@ describe 'tasks', :type => :api do
         include_examples :attribute_update
       end
 
-      let(:task_updates) do
-        update_response.task_updates
-          .map{ |u| JSONStruct.new u }
-          .index_by(&:attribute_name)
-      end
     end
   end
 
