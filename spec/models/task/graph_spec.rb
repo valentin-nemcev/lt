@@ -3,11 +3,20 @@ require 'spec_helper'
 describe Task::Graph do
   context 'with passed tasks' do
     let(:task) { stub('task') }
+    let(:another_task) { stub('task') }
     let(:connected_task) { stub('connected_task') }
     let(:disconnected_task) { stub('disconnected_task') }
 
     let(:relation1) { stub('relation1') }
     let(:relation2) { stub('relation2') }
+
+    context 'without tasks' do
+      subject(:graph) { described_class.new tasks: [] }
+
+      its(:tasks) { should be_empty }
+      its(:relations) { should be_empty }
+      its(:revisions) { should be_empty }
+    end
 
     context 'with single task' do
       subject(:graph) do
@@ -26,10 +35,21 @@ describe Task::Graph do
         described_class.new tasks: [task, connected_task]
       end
 
-      it 'returns all tasks connected to passed tasks' do
+      before(:each) do
         task.should_receive(:with_connected_tasks_and_relations)
           .and_return([[task, connected_task], []])
         connected_task.should_not_receive(:with_connected_tasks_and_relations)
+      end
+
+      it 'returns all tasks revisions' do
+        task.stub(attribute_revisions: [:task_rev1, :task_rev2])
+        connected_task.stub(attribute_revisions: [:another_task_rev1])
+        graph.revisions.should match_array([:task_rev1,
+                                           :task_rev2,
+                                           :another_task_rev1])
+      end
+
+      it 'returns all tasks connected to passed tasks' do
         graph.tasks.to_a.should match_array([task, connected_task])
       end
     end
