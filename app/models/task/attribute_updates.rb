@@ -8,6 +8,21 @@ module Task
         update.updated_value = revision.updated_value
       end
     end
+
+    def updates
+      attribute_revisions.map(&:to_update)
+    end
+
+    def creation
+      Creation.new.tap do |creation|
+        creation.id = self.id
+        creation.type = self.type
+      end
+    end
+  end
+
+  class Creation
+    attr_accessor :id, :type
   end
 
   class AttributeUpdate
