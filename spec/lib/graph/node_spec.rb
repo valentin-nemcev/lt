@@ -6,7 +6,7 @@ describe Graph::Node do
     include Graph::Node
   end
 
-  subject(:node)
+  subject(:node) { described_class }
   it 'should have only one instance method: #edges' do
     node.public_instance_methods.should eq([:edges])
   end

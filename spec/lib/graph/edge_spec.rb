@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Graph::Edge do
-  subject(:edge)
+  subject(:edge) { described_class }
   it 'should have only one instance method: #nodes' do
     edge.instance_methods.should eq([:nodes])
   end
