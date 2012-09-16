@@ -5,11 +5,8 @@ module Task
       self.record_timestamps  = false
 
       belongs_to :user
-      has_many :state_revisions,
-        :class_name => ::Task::Records::TaskStateRevision,
-        :dependent => :destroy
-      has_many :objective_revisions,
-        :class_name => ::Task::Records::TaskObjectiveRevision,
+      has_many :attribute_revisions,
+        :class_name => ::Task::Records::TaskAttributeRevision,
         :dependent => :destroy
 
       has_many :incoming_relations,
@@ -52,10 +49,8 @@ module Task
       def map_from_task(task)
         self.type = task.type
         self.created_on = task.created_on
-        self.state_revisions =
-          TaskStateRevision.save_revisions self, task.attribute_revisions[:state]
-        self.objective_revisions =
-          TaskObjectiveRevision.save_revisions self, task.attribute_revisions[:objective]
+        self.attribute_revisions =
+          TaskAttributeRevision.save_revisions self, task.attribute_revisions
         self
       end
 
@@ -63,8 +58,7 @@ module Task
         ::Task.new_subtype(self.type,
           id: self.id,
           created_on: self.created_on,
-          state_revisions: TaskStateRevision.load_revisions(self),
-          objective_revisions: TaskObjectiveRevision.load_revisions(self),
+          attribute_revisions: TaskAttributeRevision.load_revisions(self),
         )
       end
 
