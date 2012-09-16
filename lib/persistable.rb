@@ -6,7 +6,7 @@ module Persistable
 
     def message
       "Can't persist already persisted object " \
-        "(old id was #{@old_id}, new id is #{@new_id})"
+        "(old id was #{@old_id}, new id is #{@new_id.inspect})"
     end
   end
 
