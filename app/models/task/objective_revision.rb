@@ -19,8 +19,8 @@ module Task
       fields[:objective]
     end
 
-    def updated_on
-      fields[:updated_on]
+    def attribute_name
+      :objective
     end
 
     def sequence_number
@@ -30,7 +30,6 @@ module Task
     def initialize(attrs)
       super
       # fields[:objective] = validate_objective attrs[:objective]
-      fields[:updated_on] = attrs.fetch :updated_on
       fields[:sequence_number] = attrs.fetch :sequence_number
     end
 

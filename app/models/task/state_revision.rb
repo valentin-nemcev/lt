@@ -27,8 +27,8 @@ module Task
       fields[:state]
     end
 
-    def updated_on
-      fields[:updated_on]
+    def attribute_name
+      :state
     end
 
     def sequence_number
@@ -38,7 +38,6 @@ module Task
     def initialize(attrs)
       super
       # fields[:state] = validate_state attrs[:state]
-      fields[:updated_on] = attrs.fetch :updated_on
       fields[:sequence_number] = attrs.fetch :sequence_number
     end
 
