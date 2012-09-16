@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120824200933) do
+ActiveRecord::Schema.define(:version => 20120914133515) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -19,6 +19,14 @@ ActiveRecord::Schema.define(:version => 20120824200933) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
     t.integer  "user_id"
+  end
+
+  create_table "task_attribute_revisions", :force => true do |t|
+    t.integer  "task_id"
+    t.integer  "sequence_number", :null => false
+    t.datetime "updated_on"
+    t.string   "attribute_name",  :null => false
+    t.string   "updated_value"
   end
 
   create_table "task_objective_revisions", :force => true do |t|

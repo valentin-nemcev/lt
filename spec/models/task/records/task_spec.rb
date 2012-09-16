@@ -2,22 +2,25 @@ require 'spec_helper'
 
 class TaskDouble
   include Persistable
+  def initialize(*)
+  end
+
   def fields
     @fields ||= {}
   end
 end
 
-describe Task::Records::Task, pending: 'simplify and factor out mapping' do
+describe Task::Records::Task do
 
   let(:user_fixture) { User.create! login: 'test_user' }
 
   let(:task_records) { Task::Records::Task.for_user user_fixture }
-  let(:revision_records) { Task::Records::TaskObjectiveRevision }
+  let(:revision_records) { Task::Records::TaskAttributeRevision }
 
   let(:task_created_on) { 2.days.ago }
   let(:task) do
     TaskDouble.new.tap do |task|
-      task.stub created_on: task_created_on, objective_revisions: [],
+      task.stub created_on: task_created_on, attribute_revisions: [],
         type: 'task_type'
     end
   end
@@ -52,21 +55,21 @@ describe Task::Records::Task, pending: 'simplify and factor out mapping' do
     its(:user)       { should eq(user_fixture) }
     its(:type)       { should eq('task_type') }
 
-    let(:task_objective_revisions) { [:rev1, :rev2] }
-    let(:task_o_rev_records) { [revision_records.new] }
+    let(:task_attribute_revisions) { [:rev1, :rev2] }
+    let(:task_rev_records) { [revision_records.new] }
 
     before(:each) do
-      task.stub(:attribute_revisions, {})
+      task.stub(attribute_revisions: task_attribute_revisions)
       revision_records.should_receive(:save_revisions) do |rec, revs|
         @received_task_record = rec
-        revs.should eq(task_objective_revisions)
-        task_o_rev_records
+        revs.should eq(task_attribute_revisions)
+        task_rev_records
       end
     end
 
-    it 'delegates objective revisions saving' do
+    it 'delegates attribute revisions saving' do
 
-      task_record.objective_revisions.should eq(task_o_rev_records)
+      task_record.attribute_revisions.should eq(task_rev_records)
       @received_task_record.should eq(task_record)
     end
 
@@ -87,17 +90,17 @@ describe Task::Records::Task, pending: 'simplify and factor out mapping' do
     its(:type) { should eq('task_type') }
     its(:created_on) { should eq_up_to_sec(task_created_on) }
 
-    let(:task_objective_revisions) { [:rev1, :rev2] }
+    let(:task_attribute_revisions) { [:rev1, :rev2] }
 
     before(:each) do
       revision_records.should_receive(:load_revisions) do |rec|
         @received_task_record = rec
-        task_objective_revisions
+        task_attribute_revisions
       end
     end
 
-    it 'delegates loading objective revisions' do
-      task.objective_revisions.should eq(task_objective_revisions)
+    it 'delegates loading attribute revisions' do
+      task.attribute_revisions.should eq(task_attribute_revisions)
       @received_task_record.should eq(task_record)
     end
   end
