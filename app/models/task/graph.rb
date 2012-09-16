@@ -34,6 +34,10 @@ module Task
       tasks_and_relations[0]
     end
 
+    def revisions
+      tasks.collect(&:attribute_revisions).inject([], &:+)
+    end
+
     def find_task_by_id(id)
       tasks.find{ |task| task.id.to_s == id.to_s }
     end
