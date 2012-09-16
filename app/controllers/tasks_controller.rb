@@ -33,7 +33,7 @@ class TasksController < ApplicationController
 
   def update
     @task = storage.fetch params[:id]
-    task_updates = task.update_attributes updated_attrs(params[:task]),
+    task_updates = @task.update_attributes updated_attrs(params[:task]),
       on: effective_date
 
     storage.store @task

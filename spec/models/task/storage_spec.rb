@@ -98,7 +98,7 @@ describe Task::Storage do
     describe '#fetch_graph' do
       it 'fetches graph of all tasks' do
         task_base.should_receive(:all_graph_scope).and_return(task_scope)
-        storage.fetch_graph.shold eq(graph)
+        storage.fetch_graph.should eq(graph)
       end
     end
 

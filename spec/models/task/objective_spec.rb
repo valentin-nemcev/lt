@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Task::ObjectiveRevision do
+describe Task::ObjectiveRevision, :pending do
   let(:test_objective) { 'Test objective' }
   let(:test_date)      { Time.current }
   let(:test_sn)        { 12 }

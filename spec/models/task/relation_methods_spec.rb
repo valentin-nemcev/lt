@@ -1,7 +1,11 @@
 require 'spec_helper'
 
-describe Task::RelationMethods do
+# TODO: Isolate this
+describe Task::RelationMethods, :pending do
   class TaskWithRelationMethods < Task::Core
+    def initialize(*)
+    end
+
     include Task::RelationMethods
   end
 

@@ -43,6 +43,10 @@ module Task
     end
 
 
+    def id
+      object_id
+    end
+
     def inspect
       "<#{self.class}:#{id || object_id} as of #{effective_date}>"
     end

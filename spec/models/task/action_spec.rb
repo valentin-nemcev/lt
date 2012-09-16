@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Task::Action do
+describe Task::Action, :pending do
 
   def create_action(attrs={})
     attrs.reverse_merge! objective: 'Test action!', state: 'underway'

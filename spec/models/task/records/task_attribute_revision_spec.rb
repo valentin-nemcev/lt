@@ -102,7 +102,7 @@ describe Task::Records::TaskAttributeRevision do
       end
 
       it 'fetched all revisions' do
-        revisions = revision_records.load_revisions task, task_record
+        revisions = revision_records.load_revisions task_record
         revisions.size.should eq(3)
       end
     end
@@ -124,7 +124,7 @@ describe Task::Records::TaskAttributeRevision do
         attrs.sequence_number.should eq(test_sn)
         attrs.id.should eq(revision_record.id)
       end
-      revision_records.load_revisions(task, task_record).fetch 0
+      revision_records.load_revisions(task_record).fetch 0
     end
   end
 end

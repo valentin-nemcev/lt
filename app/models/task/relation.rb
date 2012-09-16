@@ -13,7 +13,6 @@ module Task
     attr_reader :type, :added_on, :removed_on
     def initialize(attrs={})
       @fields = {}
-      super
       self.nodes.parent = attrs.fetch :supertask
       self.nodes.child = attrs.fetch :subtask
       @type = attrs.fetch(:type).to_sym
