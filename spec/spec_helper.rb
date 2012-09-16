@@ -16,8 +16,6 @@ Spork.prefork do
   RSpec.configure do |config|
     config.use_transactional_fixtures = false
 
-    config.include RSpec::Rails::RequestExampleGroup, :type => :api
-
     DatabaseCleaner.logger = Rails.logger
 
     config.before(:suite) do
