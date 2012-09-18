@@ -32,6 +32,10 @@ group :development, :test do
   # Fix for recursive subject, it should be released in 2.11.2
   gem 'rspec-core',  '=  2.11.1', git: 'https://github.com/rspec/rspec-core.git'
   gem 'rspec-rails', '~> 2.11.0'
+
+  gem 'guard-jasmine', '~> 1.8.1'
+  gem 'jasminerice'  , '~> 0.0.9'
+
   gem 'capybara',    '~> 1.1.2'
   gem 'poltergeist', '~> 0.7.0'
   gem 'database_cleaner', '~> 0.8.0'
