@@ -18,6 +18,21 @@ class Hash
   end
 end
 
+RSpec::Matchers.define :be_unique do
+  def duplicates(ary)
+    ary.group_by{ |e| e }.select{ |e, dups| dups.length > 1 }.keys
+  end
+
+  match do |array|
+    duplicates(array).empty?
+  end
+
+  failure_message_for_should do |array|
+    "array has duplicated elements: #{duplicates(array)}"
+  end
+
+end
+
 class Array
   def find_struct(fields)
     structs = map(&:to_struct)
@@ -96,9 +111,10 @@ describe 'tasks', :type => :api do
   shared_examples :task_creation do
     describe do
       subject(:task_creation) { task_creations.fetch(0).to_struct }
-      its(:id)         { should_not be_nil }
-      its(:type)       { should eq('action') }
-      its(:created_on) { should eq(creation_date) }
+      its(:id)        { should_not be_nil }
+      its(:task_id)   { should_not be_nil }
+      its(:task_type) { should eq('action') }
+      its(:date)      { should eq(creation_date) }
     end
   end
 
@@ -113,7 +129,7 @@ describe 'tasks', :type => :api do
     describe do
       subject(:objective_update) { task_updates.find_struct(
         attribute_name: 'objective',
-        updated_on:      creation_date
+        date:           creation_date
       )}
       its(:updated_value) { should eq('New task objective') }
       its(:task_id)       { should eq(task_id) }
@@ -122,7 +138,7 @@ describe 'tasks', :type => :api do
     describe do
       subject(:state_update) { task_updates.find_struct(
         attribute_name: 'state',
-        updated_on:      creation_date
+        date:           creation_date
       )}
       its(:updated_value) { should eq('considered') }
       its(:task_id)       { should eq(task_id) }
@@ -133,7 +149,7 @@ describe 'tasks', :type => :api do
     describe do
       subject(:objective_update) { task_updates.find_struct(
         attribute_name: 'objective',
-        updated_on:      update_date
+        date:           update_date
       )}
       its(:updated_value) { should eq('Updated task objective') }
       its(:task_id)       { should eq(task_id) }
@@ -142,7 +158,7 @@ describe 'tasks', :type => :api do
     describe do
       subject(:state_update) { task_updates.find_struct(
         attribute_name: 'state',
-        updated_on:      update_date
+        date:           update_date
       )}
       its(:updated_value) { should eq('underway') }
       its(:task_id)       { should eq(task_id) }
@@ -181,6 +197,11 @@ describe 'tasks', :type => :api do
 
       describe do
         subject(:response_body) { get_response.json_body }
+        let(:event_ids) do
+          (response_body.task_creations +
+           response_body.task_updates).map{ |u| u['id'] }
+        end
+        specify { event_ids.should be_unique }
 
         describe do
           subject(:task_creations) { response_body.task_creations }
