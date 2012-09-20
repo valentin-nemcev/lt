@@ -35,6 +35,7 @@ group :development, :test do
 
   gem 'guard-jasmine', '~> 1.8.1'
   gem 'jasminerice'  , '~> 0.0.9'
+  gem 'sinon-rails'  , '~> 1.4.2'
 
   gem 'capybara',    '~> 1.1.2'
   gem 'poltergeist', '~> 0.7.0'
