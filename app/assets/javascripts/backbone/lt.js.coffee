@@ -34,7 +34,6 @@ window.Lt =
 
     @taskViewState = new Lt.Models.TaskViewState taskViewState
 
-    console.log(@tasks)
     @taskView = new Lt.Views.Tasks.MainView
       collection: @tasks
       state: @taskViewState

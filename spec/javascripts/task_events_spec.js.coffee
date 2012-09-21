@@ -32,44 +32,6 @@ describe 'Tasks', ->
       expect(taskEvents.length).toBe(0)
       expect(tasks.length).toBe(0)
 
-    it 'with events for one task without updates', ->
-      taskEventsJSON =
-        task_creations: [
-          id         : '1'
-          task_id    : 1
-          task_type  : 'action'
-          date       : 'Tue, 18 Sep 2012 16:00:00 GMT'
-        ]
-        task_updates: [
-          id             : 'update1'
-          task_id        : 1
-          attribute_name : 'state'
-          updated_value  : 'considered'
-          date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
-        ,
-          id             : 'update2'
-          task_id        : 1
-          attribute_name : 'objective'
-          updated_value  : 'New objective'
-          date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
-        ]
-
-      expectedTasks = [
-        id        : 1
-        type      : 'action'
-        state     : 'considered'
-        objective : 'New objective'
-      ]
-
-      server.respondWith 'GET', '/tasks', (request) ->
-        request.respond jsonResponse(taskEventsJSON)...
-
-      taskEvents.fetch()
-      server.respond()
-
-      expect(taskEvents.length).toBe(3)
-      expect(tasks.toJSON()).toEqual(expectedTasks)
-
     it 'with unordered events for multiple tasks with updates', ->
       # TODO: Add sequence numbers
       taskEventsJSON =
