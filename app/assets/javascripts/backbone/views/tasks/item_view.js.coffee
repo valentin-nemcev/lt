@@ -20,10 +20,10 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @formView = new Views.FormView model: @model
     @formView.on 'close', => @toggleForm(off)
 
-    @subtasksView = new Views.ListView
-      collection: @model.subtasksCollection
-      attributes:
-        records: 'subtasks'
+    # @subtasksView = new Views.ListView
+    #   collection: @model.subtasksCollection
+    #   attributes:
+    #     records: 'subtasks'
 
   newSubtask: ->
     @model.collection.add project_id: @model.id
@@ -59,7 +59,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       'task-state': @model.get('state')
 
     @$task.find('[control=new-subtask]').toggle(@model.get('type') is 'project')
-    @subtasksView.$el.toggle @model.get('type') is 'project'
+    # @subtasksView.$el.toggle @model.get('type') is 'project'
 
   render: ->
     @$el.html @template()
@@ -70,7 +70,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @toggleForm @model.isNew()
 
     $emptyItem = @$el.children('.empty').detach()
-    @subtasksView.render($emptyItem: $emptyItem).$el.appendTo @$el
+    # @subtasksView.render($emptyItem: $emptyItem).$el.appendTo @$el
 
     @toggleSelect off
     @changeState()

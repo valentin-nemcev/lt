@@ -27,12 +27,14 @@ window.Lt =
 
 
   initTaskView: (selector, tasks, taskViewState) ->
-    @tasks = new Lt.Collections.TasksCollection tasks
-    @tasks.fetch() if tasks.length == 0
+    @tasks = new Lt.Collections.Tasks
+    @taskEvents = new Lt.TaskEvents([], tasks: @tasks)
+    @taskEvents.fetch()
     # @bindTasksToTimeline()
 
     @taskViewState = new Lt.Models.TaskViewState taskViewState
 
+    console.log(@tasks)
     @taskView = new Lt.Views.Tasks.MainView
       collection: @tasks
       state: @taskViewState

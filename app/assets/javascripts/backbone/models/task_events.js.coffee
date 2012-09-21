@@ -1,6 +1,6 @@
 class Lt.Models.TaskEvent extends Backbone.Model
   getPositionString: ->
-    date = @get('date')
+    date = Date.parse(@get('date'))
     type = @typePriority + @type
     date + ' ' + type
 
@@ -10,6 +10,7 @@ class Lt.Models.TaskCreation extends Lt.Models.TaskEvent
   typePriority: 1
 
   apply: (tasks) ->
+    console.log this, tasks
     tasks.add(id: @get('task_id'), type: @get('task_type'))
 
 class Lt.Models.TaskUpdate extends Lt.Models.TaskEvent
@@ -17,7 +18,9 @@ class Lt.Models.TaskUpdate extends Lt.Models.TaskEvent
   typePriority: 2
 
   apply: (tasks) ->
+    console.log this, tasks
     task = tasks.get(@get('task_id'))
+    task or throw "No creation event for task " + @get('task_id')
     task.set(@get('attribute_name'), @get('updated_value'))
 
 class Lt.TaskEvents extends Backbone.Collection

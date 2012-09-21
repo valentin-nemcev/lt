@@ -82,7 +82,7 @@ describe 'Tasks', ->
           id         : '2'
           task_id    : 2
           task_type  : 'project'
-          date       : 'Tue, 18 Sep 2012 17:00:00 GMT'
+          date       : 'Thu, 20 Sep 2012 17:00:00 GMT'
         ]
         task_updates: [
           id             : 'update1'
@@ -99,19 +99,19 @@ describe 'Tasks', ->
         ,
           id             : 'update3'
           task_id        : 2
-          date           : 'Tue, 18 Sep 2012 17:00:00 GMT'
+          date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
           attribute_name : 'state'
           updated_value  : 'underway'
         ,
           id             : 'update4'
           task_id        : 2
-          date           : 'Tue, 18 Sep 2012 17:00:00 GMT'
+          date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
           attribute_name : 'objective'
           updated_value  : 'Project objective'
         ,
           id             : 'update5'
           task_id        : 2
-          date           : 'Tue, 18 Sep 2012 18:00:00 GMT'
+          date           : 'Thu, 20 Sep 2012 18:00:00 GMT'
           attribute_name : 'objective'
           updated_value  : 'Updated project objective'
         ].reverse()
