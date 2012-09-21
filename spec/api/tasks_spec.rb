@@ -1,103 +1,14 @@
 require 'spec_helper'
-
-class JSONStruct < OpenStruct
-  def as_json
-    marshal_dump
-  end
-
-  def matches?(fields)
-    fields.all? do |name, value|
-      self.send(name.to_sym) == value
-    end
-  end
-end
-
-class Hash
-  def to_struct
-    JSONStruct.new self
-  end
-end
-
-RSpec::Matchers.define :be_unique do
-  def duplicates(ary)
-    ary.group_by{ |e| e }.select{ |e, dups| dups.length > 1 }.keys
-  end
-
-  match do |array|
-    duplicates(array).empty?
-  end
-
-  failure_message_for_should do |array|
-    "array has duplicated elements: #{duplicates(array)}"
-  end
-
-end
-
-class Array
-  def find_struct(fields)
-    structs = map(&:to_struct)
-    matches = structs.find_all{ |s| s.matches? fields }
-    l = matches.size
-    l == 1 or fail "Found #{l == 0 ? 'no' : l} #{'struct'.pluralize(l)}" \
-                   " matching #{fields}" \
-                   " Existing #{'struct'.pluralize(structs.size)} were: \n" +
-                   structs.map(&:inspect).join("\n")
-    matches.first
-  end
-end
-
-module ResponseHelpers
-  def json_body(response_field = nil)
-    body.present? or fail 'response body is empty'
-    resp = JSON.parse body
-    resp = resp.fetch(response_field) if response_field
-    JSONStruct.new resp
-  end
-
-  def successful?
-    super or fail "Request was not successful: \n" \
-                  "#{code}: #{status_message}\n" \
-                  "#{body}"
-  end
-end
-
-class ActionDispatch::TestResponse
-  include ResponseHelpers
-end
-
-
-shared_context :api_helpers do
-  let(:session) { ActionDispatch::Integration::Session.new(Rails.application) }
-  def request(method, uri, data = {})
-    unless method.in? [:get, :post, :put, :delete]
-      raise ArgumentError, "Invalid method #{method}"
-    end
-    data = data.as_json
-    params = data.merge :format => :json
-    session.public_send method, uri, params
-    session.response
-  end
-end
-
-
-def create_task(fields = {})
-  fields.reverse_merge!({
-    type:      'action',
-    objective: 'Test objective',
-    state:     'considered',
-  })
-  response = request(:post, '/tasks/', :task => fields)
-  response.json_body.task_creations.fetch(0).fetch('id')
-end
+require 'api/helpers'
 
 # TODO: Use url helpers
-describe 'tasks', :type => :api do
+describe 'tasks', :api do
+  include_context :api_helpers
   attr_accessor :user_fixture
   before(:all) do
     User.delete_all;
     user_fixture = User.create!
   end
-  include_context :api_helpers
 
 
   let(:new_task_fields) {{
@@ -282,7 +193,6 @@ describe 'tasks', :type => :api do
   end
 
   describe 'delete a task' do
-    let(:task_id) { create_task type: 'action' }
     let(:task_url) { "/tasks/#{task_id}" }
 
     subject(:get_response) { request :get, '/tasks/' }
