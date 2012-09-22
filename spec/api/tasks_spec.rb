@@ -11,59 +11,116 @@ describe 'tasks', :api do
   end
 
 
-  let(:new_task_fields) {{
-    type:      'action',
-    objective: 'New task objective',
+  let(:new_project_fields) {{
+    type:      'project',
+    objective: 'New project objective',
     state:     'considered',
   }}
 
-  let(:creation_date) { Time.zone.parse('2012-01-01 10:00').httpdate }
+  let(:project_creation_date) { Time.zone.parse('2012-01-01 9:00').httpdate }
 
-  shared_examples :task_creation do
+  shared_examples :project_creation do
     describe do
-      subject(:task_creation) { task_creations.fetch(0).to_struct }
+      subject(:project_creation) {
+        task_creations.find_struct(task_type: 'project')
+      }
       its(:id)        { should_not be_nil }
-      its(:task_id)   { should_not be_nil }
-      its(:task_type) { should eq('action') }
-      its(:date)      { should eq(creation_date) }
+      its(:task_id)   { should eq(project_id) }
+      its(:task_type) { should eq('project') }
+      its(:date)      { should eq(project_creation_date) }
     end
   end
 
-  let(:updated_task_fields) { new_task_fields.merge(
-    objective: 'Updated task objective',
-    state:     'underway'
-  ) }
+  shared_examples :new_project_updates do
+    describe do
+      subject(:objective_update) { task_updates.find_struct(
+        task_id:        project_id,
+        attribute_name: 'objective',
+        date:           project_creation_date
+      )}
+      its(:updated_value) { should eq('New project objective') }
+      its(:task_id)       { should eq(project_id) }
+    end
 
-  let(:update_date)   { Time.zone.parse('2012-01-01 12:00').httpdate }
+    describe do
+      subject(:state_update) { task_updates.find_struct(
+        task_id:        project_id,
+        attribute_name: 'state',
+        date:           project_creation_date
+      )}
+      its(:updated_value) { should eq('considered') }
+      its(:task_id)       { should eq(project_id) }
+    end
+  end
 
-  shared_examples :new_task_updates do
+
+  let(:new_action_fields) {{
+    type:        'action',
+    project_ids: [project_id],
+    objective:   'New action objective',
+    state:       'considered',
+  }}
+
+  let(:action_creation_date) { Time.zone.parse('2012-01-01 10:00').httpdate }
+
+  shared_examples :action_creation do
+    describe do
+      subject(:action_creation) {
+        task_creations.find_struct(task_type: 'action')
+      }
+      its(:id)        { should_not be_nil }
+      its(:task_id)   { should_not be_nil }
+      its(:task_type) { should eq('action') }
+      its(:date)      { should eq(action_creation_date) }
+    end
+  end
+
+  shared_examples :new_action_updates do
     describe do
       subject(:objective_update) { task_updates.find_struct(
         attribute_name: 'objective',
-        date:           creation_date
+        date:           action_creation_date
       )}
-      its(:updated_value) { should eq('New task objective') }
-      its(:task_id)       { should eq(task_id) }
+      its(:updated_value) { should eq('New action objective') }
+      its(:task_id)       { should eq(action_id) }
     end
 
     describe do
       subject(:state_update) { task_updates.find_struct(
         attribute_name: 'state',
-        date:           creation_date
+        date:           action_creation_date
       )}
       its(:updated_value) { should eq('considered') }
-      its(:task_id)       { should eq(task_id) }
+      its(:task_id)       { should eq(action_id) }
     end
   end
 
-  shared_examples :updated_task_updates do
+  shared_examples :new_action_relations do
+    describe do
+      subject(:composite_relation_addition) { relation_additions.find_struct(
+        subtask_id: action_id,
+        supertask_id: project_id
+      )}
+      its(:relation_type) { should eq('composition') }
+      its(:date)          { should eq(action_creation_date) }
+    end
+  end
+
+  let(:updated_action_fields) { new_action_fields.merge(
+    objective: 'Updated action objective',
+    state:     'underway'
+  ) }
+
+  let(:update_date)   { Time.zone.parse('2012-01-01 12:00').httpdate }
+
+  shared_examples :updated_action_updates do
     describe do
       subject(:objective_update) { task_updates.find_struct(
         attribute_name: 'objective',
         date:           update_date
       )}
-      its(:updated_value) { should eq('Updated task objective') }
-      its(:task_id)       { should eq(task_id) }
+      its(:updated_value) { should eq('Updated action objective') }
+      its(:task_id)       { should eq(action_id) }
     end
 
     describe do
@@ -72,20 +129,39 @@ describe 'tasks', :api do
         date:           update_date
       )}
       its(:updated_value) { should eq('underway') }
-      its(:task_id)       { should eq(task_id) }
+      its(:task_id)       { should eq(action_id) }
     end
   end
 
-  let(:create_response) do
-    request :post, '/tasks/', :task => new_task_fields,
-      :effective_date => creation_date
+  let(:project_create_response) do
+    request :post, '/tasks/', :task => new_project_fields,
+      :effective_date => project_creation_date
   end
 
-  let(:task_id) do
-    create_response.json_body.task_creations.fetch(0).fetch('id')
+  let(:project_id) do
+    project_create_response.json_body.task_creations
+      .find_struct(task_type: 'project').id
   end
 
-  let(:task_url) { "/tasks/#{task_id}" }
+  let(:project_url) { "/tasks/#{project_id}" }
+
+
+  let(:action_create_response) do
+    request :post, '/tasks/', :task => new_action_fields,
+      :effective_date => action_creation_date
+  end
+
+  let(:action_update_response) do
+    request :put, action_url, :task => updated_action_fields,
+      :effective_date => update_date
+  end
+
+  let(:action_id) do
+    action_create_response.json_body.task_creations
+      .find_struct(task_type: 'action').id
+  end
+
+  let(:action_url) { "/tasks/#{action_id}" }
 
   describe 'get persisted tasks' do
     subject(:get_response) { request :get, '/tasks/' }
@@ -94,76 +170,86 @@ describe 'tasks', :api do
       it { should be_successful }
       describe do
         subject { get_response.json_body }
-        its(:task_creations) { should be_empty }
-        its(:task_updates)   { should be_empty }
+        its(:task_creations)     { should be_empty }
+        its(:task_updates)       { should be_empty }
+        its(:relation_additions) { should be_empty }
       end
       # its(:valid_new_task_states) { should_not be_empty }
     end
 
-    context 'with single updated task' do
-      let!(:udpate_response) do
-        request :put, task_url, :task => updated_task_fields,
-          :effective_date => update_date
+    context 'with a project and an updated action' do
+      before do
+        project_create_response.should be_successful
+        action_create_response.should be_successful
+        action_update_response.should be_successful
       end
 
       describe do
         subject(:response_body) { get_response.json_body }
         let(:event_ids) do
-          (response_body.task_creations +
-           response_body.task_updates).map{ |u| u['id'] }
+          [response_body.task_creations,
+           response_body.task_updates,
+           response_body.relation_additions].flatten.collect{ |u| u['id'] }
         end
         specify { event_ids.should be_unique }
 
         describe do
           subject(:task_creations) { response_body.task_creations }
-          it { should have(1).creation }
-          include_examples :task_creation
+          it { should have(2).creations }
+          include_examples :project_creation
+          include_examples :action_creation
         end
 
         describe do
           subject(:task_updates) { response_body.task_updates }
-          it { should have(4).updates }
-          include_examples :new_task_updates
-          include_examples :updated_task_updates
+          it { should have(6).updates }
+          include_examples :new_project_updates
+          include_examples :new_action_updates
+          include_examples :updated_action_updates
         end
-
       end
     end
-
   end
 
   describe 'create' do
-    specify { create_response.should be_successful }
-    let(:response_body) { create_response.json_body }
+    specify { project_create_response.should be_successful }
+    let(:project_response_body) { project_create_response.json_body }
 
     describe do
-      subject(:task_creations) { response_body.task_creations }
+      subject(:task_creations) { project_response_body.task_creations }
       it { should have(1).creation }
-      include_examples :task_creation
+      include_examples :project_creation
     end
 
     describe do
-      subject(:task_updates) { response_body.task_updates }
+      subject(:task_updates) { project_response_body.task_updates }
       it { should have(2).updates }
+      include_examples :new_project_updates
+    end
 
-      include_examples :new_task_updates
+    specify { action_create_response.should be_successful }
+    let(:action_response_body) { action_create_response.json_body }
+
+    describe do
+      subject(:task_creations) { action_response_body.task_creations }
+      it { should have(1).creation }
+      include_examples :action_creation
+    end
+
+    describe do
+      subject(:task_updates) { action_response_body.task_updates }
+      it { should have(2).updates }
+      include_examples :new_action_updates
+    end
+
+    describe do
+      subject(:relation_additions) { action_response_body.relation_additions }
+      it { should have(1).addition }
+      include_examples :new_action_relations
     end
 
     # describe pending: 'TODO' do
     #   its(:valid_next_states) { should_not be_empty }
-
-    #   context 'with no other tasks' do
-    #     before(:each) { task_fields.delete :project_id }
-
-    #     its(:project_id) { should be_nil }
-    #   end
-
-    #   context 'with a parent project' do
-    #     let(:project) { create_task type: 'project' }
-    #     before(:each) { task_fields[:project_id] = project.id }
-
-    #     its(:project_id) { should eq(project.id) }
-    #   end
 
     #   context 'with invalid field' do
     #     before(:each) { task_fields[:objective] = '' }
@@ -176,35 +262,26 @@ describe 'tasks', :api do
   end
 
   describe 'update' do
-    let!(:udpate_response) do
-      request :put, task_url, :task => updated_task_fields,
-        :effective_date => update_date
-    end
-
-    specify { udpate_response.should be_successful }
-    let(:response_body) { udpate_response.json_body }
+    specify { action_update_response.should be_successful }
+    let(:response_body) { action_update_response.json_body }
 
     describe do
       subject(:task_updates) { response_body.task_updates }
       it { should have(2).updates }
 
-      include_examples :updated_task_updates
+      include_examples :updated_action_updates
     end
   end
 
-  describe 'delete a task' do
-    let(:task_url) { "/tasks/#{task_id}" }
-
+  describe 'delete an action' do
     subject(:get_response) { request :get, '/tasks/' }
-    let!(:delete_response) { request :delete, task_url }
+    let!(:delete_response) { request :delete, action_url }
     let(:task_creations) { get_response.json_body.task_creations }
     let(:task_updates)   { get_response.json_body.task_updates }
 
-    context 'without subtasks' do
-      specify { delete_response.should be_successful }
-      specify { task_creations.should be_empty }
-      specify { task_updates.should be_empty }
-    end
+    specify { delete_response.should be_successful }
+    specify { task_creations.should have(1).creations }
+    specify { task_creations.find_struct(task_id: project_id).should be}
 
     # context 'with subtasks', :pending do
       # let(:task) do
