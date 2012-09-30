@@ -207,6 +207,12 @@ describe 'tasks', :api do
           include_examples :new_action_updates
           include_examples :updated_action_updates
         end
+
+        describe do
+          subject(:relation_additions) { response_body.relation_additions }
+          it { should have(1).addition }
+          include_examples :new_action_relations
+        end
       end
     end
   end

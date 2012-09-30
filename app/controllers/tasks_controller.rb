@@ -1,30 +1,31 @@
 class TasksController < ApplicationController
+  include TasksHelper
 
   rescue_from Task::Storage::TaskNotFoundError,
     with: -> { head :status => :not_found }
+
+  before_filter :get_effective_date, only: [:create, :update]
 
   def index
     graph = storage.fetch_graph
     @revisions = graph.revisions
     @tasks = graph.tasks
+    @relations = graph.relations
 
     render :events
   end
 
-  before_filter :get_effective_date, only: [:create, :update]
-
   def create
-    task_params = params.fetch :task
     @task = Task.new_subtype task_params[:type],
-      updated_attrs(task_params).merge(on: effective_date)
+      task_attrs.merge(on: effective_date)
+    @task.update_related_tasks fetch_related_tasks(task_related_ids),
+      on: effective_date
 
-    task_params[:project_id].try do |project_id|
-      project = storage.fetch project_id
-      @task.add_project project
-    end
     storage.store @task
     @tasks = [@task]
     @revisions = @task.attribute_revisions
+    @relations = @task.relations
+
     render :events, :status => :created
   rescue Task::TaskError => e
     logger.error e
@@ -33,12 +34,18 @@ class TasksController < ApplicationController
 
   def update
     @task = storage.fetch params[:id]
-    task_updates = @task.update_attributes updated_attrs(params[:task]),
+    task_updates = @task.update_attributes task_attrs,
       on: effective_date
+
+    updated_relations =
+      @task.update_related_tasks fetch_related_tasks(task_related_ids),
+        on: effective_date
 
     storage.store @task
     @tasks = []
     @revisions = task_updates
+    @relations = updated_relations
+
     render :events
   rescue Task::TaskError => e
     logger.error e
@@ -52,8 +59,20 @@ class TasksController < ApplicationController
   end
 
 
-  def updated_attrs(params)
-    params.symbolize_keys.slice(*Task::Base.revisable_attributes)
+  protected
+
+  def task_params
+    params[:task]
+  end
+
+  def task_attrs
+    task_params.symbolize_keys.slice(*Task::Base.revisable_attributes)
+  end
+
+  def task_related_ids
+    related_tasks_with_ids =
+      Task::Base.related_tasks.map{ |k| "#{k.to_s.singularize}_ids".to_sym }
+    task_params.symbolize_keys.slice(*related_tasks_with_ids)
   end
 
   def effective_date
@@ -76,6 +95,4 @@ class TasksController < ApplicationController
   def storage
     @storage ||= Task::Storage.new user: current_user
   end
-  protected :storage
-
 end

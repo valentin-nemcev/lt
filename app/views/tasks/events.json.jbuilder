@@ -13,3 +13,8 @@ json.task_updates @revisions do |json, revision|
   json.updated_value  revision.updated_value
   json.date           revision.updated_on.httpdate
 end
+
+json.relation_additions @relations do |json, relation|
+  json.id [relation.id, relation.subtask.id, relation.supertask.id].join('-')
+  json.date relation.added_on.httpdate
+end
