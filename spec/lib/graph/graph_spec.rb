@@ -1,10 +1,26 @@
-require 'spec_helper'
+require 'lib/spec_helper'
+
+require 'graph/node_edges'
+require 'graph/edge_nodes'
+
+module FakeEdge
+  def nodes
+    @nodes ||= Graph::EdgeNodes.new self
+  end
+end
+
+module FakeNode
+  def edges
+    @edges ||= Graph::NodeEdges.new self
+  end
+end
 
 describe Graph do
   context 'two nodes' do
-    let(:edge)   { stub('edge').extend Graph::Edge }
-    let(:parent) { stub('parent').extend Graph::Node }
-    let(:child)  { stub('child').extend Graph::Node }
+    # TODO: Remove Graph::Node and Graph::Edge
+    let(:edge)   { stub('edge').extend FakeEdge }
+    let(:parent) { stub('parent').extend FakeNode }
+    let(:child)  { stub('child').extend FakeNode }
 
     shared_examples 'two connected nodes' do
       describe 'edge' do
@@ -115,11 +131,11 @@ describe Graph do
   end
 
   context 'chain of three connected nodes' do
-    let(:edge12) { stub('edge12').extend Graph::Edge }
-    let(:edge23) { stub('edge23').extend Graph::Edge }
-    let(:node1)  { stub('node1').extend Graph::Node }
-    let(:node2)  { stub('node2').extend Graph::Node }
-    let(:node3)  { stub('node3').extend Graph::Node }
+    let(:edge12) { stub('edge12').extend FakeEdge }
+    let(:edge23) { stub('edge23').extend FakeEdge }
+    let(:node1)  { stub('node1').extend FakeNode }
+    let(:node2)  { stub('node2').extend FakeNode }
+    let(:node3)  { stub('node3').extend FakeNode }
 
     before(:each) do
       edge12.nodes.parent = node1
@@ -144,7 +160,7 @@ describe Graph do
     end
 
     context 'with loop' do
-      let(:edge31) { stub('edge31').extend Graph::Edge }
+      let(:edge31) { stub('edge31').extend FakeEdge }
       before(:each) do
         edge31.nodes.parent = node3
         edge31.nodes.child  = node1
@@ -172,8 +188,8 @@ describe Graph do
   end
 
   context 'node with dangling connection' do
-    let(:edge) { stub('edge').extend Graph::Edge }
-    let(:node) { stub('node').extend Graph::Node }
+    let(:edge) { stub('edge').extend FakeEdge }
+    let(:node) { stub('node').extend FakeNode }
 
     before(:each) { edge.nodes.parent = node }
 

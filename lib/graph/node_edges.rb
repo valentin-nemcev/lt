@@ -14,11 +14,6 @@ module Graph
       @filters = source.filters.clone
     end
 
-    def clone_for_node(node)
-      clone.tap { |c| c.instance_variable_set :@node, node }
-    end
-
-
     def unfiltered
       @edges.clone
     end
