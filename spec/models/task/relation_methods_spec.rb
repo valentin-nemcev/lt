@@ -1,158 +1,117 @@
-require 'spec_helper'
+require 'lib/spec_helper'
 
-# TODO: Isolate this
-describe Task::RelationMethods, :pending do
-  class TaskWithRelationMethods < Task::Core
-    def initialize(*)
+require 'models/task'
+require 'models/task/relation_methods'
+require 'models/task/relation'
+
+describe 'Task with relations' do
+  before(:each) { stub_const('TaskWithRelations', Class.new(Task::Core)) }
+  before(:each) do
+    TaskWithRelations.instance_eval do
+      include Task::RelationMethods
+      has_relation :relation_type, supers: :supertasks_name,
+        subs: :subtasks_name
+      define_method(:inspect) { '<task>' }
     end
-
-    include Task::RelationMethods
   end
 
-  def create_task(attrs={})
-    attrs.reverse_merge! objective: 'Test!'
-    TaskWithRelationMethods.new attrs
+  def create_task(name)
+    TaskWithRelations.new(created_on: created_on).tap do |task|
+      task.define_singleton_method(:inspect) { "<task #{name}>" }
+    end
   end
 
-  context 'with related tasks' do
+  let(:addition_date) { Time.zone.parse('2012-01-02') }
+  let(:created_on)    { Time.zone.parse('2012-01-01') }
+  let(:related_task1) { create_task(:related_task1) }
+  let(:related_task2) { create_task(:related_task2) }
 
-    [:project1, :project2, :dependent1, :dependent2,
-      :blocking1, :blocking2, :component1, :component2
-    ].each do |t|
-      let(t) { create_task objective: t }
-    end
+  subject(:task) { create_task(:subject) }
 
-    let(:with_related_on_creation) do
-      create_task projects: [project1], dependent_tasks: [dependent1],
-        blocking_tasks: [blocking1], component_tasks: [component1]
-    end
+  its('class.related_tasks') {
+    should match_array([:supertasks_name, :subtasks_name])
+  }
 
-    shared_examples 'related task collectons on creation' do
-      it "has related tasks collections" do
-        {
-          supertasks:      [project1, dependent1],
-          dependent_tasks: [dependent1],
-          projects:        [project1],
-          subtasks:        [blocking1, component1],
-          blocking_tasks:  [blocking1],
-          component_tasks: [component1],
-        }.each do |collection, expected|
-          actual = subject.public_send(collection).to_a
-          actual.should match_array(expected)
-          actual.each do |task|
-            task.effective_date.should eq(subject.effective_date)
-          end
-        end
+  let(:some_relation_type) { :composition }
+  context 'with existing relations' do
+    let!(:relation1) { Task::Relation.new(
+      supertask: task, subtask: related_task1, type: some_relation_type ) }
+    let!(:relation2) { Task::Relation.new(
+      subtask: task, supertask: related_task2, type: some_relation_type) }
+    its(:relations) { should match_array [relation1, relation2] }
 
-        subject.project.should == project1
-      end
-    end
-
-    shared_examples 'related task collectons after creation' do
-      it "has related tasks collections" do
-        {
-          supertasks:      [project1, project2, dependent1, dependent2],
-          dependent_tasks: [dependent1, dependent2],
-          projects:        [project1, project2],
-          subtasks:        [blocking1, blocking2, component1, component2],
-          blocking_tasks:  [blocking1, blocking2],
-          component_tasks: [component1, component2],
-        }.each do |collection, expected|
-          actual = subject.public_send(collection).to_a
-          actual.should match_array(expected)
-          actual.each do |task|
-            task.effective_date.should eq(subject.effective_date)
-          end
-        end
-
-        expect do
-          subject.project
-        end.to raise_error Task::InvalidTaskError
-      end
-    end
-
-    context 'added on creation' do
-
-
-
-      subject { with_related_on_creation }
-
-      it 'has #relations' do
-        subject.relations.should have(4).relations
-      end
-
-      include_examples 'related task collectons on creation'
-    end
-
-    let(:addition_date) { 1.day.from_now }
-
-    let(:with_related_after_creation) do
-      opts = {on: addition_date}
-      with_related_on_creation.tap do |t|
-        t.add_project        project2,   opts
-        t.add_dependent_task dependent2, opts
-        t.add_blocking_task  blocking2,  opts
-        t.add_component_task component2, opts
-      end
-    end
-
-
-    context 'added after creation on future date' do
-      context 'seen from creation date' do
-        subject { with_related_after_creation }
-
-        it 'has #relations' do
-          subject.relations.should have(8).relations
-        end
-
-        include_examples 'related task collectons on creation'
-      end
-
-      context 'seen from addition date' do
-        subject { with_related_after_creation.as_of addition_date }
-
-        it 'has #relations' do
-          subject.relations.should have(8).relations
-        end
-
-        include_examples 'related task collectons after creation'
-      end
-
-    end
-
-    let(:removal_date) { 2.day.from_now }
-
-    let(:with_unrelated_after_creation) do
-      opts = {on: removal_date}
-      with_related_after_creation.tap do |t|
-        t.remove_project        project2,   opts
-        t.remove_dependent_task dependent2, opts
-        t.remove_blocking_task  blocking2,  opts
-        t.remove_component_task component2, opts
-      end
-    end
-
-    context 'removed after addition on future date' do
-      context 'seen from addition date' do
-        subject { with_unrelated_after_creation.as_of addition_date }
-
-        it 'has #relations' do
-          subject.relations.should have(8).relations
-        end
-
-        include_examples 'related task collectons after creation'
-      end
-
-      context 'seen from removal date' do
-        subject { with_unrelated_after_creation.as_of removal_date }
-
-        it 'has #relations' do
-          subject.relations.should have(8).relations
-        end
-
-        include_examples 'related task collectons on creation'
+    describe '#with_connected_tasks_and_relations' do
+      it 'returns its connected relation, tasks, and self' do
+        tasks, rels = task.with_connected_tasks_and_relations
+        tasks.to_a.should match_array [task, related_task1, related_task2]
+        rels.to_a.should match_array [relation1, relation2]
       end
     end
   end
 
+
+  describe '#update_related_tasks' do
+    context 'without existing relations' do
+      describe 'adding new relations' do
+        let(:updates) { {
+          supertasks_name: [related_task1],
+          subtasks_name: [related_task2]} }
+
+        let(:new_relations) do
+          task.update_related_tasks updates, on: addition_date
+        end
+        specify { new_relations.should have(2).relations }
+
+        let(:relation1) {
+          new_relations.find{ |r| r.supertask == related_task1 } }
+        let(:relation2) {
+          new_relations.find{ |r| r.subtask == related_task2 } }
+
+        specify { relation1.subtask.should be task }
+        specify { relation2.supertask.should be task }
+
+        specify { relation1.type.should be :relation_type }
+        specify { relation2.type.should be :relation_type }
+
+        specify { relation1.added_on.should eq addition_date }
+        specify { relation2.added_on.should eq addition_date }
+      end
+    end
+
+    context 'with exisiting relations' do
+      let(:existing_updates) { {
+        supertasks_name: [related_task1],
+        subtasks_name: [related_task2]} }
+
+      before do
+        task.update_related_tasks existing_updates, on: addition_date
+      end
+
+      describe 'adding another task' do
+        let(:new_related_task) { create_task(:new_related_task) }
+        let(:new_addition_date) { addition_date + 1.day }
+
+        let(:updates) { {
+          supertasks_name: [related_task1],
+          subtasks_name: [related_task2, new_related_task]} }
+
+        let!(:new_relations) do
+          task.update_related_tasks updates, on: new_addition_date
+        end
+        specify { task.relations.should have(3).relations }
+        specify { new_relations.should have(1).relation }
+
+        let(:new_relation) { new_relations.first }
+
+        specify { new_relation.subtask.should be new_related_task }
+        specify { new_relation.supertask.should be task }
+
+        specify { new_relation.type.should be :relation_type }
+
+        specify { new_relation.added_on.should eq new_addition_date }
+      end
+    end
+  end
+
+  describe '#destroy_relations', :pending
 end

@@ -81,15 +81,20 @@ module Graph
     end
 
 
+    def edge_added(edge)
+    end
+
     def add_incoming edge
       if @edges.add? edge
         edge.nodes.child = node
+        edge_added edge
       end
     end
 
     def add_outgoing edge
       if @edges.add? edge
         edge.nodes.parent = node
+        edge_added edge
       end
     end
 

@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe Task::Relation do
   class TaskStub
-    include Graph::Node
+    def edges
+      @edges ||= Graph::NodeEdges.new self
+    end
   end
 
   def create_task
@@ -41,29 +43,47 @@ describe Task::Relation do
   end
 
   context 'created with addition date' do
-    let(:relation_on)       { create_relation       on: test_date1 }
-    let(:relation_added_on) { create_relation added_on: test_date1 }
+    let(:addition_date)     { test_date1 }
+    let(:relation_on)       { create_relation       on: addition_date }
+    let(:relation_added_on) { create_relation added_on: addition_date }
+    subject(:relation) { relation_on }
 
     it 'should have passed addition date' do
-      relation_on.added_on.should eq(test_date1)
-      relation_added_on.added_on.should eq(test_date1)
+      relation_on.added_on.should eq(addition_date)
+      relation_added_on.added_on.should eq(addition_date)
     end
+    its(:removed_on) { should be_nil }
 
     it "couldn't be removed earlier than it was created" do
       expect do
-        relation_on.remove on: test_date0
+        relation.remove on: test_date0
       end.to raise_error Task::InvalidRelationError
+    end
+
+    describe 'its effective period' do
+      subject { relation.effective_period }
+      its(:left_endpoint)  { should eq(addition_date) }
+      it { should be_left_closed }
+      it { should be_right_unbounded }
     end
   end
 
   context 'created with addition and valid removal date' do
-    let(:relation) do
-      create_relation added_on: test_date1, removed_on: test_date2
+    let(:addition_date) { test_date1 }
+    let(:removal_date)  { test_date2 }
+    subject(:relation) do
+      create_relation added_on: addition_date, removed_on: removal_date
     end
 
-    it 'should have addition and removal dates' do
-      relation.added_on.should   eq(test_date1)
-      relation.removed_on.should eq(test_date2)
+    its(:added_on)   { should eq(addition_date) }
+    its(:removed_on) { should eq(removal_date) }
+
+    describe 'its effective period' do
+      subject { relation.effective_period }
+      its(:left_endpoint)  { should eq(addition_date) }
+      its(:right_endpoint) { should eq(removal_date) }
+      it { should be_left_closed }
+      it { should be_right_open }
     end
 
     it 'should allow "unremoving" by setting removal date to nil' do

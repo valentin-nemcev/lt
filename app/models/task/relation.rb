@@ -1,10 +1,19 @@
+require 'interval'
+
 module Task
   class InvalidRelationError < StandardError; end;
   class Relation
 
-    include ::Graph::Edge
+    def nodes
+      @nodes ||= ::Graph::EdgeNodes.new self
+    end
+
     include Persistable
 
+
+    def other_task(task)
+      nodes.other(task)
+    end
 
     def fields
       @fields
@@ -13,12 +22,13 @@ module Task
     attr_reader :type, :added_on, :removed_on
     def initialize(attrs={})
       @fields = {}
-      self.nodes.parent = attrs.fetch :supertask
-      self.nodes.child = attrs.fetch :subtask
+      self.id = attrs[:id]
       @type = attrs.fetch(:type).to_sym
       now = attrs.fetch(:clock, Time).current
       @added_on = attrs[:on] || attrs[:added_on] || now
       remove on: attrs[:removed_on]
+      self.nodes.parent = attrs.fetch :supertask
+      self.nodes.child = attrs.fetch :subtask
     end
 
     def remove(opts={})
@@ -37,6 +47,10 @@ module Task
 
     def subtask
       nodes.child
+    end
+
+    def effective_period
+      Interval.new left_closed: added_on, right_open: removed_on
     end
 
 

@@ -23,6 +23,7 @@ module Task
     end
 
 
+    # TODO: Cleanup and refactor
     def initialize(attrs = {})
       super
       @attribute_revisions = {}

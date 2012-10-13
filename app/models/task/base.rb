@@ -19,5 +19,8 @@ module Task
     def valid_next_states
       StateRevision.valid_next_states_for self
     end
+
+
+    has_relation :composition, supers: :projects, subs: :subtasks
   end
 end

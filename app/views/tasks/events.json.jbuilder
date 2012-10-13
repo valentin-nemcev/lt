@@ -17,4 +17,7 @@ end
 json.relation_additions @relations do |json, relation|
   json.id [relation.id, relation.subtask.id, relation.supertask.id].join('-')
   json.date relation.added_on.httpdate
+  json.relation_type relation.type
+  json.supertask_id relation.supertask.id
+  json.subtask_id   relation.subtask.id
 end
