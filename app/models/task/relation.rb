@@ -54,14 +54,23 @@ module Task
 
 
     def destroy
+      @old_supertask = self.nodes.parent
+      @old_subtask   = self.nodes.child
       self.nodes.parent = nil
-      self.nodes.child = nil
+      self.nodes.child  = nil
     end
 
 
     def inspect
-      "<#{self.class}:#{id || object_id} #{type}" \
-      " of #{supertask.inspect} - #{subtask.inspect}>"
+      id_str = id.nil? ? '' : ":#{id}"
+      subtask = self.subtask.inspect +
+        (self.subtask.nil? ? " (was #{@old_subtask.inspect})" : '')
+      supertask = self.supertask.inspect +
+        (self.supertask.nil? ? " (was #{@old_supertask.inspect})" : '')
+
+      "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str} #{type}" \
+      " of #{supertask} - #{subtask}>" \
+      " effective in #{effective_period.inspect}"
     end
 
   end
