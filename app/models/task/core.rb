@@ -9,11 +9,8 @@ module Task
     protected :fields
 
     def ==(other)
-      if other.respond_to? :fields
-        fields.equal? other.fields
-      else
-        other == self
-      end
+      # TODO: Task identity map for better comparison
+      other && other.respond_to?(:id) && other.id == self.id
     end
 
     def initialize(attrs={})
