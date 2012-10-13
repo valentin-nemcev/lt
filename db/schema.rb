@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120914133515) do
+ActiveRecord::Schema.define(:version => 20121013231648) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -29,15 +29,6 @@ ActiveRecord::Schema.define(:version => 20120914133515) do
     t.string   "updated_value"
   end
 
-  create_table "task_objective_revisions", :force => true do |t|
-    t.integer  "task_id"
-    t.string   "objective"
-    t.datetime "updated_on"
-    t.integer  "sequence_number", :null => false
-  end
-
-  add_index "task_objective_revisions", ["task_id"], :name => "index_task_objective_revisions_on_task_id"
-
   create_table "task_relations", :force => true do |t|
     t.integer  "subtask_id"
     t.integer  "supertask_id"
@@ -48,13 +39,6 @@ ActiveRecord::Schema.define(:version => 20120914133515) do
 
   add_index "task_relations", ["subtask_id"], :name => "index_task_relations_on_subtask_id"
   add_index "task_relations", ["supertask_id"], :name => "index_task_relations_on_supertask_id"
-
-  create_table "task_state_revisions", :force => true do |t|
-    t.integer  "task_id"
-    t.string   "state"
-    t.datetime "updated_on"
-    t.integer  "sequence_number", :null => false
-  end
 
   create_table "tasks", :force => true do |t|
     t.integer  "user_id"
