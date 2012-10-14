@@ -1,0 +1,3 @@
+[submodule "vendor/assets/bundle/objectDiff.js"]
+	path = vendor/assets/bundle/objectDiff.js
+	url = https://github.com/NV/objectDiff.js.git

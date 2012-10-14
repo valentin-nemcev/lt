@@ -1,3 +1,11 @@
 /*
  *=require application
+ *=require objectDiff.js/objectDiff
  */
+
+.diff-holder {
+  background-color: white;
+  border: 1px solid gray;
+  padding: 3px;
+  margin: 3px;
+}
