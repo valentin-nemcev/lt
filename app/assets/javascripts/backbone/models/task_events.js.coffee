@@ -6,13 +6,20 @@ class Lt.Models.TaskEvent extends Backbone.Model
 
   apply: ->
 
-# TODO: Add unified event date
 class Lt.Models.TaskCreation extends Lt.Models.TaskEvent
   type: 'task_creation'
   typePriority: 1
 
+  initialize: (attributes, options = {}) ->
+    @updatedTask = options.updatedTask
+
   apply: (tasks) ->
-    tasks.add(id: @get('task_id'), type: @get('task_type'))
+    attrs = id: @get('task_id'), type: @get('task_type')
+    task = tasks.getByCid @updatedTask
+    if task
+      task.set(attrs)
+    else
+      tasks.add(attrs)
 
 class Lt.Models.TaskUpdate extends Lt.Models.TaskEvent
   type: 'task_update'
@@ -39,20 +46,26 @@ class Lt.TaskEvents extends Backbone.Collection
   initialize: (models = [], params = {}) ->
     {tasks: @tasks} = params
     @on 'reset', @resetTasks, @
+    @on 'add', @applyEvent, @
 
   comparator: (event) -> event.getPositionString()
 
-  parse: (events) =>
-    creations = for creation in events.task_creations ? []
-      new Lt.Models.TaskCreation(creation)
+  addEvents: (eventsJSON, updatedTask) -> @add @parse(eventsJSON, updatedTask)
 
-    updates = for update in events.task_updates ? []
+  applyEvent: (event) -> event.apply @tasks
+
+  parse: (eventsJSON, updatedTask = null) ->
+    creations = for creation in eventsJSON.task_creations ? []
+      new Lt.Models.TaskCreation(creation, updatedTask: updatedTask)
+
+    updates = for update in eventsJSON.task_updates ? []
       new Lt.Models.TaskUpdate(update)
 
-    additions = for addition in events.relation_additions ? []
+    additions = for addition in eventsJSON.relation_additions ? []
       new Lt.Models.RelationAddition(addition)
 
     return creations.concat(updates).concat(additions)
 
   resetTasks: ->
-    event.apply(@tasks) for event in @models
+    @applyEvent(event) for event in @models
+

@@ -13,12 +13,14 @@ describe 'Tasks', ->
   beforeEach ->
     tasks = new Lt.Collections.Tasks
     taskEvents = new Lt.TaskEvents([], tasks: tasks)
+    tasks.events = taskEvents
 
     server = sinon.fakeServer.create()
 
   afterEach ->
     server.restore()
 
+  jsonRequest = (body) -> JSON.parse(body)
   jsonResponse = (obj, status = 200) ->
     [status, {"Content-Type": "application/json"}, JSON.stringify(obj)]
 
@@ -108,4 +110,59 @@ describe 'Tasks', ->
       server.respond()
 
       expect(taskEvents.length).toBe(8)
+      expect(tasks.toJSON()).toEqualProperties(expectedTasks)
+
+  describe 'Create', ->
+    it 'posts a tasks and handles response', ->
+      taskEventsResponseJSON =
+        task_creations: [
+          id             : 'creation1'
+          task_id        : 'action1'
+          task_type      : 'action'
+          date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
+        ]
+        task_updates: [
+          id             : 'update1'
+          task_id        : 'action1'
+          attribute_name : 'state'
+          updated_value  : 'considered'
+          date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
+        ,
+          id             : 'update2'
+          task_id        : 'action1'
+          attribute_name : 'objective'
+          updated_value  : 'Test objective'
+          date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
+        ]
+
+      expectedTasks = [
+        id           : 'action1'
+        type         : 'action'
+        objective    : 'Test objective'
+        state        : 'considered'
+        subtaskIds   : []
+        supertaskIds : []
+      ]
+
+      expectedTaskRequestJSON =
+        type         : 'action'
+        objective    : 'Test objective'
+        state        : 'considered'
+        subtaskIds   : []
+        supertaskIds : []
+
+      actualTaskRequestJSON = null
+      server.respondWith 'POST', '/tasks', (request) ->
+        actualTaskRequestJSON = jsonRequest request.requestBody
+        request.respond jsonResponse(taskEventsResponseJSON)...
+
+      tasks.create
+        type      : 'action'
+        objective : 'Test objective'
+        state     : 'considered'
+
+      server.respond()
+
+      expect(actualTaskRequestJSON).toEqualProperties(expectedTaskRequestJSON)
+
       expect(tasks.toJSON()).toEqualProperties(expectedTasks)

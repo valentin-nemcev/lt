@@ -29,6 +29,7 @@ window.Lt =
   initTaskView: (selector, tasks, taskViewState) ->
     @tasks = new Lt.Collections.Tasks
     @taskEvents = new Lt.TaskEvents([], tasks: @tasks)
+    @tasks.events = @taskEvents
     @taskEvents.fetch()
     # @bindTasksToTimeline()
 

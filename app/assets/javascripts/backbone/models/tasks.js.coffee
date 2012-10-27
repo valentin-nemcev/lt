@@ -1,6 +1,6 @@
 class Lt.Models.Task extends Backbone.Model
 
-  initialize: ->
+  initialize: (attributes, options) ->
     @on 'change:id', @onChangeId, @
     @onChangeId(this, @id, silent: true)
 
@@ -10,6 +10,8 @@ class Lt.Models.Task extends Backbone.Model
     @onAdd(this, @collection)
 
     @_initializeRelatedTasks()
+
+  parse: (eventsJSON) -> @collection.events.addEvents(eventsJSON, this); {}
 
   getState: ->
     @state
