@@ -4,16 +4,18 @@ class Lt.Models.TaskEvent extends Backbone.Model
     type = @typePriority + @type
     date + ' ' + type
 
+  apply: ->
+
 # TODO: Add unified event date
 class Lt.Models.TaskCreation extends Lt.Models.TaskEvent
-  type: 'creation'
+  type: 'task_creation'
   typePriority: 1
 
   apply: (tasks) ->
     tasks.add(id: @get('task_id'), type: @get('task_type'))
 
 class Lt.Models.TaskUpdate extends Lt.Models.TaskEvent
-  type: 'update'
+  type: 'task_update'
   typePriority: 2
 
   apply: (tasks) ->
@@ -21,10 +23,20 @@ class Lt.Models.TaskUpdate extends Lt.Models.TaskEvent
     task or throw "No creation event for task " + @get('task_id')
     task.set(@get('attribute_name'), @get('updated_value'))
 
+class Lt.Models.RelationAddition extends Lt.Models.TaskEvent
+  type: 'relation_addition'
+
+  apply: (tasks) ->
+    supertask = tasks.get(@get('supertask_id'))
+    subtask   = tasks.get(@get('subtask_id'))
+
+    supertask.addSubtask subtask.id
+    subtask.addSupertask supertask.id
+
 class Lt.TaskEvents extends Backbone.Collection
   url: '/tasks'
 
-  initialize: (models, params) ->
+  initialize: (models = [], params = {}) ->
     {tasks: @tasks} = params
     @on 'reset', @resetTasks, @
 
@@ -37,7 +49,10 @@ class Lt.TaskEvents extends Backbone.Collection
     updates = for update in events.task_updates ? []
       new Lt.Models.TaskUpdate(update)
 
-    return creations.concat updates
+    additions = for addition in events.relation_additions ? []
+      new Lt.Models.RelationAddition(addition)
+
+    return creations.concat(updates).concat(additions)
 
   resetTasks: ->
     event.apply(@tasks) for event in @models

@@ -1,3 +1,6 @@
+# TODO: Remove this
+# TODO: Reorganize and isolate namespaces
+
 class Lt.Models.Task extends Backbone.Model
   paramRoot: 'task'
 
@@ -130,8 +133,4 @@ class Lt.Collections.Subtasks extends Backbone.FilteredCollection
   modelFilter: (task) ->
     task.has('project_id') and task.get('project_id') == @project.id
 
-class Lt.Collections.RootTasks extends Backbone.FilteredCollection
-
-  modelFilter: (task) ->
-    not task.has('project_id')
 

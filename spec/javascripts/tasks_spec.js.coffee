@@ -37,57 +37,68 @@ describe 'Tasks', ->
       taskEventsJSON =
         task_creations: [
           id         : '1'
-          task_id    : 1
+          task_id    : 'action1'
           task_type  : 'action'
           date       : 'Tue, 18 Sep 2012 16:00:00 GMT'
         ,
           id         : '2'
-          task_id    : 2
+          task_id    : 'project1'
           task_type  : 'project'
           date       : 'Thu, 20 Sep 2012 17:00:00 GMT'
         ]
         task_updates: [
           id             : 'update1'
-          task_id        : 1
+          task_id        : 'action1'
           date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
           attribute_name : 'state'
           updated_value  : 'considered'
         ,
           id             : 'update2'
-          task_id        : 1
+          task_id        : 'action1'
           date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
           attribute_name : 'objective'
           updated_value  : 'New objective'
         ,
           id             : 'update3'
-          task_id        : 2
+          task_id        : 'project1'
           date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
           attribute_name : 'state'
           updated_value  : 'underway'
         ,
           id             : 'update4'
-          task_id        : 2
+          task_id        : 'project1'
           date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
           attribute_name : 'objective'
           updated_value  : 'Project objective'
         ,
           id             : 'update5'
-          task_id        : 2
+          task_id        : 'project1'
           date           : 'Thu, 20 Sep 2012 18:00:00 GMT'
           attribute_name : 'objective'
           updated_value  : 'Updated project objective'
         ].reverse()
+        relation_additions: [
+          id            : 'relation_addition1'
+          date          : 'Thu, 20 Sep 2012 17 : 00 : 00 GMT'
+          relation_type : 'composition'
+          supertask_id  : 'project1'
+          subtask_id    : 'action1'
+        ]
 
       expectedTasks = [
-        id        : 1
-        type      : 'action'
-        state     : 'considered'
-        objective : 'New objective'
+        id           : 'action1'
+        type         : 'action'
+        state        : 'considered'
+        objective    : 'New objective'
+        supertaskIds : ['project1']
+        subtaskIds   : []
       ,
-        id        : 2
-        type      : 'project'
-        state     : 'underway'
-        objective : 'Updated project objective'
+        id           : 'project1'
+        type         : 'project'
+        state        : 'underway'
+        objective    : 'Updated project objective'
+        supertaskIds : []
+        subtaskIds   : ['action1']
       ]
 
       server.respondWith 'GET', '/tasks', (request) ->
@@ -96,6 +107,5 @@ describe 'Tasks', ->
       taskEvents.fetch()
       server.respond()
 
-      expect(taskEvents.length).toBe(7)
-      expect(tasks.toJSON()).toEqual(expectedTasks)
-
+      expect(taskEvents.length).toBe(8)
+      expect(tasks.toJSON()).toEqualProperties(expectedTasks)
