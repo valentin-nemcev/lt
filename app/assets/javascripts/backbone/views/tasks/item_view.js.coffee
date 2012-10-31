@@ -26,7 +26,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
         records: 'subtasks'
 
   newSubtask: ->
-    @model.collection.add project_id: @model.id
+    @model.newSubtask()
 
   delete: ->
     @model.destroy()

@@ -84,6 +84,6 @@ describe 'RelationAddition', ->
 
     event.apply(tasks)
 
-    expect(supertask.addSubtask).toHaveBeenCalledWith('subtask1')
-    expect(subtask.addSupertask).toHaveBeenCalledWith('supertask1')
+    expect(supertask.addSubtask).toHaveBeenCalledWith(subtask)
+    expect(subtask.addSupertask).toHaveBeenCalledWith(supertask)
 

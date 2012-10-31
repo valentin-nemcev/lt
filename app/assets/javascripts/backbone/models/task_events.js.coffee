@@ -37,8 +37,8 @@ class Lt.Models.RelationAddition extends Lt.Models.TaskEvent
     supertask = tasks.get(@get('supertask_id'))
     subtask   = tasks.get(@get('subtask_id'))
 
-    supertask.addSubtask subtask.id
-    subtask.addSupertask supertask.id
+    supertask.addSubtask subtask
+    subtask.addSupertask supertask
 
 class Lt.TaskEvents extends Backbone.Collection
   url: '/tasks'

@@ -1,6 +1,6 @@
 class Lt.Models.Task extends Backbone.Model
 
-  initialize: (attributes, options) ->
+  initialize: (attributes = {}, options = {}) ->
     @on 'change:id', @onChangeId, @
     @onChangeId(this, @id, silent: true)
 
@@ -9,7 +9,7 @@ class Lt.Models.Task extends Backbone.Model
     @on 'add', @onAdd, @
     @onAdd(this, @collection)
 
-    @_initializeRelatedTasks()
+    @_initializeRelatedTasks(attributes)
 
   parse: (eventsJSON) -> @collection.events.addEvents(eventsJSON, this); {}
 
@@ -17,9 +17,6 @@ class Lt.Models.Task extends Backbone.Model
     @state
 
   onAdd: (model, collection, options = {}) ->
-    return unless collection?
-    model.subtasksCollection ?=
-      new Lt.Collections.Subtasks collection, project: model
 
   onDestroy: (model, collection, options = {}) ->
     @setState 'deleted', options
@@ -34,7 +31,7 @@ class Lt.Models.Task extends Backbone.Model
 
   isValidNextState: (state) -> yes
 
-  _initializeRelatedTasks: ->
+  _initializeRelatedTasks: (attributes) ->
     @set
       supertaskIds: []
       subtaskIds:   []
@@ -42,15 +39,18 @@ class Lt.Models.Task extends Backbone.Model
     @subtaskCollection   = new Lt.Collections.RelatedTasks
     @supertaskCollection = new Lt.Collections.RelatedTasks
 
+  newSubtask: (attributes = {}, options = {})->
+    options.collection ?= @collection
+    subtask = new @collection.model attributes, options
+    subtask.addSupertask this
+    this.addSubtask subtask
+    @collection.add(subtask)
+    subtask
+
   addSupertask: (tasks...) -> @_addRelated('supertask', tasks)
   addSubtask:   (tasks...) -> @_addRelated('subtask'  , tasks)
 
   _addRelated: (field, tasks) ->
-    tasks = _.chain(tasks)
-      .map((task) => @collection.get(task))
-      .compact()
-      .value()
-
     collection = @[field + 'Collection']
     collection.add tasks
     @set(field + 'Ids', collection.pluck('id'))
