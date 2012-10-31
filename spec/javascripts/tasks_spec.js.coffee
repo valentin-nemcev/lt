@@ -88,19 +88,19 @@ describe 'Tasks', ->
         ]
 
       expectedTasks = [
-        id           : 'action1'
-        type         : 'action'
-        state        : 'considered'
-        objective    : 'New objective'
-        supertaskIds : ['project1']
-        subtaskIds   : []
+        id            : 'action1'
+        type          : 'action'
+        state         : 'considered'
+        objective     : 'New objective'
+        supertask_ids : {composition: ['project1']}
+        subtask_ids   : {}
       ,
-        id           : 'project1'
-        type         : 'project'
-        state        : 'underway'
-        objective    : 'Updated project objective'
-        supertaskIds : []
-        subtaskIds   : ['action1']
+        id            : 'project1'
+        type          : 'project'
+        state         : 'underway'
+        objective     : 'Updated project objective'
+        supertask_ids : {}
+        subtask_ids   : {composition: ['action1']}
       ]
 
       server.respondWith 'GET', '/tasks', (request) ->
@@ -136,20 +136,20 @@ describe 'Tasks', ->
         ]
 
       expectedTasks = [
-        id           : 'action1'
-        type         : 'action'
-        objective    : 'Test objective'
-        state        : 'considered'
-        subtaskIds   : []
-        supertaskIds : []
+        id            : 'action1'
+        type          : 'action'
+        objective     : 'Test objective'
+        state         : 'considered'
+        subtask_ids   : {}
+        supertask_ids : {}
       ]
 
       expectedTaskRequestJSON =
-        type         : 'action'
-        objective    : 'Test objective'
-        state        : 'considered'
-        subtaskIds   : []
-        supertaskIds : []
+        type          : 'action'
+        objective     : 'Test objective'
+        state         : 'considered'
+        subtask_ids   : {}
+        supertask_ids : {}
 
       actualTaskRequestJSON = null
       server.respondWith 'POST', '/tasks', (request) ->

@@ -31,41 +31,67 @@ class Lt.Models.Task extends Backbone.Model
 
   isValidNextState: (state) -> yes
 
+  collectionsToIds = (collections) ->
+    ids = {}
+    for type, collection of collections
+      ids["#{field}_#{type}"] = collection.pluck('id')
+    ids
+
+  # TODO: Maybe use https://github.com/powmedia/backbone-deep-model
+  toJSON: ->
+    attrs = super
+    for field in ['supertask', 'subtask']
+      attrs["#{field}_ids"] = {}
+      collections = @["_#{field}s"]
+      for type, collection of collections
+        ids = attrs["#{field}s_#{type}"]
+        attrs["#{field}_ids"][type] = ids if ids?
+        delete attrs["#{field}s_#{type}"]
+
+    attrs
+
   _initializeRelatedTasks: (attributes) ->
-    @set
-      supertaskIds: []
-      subtaskIds:   []
+    @_supertasks = {}
+    @_subtasks   = {}
 
-    @subtaskCollection   = new Lt.Collections.RelatedTasks
-    @supertaskCollection = new Lt.Collections.RelatedTasks
-
-  newSubtask: (attributes = {}, options = {})->
+  newSubtask: (type, attributes = {}, options = {})->
     options.collection ?= @collection
     subtask = new @collection.model attributes, options
-    subtask.addSupertask this
-    this.addSubtask subtask
+    subtask.addSupertask type, this
+    this.addSubtask type, subtask
     @collection.add(subtask)
     subtask
 
-  addSupertask: (tasks...) -> @_addRelated('supertask', tasks)
-  addSubtask:   (tasks...) -> @_addRelated('subtask'  , tasks)
+  addSupertask: (type, tasks...) -> @_addRelated('supertasks', type, tasks)
+  addSubtask:   (type, tasks...) -> @_addRelated('subtasks'  , type, tasks)
 
-  _addRelated: (field, tasks) ->
-    collection = @[field + 'Collection']
+  getSupertasks: (type) -> @_getRelated('supertasks', type)
+  getSubtasks:   (type) -> @_getRelated('subtasks'  , type)
+
+  _getRelated: (field, type) ->
+    collections = @['_' + field]
+    collections[type] ?= new Lt.Collections.RelatedTasks
+
+  _addRelated: (field, type, tasks) ->
+    collection = @_getRelated(field, type)
     collection.add tasks
-    @set(field + 'Ids', collection.pluck('id'))
+    @set "#{field}_#{type}", collection.pluck('id')
+    this
 
 class Lt.Collections.Tasks extends Backbone.Collection
   url: '/tasks'
   model: Lt.Models.Task
 
   initialize: ->
-    @rootTasks = new Lt.Collections.RootTasks this
+    @rootTasks = {}
+
+  relationFilterFor: (relationType) ->
+    (task) -> task.getSupertasks(relationType).length == 0
+
+  getRootTasksFor: (relationType) ->
+    @rootTasks[relationType] ?= new Backbone.FilteredCollection this,
+      modelFilter: @relationFilterFor(relationType)
 
 class Lt.Collections.RelatedTasks extends Backbone.Collection
   model: Lt.Models.Task
-
-class Lt.Collections.RootTasks extends Backbone.FilteredCollection
-  modelFilter: (task) ->
-    not task.get('supertaskIds').length
 

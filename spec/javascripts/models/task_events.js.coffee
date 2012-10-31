@@ -78,12 +78,15 @@ describe 'RelationAddition', ->
     tasks.add [supertask, subtask]
 
     event = new Lt.Models.RelationAddition
-      id           : 'event1'
-      supertask_id : 'supertask1'
-      subtask_id   : 'subtask1'
+      id            : 'event1'
+      relation_type : 'relation_type'
+      supertask_id  : 'supertask1'
+      subtask_id    : 'subtask1'
 
     event.apply(tasks)
 
-    expect(supertask.addSubtask).toHaveBeenCalledWith(subtask)
-    expect(subtask.addSupertask).toHaveBeenCalledWith(supertask)
+    expect(supertask.addSubtask)
+      .toHaveBeenCalledWith('relation_type', subtask)
+    expect(subtask.addSupertask)
+      .toHaveBeenCalledWith('relation_type', supertask)
 

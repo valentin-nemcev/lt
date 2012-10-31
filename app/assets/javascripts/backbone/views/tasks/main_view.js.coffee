@@ -6,7 +6,7 @@ class Views.MainView extends Backbone.View
 
   initialize: ->
     @listView = new Views.ListView
-      collection: @collection.rootTasks
+      collection: @collection.getRootTasksFor 'composition'
       attributes:
         records: 'root-tasks'
 

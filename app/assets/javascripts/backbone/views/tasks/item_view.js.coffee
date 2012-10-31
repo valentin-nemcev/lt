@@ -21,12 +21,12 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @formView.on 'close', => @toggleForm(off)
 
     @subtasksView = new Views.ListView
-      collection: @model.subtaskCollection
+      collection: @model.getSubtasks('composition')
       attributes:
         records: 'subtasks'
 
   newSubtask: ->
-    @model.newSubtask()
+    @model.newSubtask('composition')
 
   delete: ->
     @model.destroy()

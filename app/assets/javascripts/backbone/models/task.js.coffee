@@ -96,7 +96,8 @@ class Lt.Collections.TasksCollection extends Backbone.Collection
 
 
 class Backbone.FilteredCollection extends Backbone.Collection
-  constructor: (@sourceCollection, params)->
+  constructor: (@sourceCollection, params = {})->
+    @modelFilter ?= params.modelFilter
     super(@sourceCollection.models, params)
     @sourceCollection.bind 'add'    , @add    , @
     @sourceCollection.bind 'change' , @change , @
