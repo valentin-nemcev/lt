@@ -53,9 +53,9 @@ describe 'Task with relations' do
   describe '#update_related_tasks' do
     context 'without existing relations' do
       describe 'adding new relations' do
-        let(:updates) { {
-          supertasks_name: [related_task1],
-          subtasks_name: [related_task2]} }
+        let(:updates) { { relation_type: {
+          supertasks: [related_task1],
+          subtasks:   [related_task2]}} }
 
         let(:new_relations) do
           task.update_related_tasks updates, on: addition_date
@@ -79,9 +79,9 @@ describe 'Task with relations' do
     end
 
     context 'with exisiting relations' do
-      let(:existing_updates) { {
-        supertasks_name: [related_task1],
-        subtasks_name: [related_task2]} }
+      let(:existing_updates) { { relation_type: {
+        supertasks: [related_task1],
+        subtasks:   [related_task2]}} }
 
       before do
         task.update_related_tasks existing_updates, on: addition_date
@@ -91,9 +91,9 @@ describe 'Task with relations' do
         let(:new_related_task) { create_task(:new_related_task) }
         let(:new_addition_date) { addition_date + 1.day }
 
-        let(:updates) { {
-          supertasks_name: [related_task1],
-          subtasks_name: [related_task2, new_related_task]} }
+        let(:updates) { { relation_type: {
+          supertasks: [related_task1],
+          subtasks:   [related_task2, new_related_task]}} }
 
         let!(:new_relations) do
           task.update_related_tasks updates, on: new_addition_date

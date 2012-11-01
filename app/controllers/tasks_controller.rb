@@ -18,7 +18,7 @@ class TasksController < ApplicationController
   def create
     @task = Task.new_subtype task_params[:type],
       task_attrs.merge(on: effective_date)
-    @task.update_related_tasks fetch_related_tasks(task_related_ids),
+    @task.update_related_tasks fetch_related_tasks(task_params),
       on: effective_date
 
     storage.store @task
@@ -38,7 +38,7 @@ class TasksController < ApplicationController
       on: effective_date
 
     updated_relations =
-      @task.update_related_tasks fetch_related_tasks(task_related_ids),
+      @task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
 
     storage.store @task
@@ -62,17 +62,11 @@ class TasksController < ApplicationController
   protected
 
   def task_params
-    params[:task]
+    params[:task].symbolize_keys
   end
 
   def task_attrs
-    task_params.symbolize_keys.slice(*Task::Base.revisable_attributes)
-  end
-
-  def task_related_ids
-    related_tasks_with_ids =
-      Task::Base.related_tasks.map{ |k| "#{k.to_s.singularize}_ids".to_sym }
-    task_params.symbolize_keys.slice(*related_tasks_with_ids)
+    task_params.slice(*Task::Base.revisable_attributes)
   end
 
   def effective_date

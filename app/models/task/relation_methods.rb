@@ -26,25 +26,23 @@ module Task
     end
 
     def update_related_tasks(new_related_tasks = {}, opts = {})
-      new_related_tasks.flat_map do |relation_name, tasks|
-        tasks.map do
-          |task| add_relation(relation_name, task, opts)
-        end.compact
+      new_related_tasks.flat_map do |relation_type, related|
+        related.flat_map do |relation, tasks|
+          tasks.map { |task|
+            add_relation(relation_type, relation, task, opts)
+          }.compact
+        end
       end
     end
 
-    def add_relation(name, task, additional_opts)
-      relation_opts = relation_opts_for(name)
-      related_tasks = case relation_opts[:relation]
-                      when :sub   then {subtask: task, supertask: self}
-                      when :super then {subtask: self, supertask: task}
+    def add_relation(type, relation, task, additional_opts)
+      related_tasks = case relation
+                      when :supertasks then {subtask: self, supertask: task}
+                      when :subtasks   then {subtask: task, supertask: self}
                       else {}
                       end
-      Relation.new [
-        related_tasks,
-        {type: relation_opts[:type]},
-        additional_opts
-      ].inject(&:merge)
+      params = [related_tasks, {type: type}, additional_opts].inject(&:merge)
+      Relation.new params
     rescue Relations::DuplicateRelationError
     end
 

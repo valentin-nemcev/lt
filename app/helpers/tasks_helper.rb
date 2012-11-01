@@ -1,9 +1,17 @@
 module TasksHelper
-  def fetch_related_tasks(related_ids_hash)
-    Hash[related_ids_hash.map{ |rel_ids_name, ids|
-      rel_name = rel_ids_name.to_s.sub(/_ids$/, '').pluralize.to_sym
-      tasks = ids.map{ |id| storage.fetch id }
-      [rel_name, tasks]
-    }]
+  def fetch_related_tasks(params)
+    tasks = Hash.new do |tasks, rel_name|
+      tasks[rel_name] = {supertasks: [], subtasks: [] }
+    end
+    {
+      :supertask_ids => :supertasks,
+      :subtask_ids => :subtasks
+    }.each do |rel_ids, rel|
+      params.fetch(rel_ids, {}).each do |rel_name, ids|
+        rel_tasks = ids.map{ |id| storage.fetch id }
+        tasks[rel_name][rel] = rel_tasks
+      end
+    end
+    tasks
   end
 end

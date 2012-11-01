@@ -55,10 +55,10 @@ describe 'tasks', :api do
 
 
   let(:new_action_fields) {{
-    type:        'action',
-    project_ids: [project_id],
-    objective:   'New action objective',
-    state:       'considered',
+    type:          'action',
+    supertask_ids: {composition: [project_id]},
+    objective:     'New action objective',
+    state:         'considered',
   }}
 
   let(:action_creation_date) { Time.zone.parse('2012-01-01 10:00').httpdate }
