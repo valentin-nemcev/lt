@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/rspec/rspec-core.git
   revision: 35eb45a6b5eaec7377c04ef6c51b857c97704349
+  ref: 35eb45a6b5eaec7377c04ef6c51b857c97704349
   specs:
     rspec-core (2.11.1)
 
@@ -79,7 +80,7 @@ GEM
     eco-source (1.1.0.rc.1)
     ejs (1.0.0)
     erubis (2.7.0)
-    eventmachine (0.12.10)
+    eventmachine (1.0.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
     faye-websocket (0.4.6)
@@ -130,7 +131,7 @@ GEM
     net-ssh-gateway (1.1.0)
       net-ssh (>= 1.99.1)
     nokogiri (1.5.5)
-    poltergeist (0.7.0)
+    poltergeist (1.0.2)
       capybara (~> 1.1)
       childprocess (~> 0.3)
       faye-websocket (~> 0.4, >= 0.4.4)
@@ -238,7 +239,7 @@ DEPENDENCIES
   jbuilder (~> 0.4.0)
   jquery-rails (~> 2.1.0)
   mysql2 (~> 0.3.11)
-  poltergeist (~> 0.7.0)
+  poltergeist (~> 1.0.0)
   rails (~> 3.2.2)
   rails-backbone (~> 0.7.0)
   rspec-core (= 2.11.1)!

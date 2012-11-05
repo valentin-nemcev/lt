@@ -30,7 +30,10 @@ group :development, :test do
   gem 'rvm-capistrano',    '~> 1.2.0'
 
   # Fix for recursive subject, it should be released in 2.11.2
-  gem 'rspec-core',  '=  2.11.1', git: 'https://github.com/rspec/rspec-core.git'
+  gem 'rspec-core',  '=  2.11.1',
+    git: 'https://github.com/rspec/rspec-core.git',
+    ref: '35eb45a6b5eaec7377c04ef6c51b857c97704349'
+
   gem 'rspec-rails', '~> 2.11.0'
 
   gem 'guard-jasmine', '~> 1.8.1'
@@ -38,7 +41,7 @@ group :development, :test do
   gem 'sinon-rails'  , '~> 1.4.2'
 
   gem 'capybara',    '~> 1.1.2'
-  gem 'poltergeist', '~> 0.7.0'
+  gem 'poltergeist', '~> 1.0.0'
   gem 'database_cleaner', '~> 0.8.0'
   gem 'spork-rails', '~> 3.2.0'
 end
