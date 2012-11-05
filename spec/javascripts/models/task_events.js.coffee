@@ -72,8 +72,8 @@ describe 'RelationAddition', ->
     supertask = new Backbone.Model id: 'supertask1'
     subtask   = new Backbone.Model id: 'subtask1'
 
-    supertask.addSubtask = jasmine.createSpy('addSubtask')
-    subtask.addSupertask = jasmine.createSpy('addSupertask')
+    supertask.addSubtask = sinon.spy()
+    subtask.addSupertask = sinon.spy()
 
     tasks.add [supertask, subtask]
 
