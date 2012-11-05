@@ -53,13 +53,15 @@ class Lt.Models.Task extends Backbone.Model
   _initializeRelatedTasks: (attributes) ->
     @_supertasks = {}
     @_subtasks   = {}
+    @addSupertask(type, tasks...) for type, tasks of attributes.supertasks ? {}
+    @addSubtask(type, tasks...)   for type, tasks of attributes.subtasks   ? {}
 
   newSubtask: (type, attributes = {}, options = {})->
-    options.collection ?= @collection
+    attributes.supertasks ?= {}
+    attributes.supertasks[type] = [this]
     subtask = new @collection.model attributes, options
-    subtask.addSupertask type, this
-    this.addSubtask type, subtask
     @collection.add(subtask)
+    this.addSubtask type, subtask
     subtask
 
   addSupertask: (type, tasks...) -> @_addRelated('supertasks', type, tasks)

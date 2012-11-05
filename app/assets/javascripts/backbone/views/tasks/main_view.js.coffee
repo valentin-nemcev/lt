@@ -5,8 +5,10 @@ class Views.MainView extends Backbone.View
   template: JST['backbone/templates/tasks/main']
 
   initialize: ->
+    rootTasks = @collection.getRootTasksFor 'composition'
+
     @listView = new Views.ListView
-      collection: @collection.getRootTasksFor 'composition'
+      collection: rootTasks
       attributes:
         records: 'root-tasks'
 

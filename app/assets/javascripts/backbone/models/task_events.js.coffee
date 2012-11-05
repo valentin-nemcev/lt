@@ -56,6 +56,7 @@ class Lt.TaskEvents extends Backbone.Collection
   applyEvent: (event) -> event.apply @tasks
 
   parse: (eventsJSON, updatedTask = null) ->
+    updatedTask = null unless updatedTask.cid?
     creations = for creation in eventsJSON.task_creations ? []
       new Lt.Models.TaskCreation(creation, updatedTask: updatedTask)
 

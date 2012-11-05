@@ -42,19 +42,38 @@ describe 'Task', ->
       expect(sortedIdsOf supertasks1).toEqual(['supertask1'])
       expect(sortedIdsOf supertasks2).toEqual(['supertask2', 'supertask3'])
 
+    it 'adds subtask only once', ->
+      tasks = new Lt.Collections.Tasks
+      rootTasks = tasks.getRootTasksFor('relation')
+      rootTasks.on 'add', rootTaskAdded = sinon.spy(
+        (task) -> console.log task.id
+      )
+      project = new Lt.Models.Task id: 'project1'
+      tasks.add(project)
+
+
+      project.getSubtasks('relation').on 'add', subtaskAdded = sinon.spy()
+      project.newSubtask('relation', id: 'action1')
+      expect(subtaskAdded).toHaveBeenCalledOnce()
+      expect(rootTaskAdded).toHaveBeenCalledOnce()
+
+
+
+
     it 'makes new subtasks', ->
+      Lt.Models.Task::toString = -> 'test'
       tasks = new Lt.Collections.Tasks
       supertask = new Lt.Models.Task id: 'supertask1'
       tasks.add supertask
       subtask = supertask.newSubtask('relation', id: 'subtask1')
 
-      expect(tasks.get('subtask1')).toBe(subtask)
+      expect(tasks.get('subtask1').id).toBe('subtask1')
       expect(tasks.getRootTasksFor('relation').get 'subtask1')
         .toBeUndefined()
-      expect(supertask.getSubtasks('relation').get 'subtask1')
-        .toBe(subtask)
-      expect(subtask.getSupertasks('relation').get 'supertask1')
-        .toBe(supertask)
+      expect(supertask.getSubtasks('relation').get('subtask1').id)
+        .toBe('subtask1')
+      expect(subtask.getSupertasks('relation').get('supertask1').id)
+        .toBe('supertask1')
 
 describe 'Tasks', ->
   it 'has root tasks', ->
