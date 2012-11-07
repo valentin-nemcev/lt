@@ -33,7 +33,7 @@ module Acceptance::Task
     end
 
     def fill_form(fields={})
-      @node.find('[form=new-task], [form=update-task]').tap do |form|
+      task_node.find('[form=new-task], [form=update-task]').tap do |form|
         fields[:type].try{ |type| form.find('[input=type]').set_option type }
         fields[:state].try{ |state|
           form.find('[input=state]').set_option state
@@ -46,7 +46,9 @@ module Acceptance::Task
     end
 
     def persisted?
-      @node.matches_selector?('[record-state=persisted]')
+      @node.session.wait_until do
+        @node['record-state'] == 'persisted'
+      end
     end
 
     def new_project_sn
@@ -67,24 +69,31 @@ module Acceptance::Task
                                 objective: "Action #{new_action_sn}")
     end
 
-    def selected?
-      xpath = Nokogiri::CSS.xpath_for('> .task.selected').first
-      @node.has_selector?(:xpath, xpath)
+    def subtasks_node
+      return @subtasks_node if @subtasks_node
+      xpath = Nokogiri::CSS.xpath_for('> [records="subtasks"]').first
+      @subtasks_node = @node.find :xpath, xpath
+    end
+
+    def task_node
+      return @task_node if @task_node
+      xpath = Nokogiri::CSS.xpath_for('> .task').first
+      @task_node = @node.find :xpath, xpath
     end
 
     def select
-      @node.find('[control=select]').click unless selected?
+      task_node.has_selector?('[control=select]') and
+        task_node.find('[control=select]').click
     end
 
     def update
-      @node.find("[control=update]").click
+      task_node.find("[control=update]").click
     end
 
     def new_sub_task(fields = {})
       select
-      @node.find('[control=new-subtask]').click
-      sub_task_node = @node.find('[records=subtasks]')
-        .find('[record=task][record-state=new]')
+      task_node.find('[control=new-subtask]').click
+      sub_task_node = subtasks_node.find('[record=task][record-state=new]')
       Record.new(node: sub_task_node).tap do |sub_task_record|
         sub_task_record.fill_form fields
         sub_task_record.persisted? or fail 'Sub-task was not created'
@@ -98,7 +107,16 @@ module Acceptance::Task
     end
 
     def has_state?(state)
-      @node.matches_selector?("[task-state='#{state}']")
+      @node.session.wait_until do
+        @node['task-state'] == state
+      end
+    end
+
+    def inspect
+      attrs = %w{id record-id record-state task-type task-state}.map do |el|
+        "#{el}=#{@node[el]}"
+      end.join(' ')
+      "#<task element: #{attrs}>"
     end
   end
 end
