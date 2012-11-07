@@ -42,9 +42,15 @@ module AcceptanceHelpers
     visit current_path
   end
 
+  def debug
+    page.driver.debug
+  end
+
+  def screenshot
+    page.driver.render('public/page.png')
+  end
+
   def pause
-    # page.driver.render('public/page.png')
-    # page.driver.debug
     print "Tests paused, press something to continue"
     STDIN.getc
   end

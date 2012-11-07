@@ -19,8 +19,8 @@ Capybara.register_driver :poltergeist do |app|
   }
   Capybara::Poltergeist::Driver.new(app, opts)
 end
-# Capybara.default_driver = :poltergeist
-Capybara.default_driver = :selenium
+
+Capybara.default_driver = :poltergeist # :poltergeist or :selenium
 
 Capybara.ignore_hidden_elements = true
 
