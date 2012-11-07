@@ -1,13 +1,27 @@
 module Acceptance; end
 
 module Acceptance::Task
+  module Helpers
+    def visit_unless_current(path)
+      visit(path) unless current_path == path
+    end
+
+    def reload_page
+      visit current_path
+    end
+  end
+
+  PAGE_PATH = '/'
   class Widget
     include Capybara::DSL
+    include Helpers
     def new_project_sn
       @project_sn = (@project_sn || 0) + 1
     end
 
+
     def initialize
+      visit_unless_current PAGE_PATH
       @node = find('[widget=tasks]')
     end
 

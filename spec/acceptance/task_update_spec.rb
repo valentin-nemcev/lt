@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'acceptance/tasks'
 
 feature 'Task update', :acceptance do
   before(:each) { create_test_user }
@@ -61,43 +60,6 @@ feature 'Task update', :acceptance do
         available_options = %w{considered underway canceled}
         # TODO:
         # state.options.should match_array(available_options)
-      end
-    end
-  end
-
-  context 'Project hierarhy', :pause_if_failed do
-    before(:each) { visit tasks_page }
-    let(:task_widget)    { Acceptance::Task::Widget.new }
-    let(:super_project)  { task_widget.new_project \
-                            objective: 'Super project', state: 'underway'}
-    let(:project)        { super_project.new_sub_project \
-                            objective: 'Project', state: 'underway'}
-    let!(:action1)       { project.new_sub_action }
-    let!(:action2)       { project.new_sub_action }
-
-    describe 'Half-completed project' do
-      before(:each) { action1.update_state 'completed' }
-
-      %w{underway considered}.each do |state|
-        example "with second action #{state}" do
-          action2.update_state 'underway'
-
-          project.should have_state('underway')
-          super_project.should have_state('underway')
-        end
-      end
-    end
-
-    describe 'Completed project' do
-      before(:each) { action1.update_state 'completed' }
-
-      %w{completed canceled}.each do |state|
-        example "with second action #{state}" do
-          action2.update_state 'underway'
-
-          project.should have_state('completed')
-          super_project.should have_state('completed')
-        end
       end
     end
   end
