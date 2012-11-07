@@ -34,34 +34,5 @@ describe Task::Core do
       its(:effective_date) { should eq(task_creation_date) }
     end
   end
-
-  describe '#as_of' do
-    let(:task) { described_class.new clock: clock }
-
-    context 'as of now' do
-      subject { task.as_of current_time }
-      its(:effective_date) { should eq(current_time) }
-    end
-
-    context 'as of date from past' do
-      subject { task.as_of 1.second.until(current_time) }
-      it {should be_nil}
-    end
-
-    context 'as of different date in future' do
-      let(:different_date) { 1.second.since(current_time) }
-      subject { task.as_of different_date }
-      its(:effective_date) { should eq(different_date) }
-    end
-  end
-
-  describe '#==' do
-    let(:different_date) { 1.second.since(current_time) }
-    subject(:task) { described_class.new }
-    it { should eq(task.as_of(different_date)) }
-    it { should eq(task) }
-    it { should_not eq(nil) }
-    it { should_not eq(:some_other_thing) }
-  end
 end
 

@@ -25,12 +25,6 @@ module Task
     end
 
 
-    def as_of(date)
-      clone.tap { |t| t.effective_date = date }
-    rescue IncorrectEffectiveDateError
-      nil
-    end
-
     def effective_date=(date)
       if date < self.created_on
         raise IncorrectEffectiveDateError, "Task didn't exist as of #{date}"

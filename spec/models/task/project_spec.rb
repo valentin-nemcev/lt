@@ -8,14 +8,4 @@ describe Task::Project do
   end
 
   subject(:project) { create_project }
-
-  it { should_not be_actionable }
-
-  it 'could not be completed directly' do
-    expect { project.complete! }.to raise_error
-  end
-
-  context 'new' do
-    it { should_not be_completed }
-  end
 end
