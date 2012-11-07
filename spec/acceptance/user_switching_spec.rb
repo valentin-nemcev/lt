@@ -4,9 +4,15 @@ feature 'User switching', :acceptance do
 
   let(:tasks) { find('[widget=tasks]') }
 
-  def switch_user(user)
+  def switch_user(user_id)
+    user_id = user_id.to_s
     users = find('[widget=user-selector]')
-    users.find('[control=current-user]').find("[value='#{user}']").select_option
+    users.find('[control=current-user]').tap do |user_control|
+      unless user_control.value == user_id
+        user_control.find("[value='#{user_id}']").select_option
+      end
+      user_control.should match_selector("[current-user='#{user_id}']")
+    end
   end
 
   scenario 'Create tasks for different users' do
