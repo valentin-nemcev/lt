@@ -279,31 +279,20 @@ describe 'tasks', :api do
     end
   end
 
-  describe 'delete an action' do
+  describe 'delete a project with subtasks' do
     subject(:get_response) { request :get, '/tasks/' }
-    let!(:delete_response) { request :delete, action_url }
-    let(:task_creations) { get_response.json_body.task_creations }
-    let(:task_updates)   { get_response.json_body.task_updates }
+    let!(:delete_response) do
+      project_id
+      action_id
+      request :delete, project_url
+    end
+    let(:task_creations)   { get_response.json_body.task_creations }
+    let(:task_updates)     { get_response.json_body.task_updates }
+    let(:relation_additions) { get_response.json_body.relation_additions }
 
     specify { delete_response.should be_successful }
-    specify { task_creations.should have(1).creations }
-    specify { task_creations.find_struct(task_id: project_id).should be}
-
-    # context 'with subtasks', :pending do
-      # let(:task) do
-        # create_task(type: 'project').tap do |task|
-          # self.action = create_task type: 'action', project_id: task_id
-        # end
-      # end
-      # attr_accessor :action_id
-
-      # let(:action_response) do
-        # request(:get, "/tasks/#{action_id}").json_body 'task'
-      # end
-
-      # specify { delete_response.should be_successful }
-      # specify { task_list.should have(1).task }
-      # specify { action_response.project_id.should be_nil }
-    # end
+    specify { task_creations.should have(0).creations }
+    specify { task_updates.should have(0).updates }
+    specify { relation_additions.should have(0).additions }
   end
 end

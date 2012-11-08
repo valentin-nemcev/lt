@@ -22,5 +22,9 @@ module Task
 
 
     has_relation :composition, supers: :projects, subs: :subtasks
+
+    def subtasks
+      related :type => :composition, :relation => :sub
+    end
   end
 end

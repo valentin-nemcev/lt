@@ -41,7 +41,7 @@ module Task
 
     def destroy_task(task)
       task_base.destroy_task(task)
-      task.destroy_relations
+      task.destroy{ |related_task| destroy_task related_task }
       task.freeze
       nil
     end

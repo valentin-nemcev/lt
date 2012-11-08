@@ -21,9 +21,12 @@ module Task
       self.relation_opts ||= {}
     end
 
-    def edges
-      @edges ||= Relations.new(self)
+    def initialize(attrs = {})
+      super
+      @edges = Relations.new(self)
     end
+
+    attr_reader :edges
 
     def update_related_tasks(new_related_tasks = {}, opts = {})
       new_related_tasks.flat_map do |relation_type, related|
@@ -50,7 +53,20 @@ module Task
       edges.to_a
     end
 
-    def destroy_relations
+    def related(filter_opts = {})
+      e = edges.dup
+      case filter_opts[:relation]
+      when :super then e.incoming!
+      when :sub   then e.outgoing!
+      end
+      if type = filter_opts[:type]
+        e.filter!{ |r| r.type == type }
+      end
+      e.nodes
+    end
+
+    def destroy
+      super
       relations.each(&:destroy)
     end
 

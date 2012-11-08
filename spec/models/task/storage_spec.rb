@@ -115,11 +115,29 @@ describe Task::Storage do
       task.stub(:id => task_id)
     end
 
-    it 'destroys single task and its relations' do
+    it 'destroys task' do
       task_base.should_receive(:destroy_task).with(task)
-      task.should_receive(:destroy_relations)
+      task.should_receive(:destroy)
       task.should_receive(:freeze)
       storage.destroy_task(task).should be_nil
+    end
+
+    let(:related_task) { stub(:related_task) }
+    def get_task_destroyer
+      task_base.as_null_object
+      task.stub(:freeze)
+      task_destroyer = nil
+      task.should_receive(:destroy) do |&block|
+        task_destroyer = block
+      end
+      storage.destroy_task(task)
+      task_destroyer
+    end
+
+    it 'it passes a block to destroy related tasks' do
+      task_destroyer = get_task_destroyer
+      storage.should_receive(:destroy_task).with(related_task)
+      task_destroyer.(related_task)
     end
   end
 end

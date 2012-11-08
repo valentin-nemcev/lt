@@ -38,6 +38,9 @@ module Task
       object_id
     end
 
+    def destroy
+    end
+
     def inspect
       id_str = id.nil? || id == object_id ? '' : ":#{id}"
       "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str}>"
