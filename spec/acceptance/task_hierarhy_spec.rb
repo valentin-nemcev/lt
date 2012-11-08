@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'acceptance/tasks'
 
-describe 'Project states', :acceptance do
+describe 'Task hierarhy', :acceptance do
   before(:each) { create_test_user }
 
   let(:tasks)         { Acceptance::Task::Widget.new }

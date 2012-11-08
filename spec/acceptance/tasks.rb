@@ -33,18 +33,23 @@ module Acceptance::Task
     def new_task(fields = {})
       @node.find('[control=new]').click
       task_node = @node.find('[record=task][record-state=new]')
-      Record.new(node: task_node).tap do |task_record|
+      Record.new(node: task_node, widget: self).tap do |task_record|
         task_record.fill_form fields
-        task_record.persisted? or fail 'Task was not created'
       end
+    end
+
+    def has_task?(task_id)
+      @node.has_selector?("[record=task][record-id='#{task_id}']")
     end
 
   end
 
   class Record
     def initialize(opts = {})
-      @node = opts[:node]
+      @node   = opts.fetch :node
+      @widget = opts.fetch :widget
     end
+    attr_reader :widget, :node, :id
 
     def fill_form(fields={})
       task_node.find('[form=new-task], [form=update-task]').tap do |form|
@@ -56,6 +61,11 @@ module Acceptance::Task
           form.find('[input=objective]').set objective
         }
         form.find('[control=save]').click
+        if persisted?
+          @id = node['record-id']
+        else
+          fail "Task with fields #{fields}"
+        end
       end
     end
 
@@ -108,7 +118,7 @@ module Acceptance::Task
       select
       task_node.find('[control=new-subtask]').click
       sub_task_node = subtasks_node.find('[record=task][record-state=new]')
-      Record.new(node: sub_task_node).tap do |sub_task_record|
+      Record.new(node: sub_task_node, widget: widget).tap do |sub_task_record|
         sub_task_record.fill_form fields
         sub_task_record.persisted? or fail 'Sub-task was not created'
       end
@@ -124,6 +134,14 @@ module Acceptance::Task
       @node.session.wait_until do
         @node['task-state'] == state
       end
+    end
+
+    def delete
+      task_node.find('[control=delete]').click
+    end
+
+    def exists?
+      widget.has_task? self.id
     end
 
     def inspect
