@@ -41,14 +41,6 @@ describe Task::Graph do
         connected_task.should_not_receive(:with_connected_tasks_and_relations)
       end
 
-      it 'returns all tasks revisions' do
-        task.stub(attribute_revisions: [:task_rev1, :task_rev2])
-        connected_task.stub(attribute_revisions: [:another_task_rev1])
-        graph.revisions.should match_array([:task_rev1,
-                                           :task_rev2,
-                                           :another_task_rev1])
-      end
-
       it 'returns all tasks connected to passed tasks' do
         graph.tasks.to_a.should match_array([task, connected_task])
       end
@@ -114,16 +106,28 @@ describe Task::Graph do
     end
   end
 
-  describe 'find_task_by_id' do
+  context 'with tasks' do
     let(:task1) { stub('task1', id: 1) }
     let(:task2) { stub('task2', id: '2') }
 
     subject(:graph) do
       described_class.new_from_records tasks: [task1, task2]
     end
-    it 'should find task by id comparing ids as strings' do
-      graph.find_task_by_id('1').should eq(task1)
-      graph.find_task_by_id( 2 ).should eq(task2)
+
+    describe '#find_task_by_id' do
+      it 'should find task by id comparing ids as strings' do
+        graph.find_task_by_id('1').should eq(task1)
+        graph.find_task_by_id( 2 ).should eq(task2)
+      end
+    end
+
+    describe '#revisions' do
+      it 'returns all tasks revisions' do
+        task1.stub(attribute_revisions: [:task_rev1, :task_rev2])
+        task2.stub(attribute_revisions: [:another_task_rev1])
+        graph.revisions.should match_array(
+          [:task_rev1, :task_rev2, :another_task_rev1])
+      end
     end
   end
 end
