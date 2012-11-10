@@ -35,7 +35,11 @@ module Task
     end
 
     def revisions
-      tasks.collect(&:attribute_revisions).inject([], &:+)
+      tasks.collect_concat(&:attribute_revisions)
+    end
+
+    def computed_revisions *args
+      tasks.collect_concat{ |t| t.computed_attribute_revisions *args }
     end
 
     def find_task_by_id(id)

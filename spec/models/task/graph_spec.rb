@@ -107,7 +107,7 @@ describe Task::Graph do
   end
 
   context 'with tasks' do
-    let(:task1) { stub('task1', id: 1) }
+    let(:task1) { stub('task1', id:  1 ) }
     let(:task2) { stub('task2', id: '2') }
 
     subject(:graph) do
@@ -127,6 +127,18 @@ describe Task::Graph do
         task2.stub(attribute_revisions: [:another_task_rev1])
         graph.revisions.should match_array(
           [:task_rev1, :task_rev2, :another_task_rev1])
+      end
+    end
+
+    describe '#computed_attributes' do
+      let(:args) { %w{some args} }
+      it 'returns all tasks computed revisions' do
+        task1.stub(:computed_attribute_revisions)
+          .with(*args).and_return([:task_crev1, :task_crev2])
+        task2.stub(:computed_attribute_revisions)
+          .with(*args).and_return([:another_task_crev1])
+        graph.computed_revisions(*args).should match_array(
+          [:task_crev1, :task_crev2, :another_task_crev1])
       end
     end
   end

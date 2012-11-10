@@ -1,4 +1,10 @@
 class Interval
+
+
+  def self.infinite
+    @infinite ||= new left_open: nil, right_open: nil
+  end
+
   def initialize(endpoints = {})
     @left_endpoint  = endpoints[:left_open]  || endpoints[:left_closed]
     @right_endpoint = endpoints[:right_open] || endpoints[:right_closed]
