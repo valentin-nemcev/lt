@@ -8,13 +8,6 @@ module Task
   class ObjectiveRevision < Revisions::Revision
     include Persistable
 
-    attr_reader :objective, :updated_on
-
-    def fields
-      @fields ||= {}
-    end
-    protected :fields
-
     def attribute_name
       :objective
     end

@@ -40,21 +40,9 @@ describe Persistable do
     end
   end
 
-  context 'persisted clone' do
-    it 'should be persisted if original is persisted' do
-      original = persistable_class.new
-      clone = original.clone
-      original.id = 1
-      clone.id.should eq(1)
-    end
-  end
-
   let(:persistable_class) do
     Class.new(base_class) do
       include Persistable
-      def fields
-        @fields ||= {}
-      end
     end
   end
 

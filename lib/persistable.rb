@@ -20,15 +20,13 @@ module Persistable
     !!id
   end
 
+  attr_reader :id
+
   def id=(id)
     if persisted? && id && self.id != id
       raise AlreadyPersistedError.new self.id, id
     end
-    fields[:id] = id
+    @id = id
     return self
-  end
-
-  def id
-    fields[:id]
   end
 end

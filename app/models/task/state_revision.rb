@@ -16,11 +16,6 @@ module Task
       VALID_STATES.fetch(what)
     end
 
-    def fields
-      @fields ||= {}
-    end
-    protected :fields
-
     def attribute_name
       :state
     end

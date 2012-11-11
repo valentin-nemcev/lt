@@ -2,11 +2,8 @@ require 'spec_helper'
 
 class RelationDouble
   include Persistable
-  def initialize(*)
-  end
 
-  def fields
-    @fields ||= {}
+  def initialize(*)
   end
 end
 

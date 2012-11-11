@@ -5,10 +5,6 @@ class AttributeRevisionDouble
 
   def initialize(*)
   end
-
-  def fields
-    @fields ||= {}
-  end
 end
 
 

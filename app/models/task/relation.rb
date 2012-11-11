@@ -15,13 +15,8 @@ module Task
       nodes.other(task)
     end
 
-    def fields
-      @fields
-    end
-
     attr_reader :type, :added_on, :removed_on
     def initialize(attrs={})
-      @fields = {}
       self.id = attrs[:id]
       @type = attrs.fetch(:type).to_sym
       now = attrs.fetch(:clock, Time).current
