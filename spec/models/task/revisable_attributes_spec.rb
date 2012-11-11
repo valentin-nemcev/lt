@@ -55,13 +55,10 @@ describe 'Object with revisable attributes' do
       let(:initial_attrs) { {:attr_name1 => :attr_value} }
 
       example do
-        attr_revisions1.should_receive(:new_revision) do |args|
-          @new_task = args.delete(:owner)
-          args.should eq(:updated_value => :attr_value,
-                         updated_on: created_on)
-          attr_revision
-        end
-        task.should eq(@new_task)
+        attr_revisions1.should_receive(:new_revision).
+         with(:updated_value => :attr_value, updated_on: created_on).
+         and_return(attr_revision)
+        task
       end
     end
 
@@ -78,11 +75,7 @@ describe 'Object with revisable attributes' do
           .with([attr1_rev1, attr1_rev2])
         attr_revisions2.should_receive(:set_revisions)
           .with([attr2_rev1])
-        [attr1_rev1, attr1_rev2, attr2_rev1].each do |r|
-          r.should_receive(:"owner=") { |task| (@new_tasks ||= []) << task }
-        end
         task
-        @new_tasks.uniq.should eq([task])
       end
     end
 
@@ -98,13 +91,11 @@ describe 'Object with revisable attributes' do
     before(:each) do
       attr_revisions1.should_receive(:new_revision)
         .with(:updated_value => :new_attr_value1,
-              updated_on: update_date,
-              owner: task)
+              updated_on: update_date)
         .and_return(attr_revision)
       attr_revisions2.should_receive(:new_revision)
         .with(:updated_value => :new_attr_value2,
-              updated_on: update_date,
-              owner: task)
+              updated_on: update_date)
         .and_return(attr_revision)
     end
     example do
@@ -119,12 +110,20 @@ describe 'Object with revisable attributes' do
   before(:each) do
     stub_const('Revisions::Sequence', stub())
 
-    Revisions::Sequence.should_receive(:new)
-      .with(created_on: created_on, revision_class: AttrNameRevision1)
-      .and_return(attr_revisions1)
-    Revisions::Sequence.should_receive(:new)
-      .with(created_on: created_on, revision_class: AttrNameRevision2)
-      .and_return(attr_revisions2)
+    {
+      attr_revisions1 => AttrNameRevision1,
+      attr_revisions2 => AttrNameRevision2
+    }.each do |revisions, revision_class|
+      Revisions::Sequence.should_receive(:new) do |attrs|
+        attrs.delete(:owner).should \
+          be_an_instance_of class_with_revisable_attributes
+        attrs.should == {
+          created_on: created_on,
+          revision_class: revision_class,
+        }
+        revisions
+      end
+    end
   end
 
   let(:base_class) do

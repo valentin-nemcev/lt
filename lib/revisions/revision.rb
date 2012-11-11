@@ -1,12 +1,14 @@
 module Revisions
   class Revision
     def initialize(opts={})
-      @updated_value = opts.fetch :updated_value
-      @updated_on = opts.fetch :updated_on
+      @updated_value   = opts.fetch :updated_value
+      @updated_on      = opts.fetch :updated_on
+      @sequence_number = opts.fetch :sequence_number
       @owner = opts[:owner]
     end
 
-    attr_reader :owner, :updated_on, :updated_value
+    attr_reader :owner, :updated_on, :updated_value, :sequence_number
+    def attribute_name; end
 
     def owner=(new_owner)
       owner.nil? or fail RevisionError.new owner, new_owner

@@ -15,22 +15,12 @@ module Task
     end
     protected :fields
 
-    def objective
-      fields[:objective]
-    end
-
     def attribute_name
       :objective
     end
 
-    def sequence_number
-      fields[:sequence_number]
-    end
-
     def initialize(attrs)
       super
-      # fields[:objective] = validate_objective attrs[:objective]
-      fields[:sequence_number] = attrs.fetch :sequence_number
     end
 
 

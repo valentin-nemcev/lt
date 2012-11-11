@@ -23,40 +23,44 @@ module Task
     end
 
 
-    # TODO: Cleanup and refactor
-    def initialize(attrs = {})
+    def initialize(given_attributes = {})
       super
-      @attribute_revisions = {}
-      all_revs_a = attrs.fetch :attribute_revisions, []
-      all_revs = all_revs_a.group_by(&:attribute_name)
-      revisable_attributes_opts.each_pair do |attr, attr_opts|
-        @attribute_revisions[attr] = revs = Revisions::Sequence.new(
-          created_on: created_on,
-          revision_class: attr_opts[:revision_class]
-        )
 
-        all_revs[attr].try do |revs_a|
-          revs_a.each{ |rev| rev.owner = self }
-          revs.set_revisions revs_a
+      @attribute_revisions = {}
+
+      given_attribute_revisions = given_attributes.
+        fetch(:attribute_revisions, []).group_by(&:attribute_name)
+
+      revisable_attributes_opts.each_pair do |attr, attr_opts|
+        revision_sequence = initialize_revision_sequence attr, attr_opts
+
+        given_attribute_revisions[attr].try do |revisions|
+          revision_sequence.set_revisions revisions
         end
-        attrs[attr].try do |val|
+
+        given_attributes[attr].try do |val|
           update_attributes({attr => val}, on: created_on)
         end
 
-        raise MissingAttributeError, attr if revs.empty?
-
-        define_singleton_method(attr) { revs.last.send attr }
+        raise MissingAttributeError, attr if revision_sequence.empty?
       end
     end
 
+    def initialize_revision_sequence(attribute, options)
+      @attribute_revisions[attribute] = Revisions::Sequence.new(
+        owner: self,
+        created_on: created_on,
+        revision_class: options[:revision_class]
+      )
+    end
+
     def attribute_revisions
-      @attribute_revisions.values.map(&:to_a).inject(&:+)
+      @attribute_revisions.values.flat_map(&:to_a)
     end
 
     def update_attributes(attrs = {}, opts = {})
       attrs.map do |name, val|
         @attribute_revisions[name].new_revision(
-          owner: self,
           updated_value: val,
           updated_on: opts.fetch(:on))
       end

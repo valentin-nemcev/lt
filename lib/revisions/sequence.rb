@@ -3,9 +3,10 @@ module Revisions
     def initialize(opts = {})
       @created_on = opts.fetch :created_on
       @revision_class = opts[:revision_class]
+      @owner = opts.fetch :owner
       set_revisions opts[:revisions] || []
     end
-    attr_reader :created_on, :revision_class
+    attr_reader :created_on, :revision_class, :owner
 
     include Enumerable
     def each(*args, &block)
@@ -43,12 +44,13 @@ module Revisions
     end
 
     def add_revision(revision)
-       last_sequence_number < revision.sequence_number or
-         raise SequenceNumberError.new last_sequence_number,
-                                          revision.sequence_number
+      last_sequence_number < revision.sequence_number or
+        raise SequenceNumberError.new last_sequence_number,
+                                        revision.sequence_number
       last_updated_on <= revision.updated_on or
         raise DateSequenceError.new last_updated_on, revision.updated_on
 
+      revision.owner = owner
       @revisions << revision
       return revision
     end

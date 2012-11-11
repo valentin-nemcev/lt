@@ -6,18 +6,24 @@ include Revisions
 describe Sequence do
   before(:each) { stub_const('RevisionClass', stub()) }
 
+  let(:owner) { stub('Attribute owner') }
+
   let(:creation_date) { 4.hours.ago }
   let(:update_date)   { 3.hours.ago }
 
-  let(:first_revision) do
-    stub('first revision',  updated_on: creation_date, sequence_number: 1)
-  end
-  let(:second_revision) do
-    stub('second revision', updated_on: update_date,   sequence_number: 2)
+  def stub_revision(*args)
+    stub(*args).tap do |revision_stub|
+      revision_stub.stub(:'owner=')
+    end
   end
 
+  let(:first_revision)  { stub_revision(
+    'first revision',  updated_on: creation_date, sequence_number: 1) }
+  let(:second_revision) { stub_revision(
+    'second revision', updated_on: update_date,   sequence_number: 2) }
+
   let(:initial_arguments) do
-    { created_on: creation_date, revision_class: RevisionClass }
+    { created_on: creation_date, revision_class: RevisionClass, owner: owner }
   end
 
 
@@ -56,8 +62,10 @@ describe Sequence do
       end
 
       let(:revisions_with_incorrect_dates) { [
-        stub('first revision',  updated_on: update_date,   sequence_number: 1),
-        stub('second revision', updated_on: creation_date, sequence_number: 2),
+        stub_revision(
+          'first revision',  updated_on: update_date,   sequence_number: 1),
+        stub_revision(
+          'second revision', updated_on: creation_date, sequence_number: 2),
       ] }
       it 'should not allow revision list with incorrect dates' do
         expect do
@@ -66,8 +74,10 @@ describe Sequence do
       end
 
       let(:revisions_with_incorrect_sns) { [
-        stub('first revision',  updated_on: creation_date, sequence_number: 1),
-        stub('second revision', updated_on: update_date,   sequence_number: 1),
+        stub_revision(
+          'first revision',  updated_on: creation_date, sequence_number: 1),
+        stub_revision(
+          'second revision', updated_on: update_date,   sequence_number: 1),
       ] }
       it 'should not allow revision list with incorrect sequence numbers' do
         expect do
@@ -86,12 +96,18 @@ describe Sequence do
         sequence.to_a.should eq([first_revision])
       end
     end
+
+    it 'should set revisions owner' do
+      first_revision.should_receive(:'owner=').with(owner)
+      second_revision.should_receive(:'owner=').with(owner)
+      sequence.set_revisions [first_revision, second_revision]
+    end
   end
 
   describe '#new_revision' do
     let(:revision_attrs) { {updated_value: :value, updated_on: creation_date} }
     let(:new_sn) { 1 }
-    let(:new_revision) { stub('new revision', revision_attrs) }
+    let(:new_revision) { stub_revision('new revision', revision_attrs) }
 
     before(:each) do
       revision_attrs.update sequence_number: new_sn
@@ -142,6 +158,11 @@ describe Sequence do
         sequence.new_revision revision_attrs
         sequence.to_a.should eq([first_revision, second_revision, new_revision])
       end
+    end
+
+    it 'should set revisions owner' do
+      new_revision.should_receive(:'owner=').with(owner)
+      sequence.new_revision revision_attrs
     end
   end
 end

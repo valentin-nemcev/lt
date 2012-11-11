@@ -16,29 +16,17 @@ module Task
       VALID_STATES.fetch(what)
     end
 
-    attr_reader :state, :updated_on
-
     def fields
       @fields ||= {}
     end
     protected :fields
 
-    def state
-      fields[:state]
-    end
-
     def attribute_name
       :state
     end
 
-    def sequence_number
-      fields[:sequence_number]
-    end
-
     def initialize(attrs)
       super
-      # fields[:state] = validate_state attrs[:state]
-      fields[:sequence_number] = attrs.fetch :sequence_number
     end
 
     #TODO: Whitelisting states, validation of state for tasks and projects
