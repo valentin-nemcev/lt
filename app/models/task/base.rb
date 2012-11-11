@@ -21,8 +21,17 @@ module Task
 
     has_relation :composition, supers: :projects, subs: :subtasks
 
+    # TODO: Automatically define methods like these based on relation
+    # definition
     def subtasks
       related :type => :composition, :relation => :sub
     end
+
+    include ComputedAttributes
+
+    has_computed_attribute :state,
+      computed_from: {subtasks: :state} do |subtasks|
+    end
+
   end
 end
