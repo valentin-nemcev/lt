@@ -7,8 +7,6 @@ module Task
     include RelationMethods
     include RevisableAttributes
 
-    include AttributeUpdates
-
     has_revisable_attribute :state, revision_class: StateRevision
     has_revisable_attribute :objective, revision_class: ObjectiveRevision
 
