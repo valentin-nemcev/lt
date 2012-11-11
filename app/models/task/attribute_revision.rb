@@ -1,5 +1,5 @@
-module Revisions
-  class Revision
+module Task
+  class AttributeRevision
     def initialize(opts={})
       @updated_value   = opts.fetch :updated_value
       @updated_on      = opts.fetch :updated_on
@@ -11,12 +11,12 @@ module Revisions
     def attribute_name; end
 
     def owner=(new_owner)
-      owner.nil? or fail RevisionError.new owner, new_owner
+      owner.nil? or fail AttributeRevisionError.new owner, new_owner
       @owner = new_owner
     end
   end
 
-  class RevisionError < StandardError
+  class AttributeRevisionError < StandardError
     def initialize(last, current)
       @last, @current = last, current
     end
