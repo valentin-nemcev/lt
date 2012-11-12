@@ -6,9 +6,8 @@ json.task_creations @tasks do |json, task|
 end
 
 json.task_updates @revisions do |json, revision|
-  # TODO: User revision.task_id
-  json.id             "#{revision.id}-#{revision.owner.id}"
-  json.task_id        revision.owner.id
+  json.id             "#{revision.id}-#{revision.task_id}"
+  json.task_id        revision.task_id
   json.attribute_name revision.attribute_name
   json.updated_value  revision.updated_value
   json.date           revision.updated_on.httpdate

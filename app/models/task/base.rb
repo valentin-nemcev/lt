@@ -30,7 +30,9 @@ module Task
     include ComputedAttributes
 
     has_computed_attribute :state,
-      computed_from: {subtasks: :state} do |subtasks|
+      computed_from: {self: :state, subtasks: :state} \
+    do |self_state, subtasks_states|
+      self_state
     end
 
   end

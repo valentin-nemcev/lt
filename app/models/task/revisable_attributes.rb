@@ -54,8 +54,11 @@ module Task
       )
     end
 
-    def attribute_revisions
+    def attribute_revisions(*)
       @attribute_revisions.values.flat_map(&:to_a)
+    end
+
+    def last_attribute_revision(*)
     end
 
     def update_attributes(attrs = {}, opts = {})

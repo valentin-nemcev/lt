@@ -2,7 +2,7 @@ module Task
   class InvalidTaskError < StandardError; end
   class InvalidStateError < InvalidTaskError; end
   #TODO: Remove duplication with ObjectiveRevision
-  class StateRevision < AttributeRevision
+  class StateRevision < RevisableAttributeRevision
     include Persistable
 
     VALID_STATES = {

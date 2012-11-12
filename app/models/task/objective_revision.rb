@@ -5,7 +5,7 @@ module Task
     end
   end
 
-  class ObjectiveRevision < AttributeRevision
+  class ObjectiveRevision < RevisableAttributeRevision
     include Persistable
 
     def attribute_name

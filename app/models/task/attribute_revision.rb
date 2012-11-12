@@ -3,16 +3,27 @@ module Task
     def initialize(opts={})
       @updated_value   = opts.fetch :updated_value
       @updated_on      = opts.fetch :updated_on
-      @sequence_number = opts.fetch :sequence_number
       @owner = opts[:owner]
     end
 
-    attr_reader :owner, :updated_on, :updated_value, :sequence_number
+    attr_reader :owner, :updated_on, :updated_value
     def attribute_name; end
 
     def owner=(new_owner)
       owner.nil? or fail AttributeRevisionError.new owner, new_owner
       @owner = new_owner
+    end
+
+    def == other
+      self.updated_value == other.updated_value &&
+        self.updated_on == other.updated_on &&
+        self.owner == other.owner
+    end
+
+    alias_method :task, :owner
+
+    def task_id
+      task.id
     end
   end
 

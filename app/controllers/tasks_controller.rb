@@ -8,7 +8,8 @@ class TasksController < ApplicationController
 
   def index
     graph = storage.fetch_graph
-    @revisions = graph.revisions + graph.computed_revisions(Interval.infinite)
+    @revisions = graph.revisions +
+      graph.computed_revisions(:state, TimePeriod.for_all_time)
     @tasks = graph.tasks
     @relations = graph.relations
 
@@ -45,7 +46,7 @@ class TasksController < ApplicationController
     storage.store @task
     @tasks = []
     @revisions = task_updates +
-      graph.computed_revisions(Interval.new left_open: effective_date)
+      graph.computed_revisions(:state, TimePeriod.from(effective_date))
     @relations = updated_relations
 
     render :events
