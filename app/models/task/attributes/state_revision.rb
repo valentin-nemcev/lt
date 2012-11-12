@@ -1,8 +1,9 @@
 module Task
+  module Attributes
   class InvalidTaskError < StandardError; end
   class InvalidStateError < InvalidTaskError; end
   #TODO: Remove duplication with ObjectiveRevision
-  class StateRevision < RevisableAttributeRevision
+  class StateRevision < Editable::Revision
     include Persistable
 
     VALID_STATES = {
@@ -32,6 +33,6 @@ module Task
         return state
       end
     end
-
+  end
   end
 end

@@ -69,7 +69,7 @@ class TasksController < ApplicationController
   end
 
   def task_attrs
-    task_params.slice(*Task::Base.revisable_attributes)
+    task_params.slice(*Task::Base.editable_attributes)
   end
 
   def effective_date

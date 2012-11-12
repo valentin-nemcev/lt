@@ -1,5 +1,6 @@
 module Task
-  class AttributeRevision
+  module Attributes
+  class Revision
     def initialize(opts={})
       @updated_value   = opts.fetch :updated_value
       @updated_on      = opts.fetch :updated_on
@@ -37,5 +38,5 @@ module Task
         " last: #{@last}, current: #{@current}"
     end
   end
-
+  end
 end

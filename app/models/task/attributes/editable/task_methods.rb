@@ -1,25 +1,27 @@
 module Task
-  module RevisableAttributes
+  module Attributes
+  module Editable
+  module TaskMethods
 
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def has_revisable_attribute(attr_name, opts = {})
-        revisable_attributes_opts[attr_name] = opts
+      def has_editable_attribute(attr_name, opts = {})
+        editable_attributes_opts[attr_name] = opts
       end
 
-      def revisable_attributes
-        revisable_attributes_opts.keys
+      def editable_attributes
+        editable_attributes_opts.keys
       end
 
       def new_attribute_revision(name, attrs)
-        revisable_attributes_opts.fetch(name).fetch(:revision_class).new(attrs)
+        editable_attributes_opts.fetch(name).fetch(:revision_class).new(attrs)
       end
     end
 
     included do |base|
-      base.class_attribute :revisable_attributes_opts
-      self.revisable_attributes_opts ||= {}
+      base.class_attribute :editable_attributes_opts
+      self.editable_attributes_opts ||= {}
     end
 
 
@@ -31,7 +33,7 @@ module Task
       given_attribute_revisions = given_attributes.
         fetch(:attribute_revisions, []).group_by(&:attribute_name)
 
-      revisable_attributes_opts.each_pair do |attr, attr_opts|
+      editable_attributes_opts.each_pair do |attr, attr_opts|
         revision_sequence = initialize_revision_sequence attr, attr_opts
 
         given_attribute_revisions[attr].try do |revisions|
@@ -79,5 +81,7 @@ module Task
     def message
       "Missing #{@attr} value or missing or empty attribute revisions"
     end
+  end
+  end
   end
 end

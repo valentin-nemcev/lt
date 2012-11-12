@@ -2,18 +2,18 @@ require 'lib/spec_helper'
 
 require 'persistable'
 require 'models/task'
-require 'models/task/revisable_attributes'
+require 'models/task/attributes/editable/task_methods'
 
+describe 'Object with editable attributes' do
 
-describe 'Object with revisable attributes' do
-  let(:class_with_revisable_attributes) { Class.new(base_class) }
+  let(:class_with_editable_attributes) { Class.new(base_class) }
   before(:each) do
     stub_const('AttrNameRevision1', stub())
     stub_const('AttrNameRevision2', stub())
-    class_with_revisable_attributes.instance_eval do
-      include Task::RevisableAttributes
-      has_revisable_attribute :attr_name1, :revision_class => AttrNameRevision1
-      has_revisable_attribute :attr_name2, :revision_class => AttrNameRevision2
+    class_with_editable_attributes.instance_eval do
+      include Task::Attributes::Editable::TaskMethods
+      has_editable_attribute :attr_name1, :revision_class => AttrNameRevision1
+      has_editable_attribute :attr_name2, :revision_class => AttrNameRevision2
       define_method(:inspect) { '<task>' }
     end
   end
@@ -22,9 +22,9 @@ describe 'Object with revisable attributes' do
   #TODO: Specs for updates that doesn't change anything
 
   let(:initial_attrs) { Hash.new }
-  subject(:task) { class_with_revisable_attributes.new initial_attrs }
+  subject(:task) { class_with_editable_attributes.new initial_attrs }
 
-  its('class.revisable_attributes') { should eq([:attr_name1, :attr_name2]) }
+  its('class.editable_attributes') { should eq([:attr_name1, :attr_name2]) }
 
   describe '.new_attribute_revision' do
     subject(:new_revision) do
@@ -82,7 +82,7 @@ describe 'Object with revisable attributes' do
     context 'without attribute or revisions passed' do
       specify do
         attr_revisions2.stub empty?: true
-        expect{ task }.to raise_error Task::MissingAttributeError
+        expect{ task }.to raise_error Task::Attributes::Editable::MissingAttributeError
       end
     end
   end
@@ -116,7 +116,7 @@ describe 'Object with revisable attributes' do
     }.each do |revisions, revision_class|
       Revisions::Sequence.should_receive(:new) do |attrs|
         attrs.delete(:owner).should \
-          be_an_instance_of class_with_revisable_attributes
+          be_an_instance_of class_with_editable_attributes
         attrs.should == {
           created_on: created_on,
           revision_class: revision_class,

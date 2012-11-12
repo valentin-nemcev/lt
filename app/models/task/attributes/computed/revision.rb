@@ -1,5 +1,7 @@
 module Task
-  class ComputedAttributeRevision < AttributeRevision
+  module Attributes
+  module Computed
+  class Revision < Attributes::Revision
     def initialize(attributes = {})
       @attribute_name = attributes.fetch :attribute_name
       super
@@ -18,5 +20,7 @@ module Task
       super &&
         self.attribute_name == other.attribute_name
     end
+  end
+  end
   end
 end

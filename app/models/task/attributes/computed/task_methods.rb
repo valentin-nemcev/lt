@@ -1,5 +1,7 @@
 module Task
-  module ComputedAttributes
+  module Attributes
+  module Computed
+  module TaskMethods
 
     extend ActiveSupport::Concern
 
@@ -43,7 +45,7 @@ module Task
             current_values[attribute_name]
           end
           computed_value = attribute_computer.(*computer_arguments)
-          ComputedAttributeRevision.new \
+          Revision.new \
             owner: self,
             attribute_name: attribute,
             updated_value: computed_value,
@@ -51,5 +53,7 @@ module Task
         end
 
     end
+  end
+  end
   end
 end

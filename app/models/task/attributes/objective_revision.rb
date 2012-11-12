@@ -5,7 +5,8 @@ module Task
     end
   end
 
-  class ObjectiveRevision < RevisableAttributeRevision
+  module Attributes
+  class ObjectiveRevision < Editable::Revision
     include Persistable
 
     def attribute_name
@@ -24,6 +25,6 @@ module Task
         return objective
       end
     end
-
+  end
   end
 end

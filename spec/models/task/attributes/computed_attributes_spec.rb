@@ -1,26 +1,29 @@
 require 'lib/spec_helper'
 
 require 'models/task'
-require 'models/task/computed_attributes'
+require 'models/task/attributes/computed/task_methods'
+require 'interval'
+require 'time_period'
+
 
 describe 'Task with computed attributes' do
   def create_computed_attr_rev(name, value, update_date)
-    Task::ComputedAttributeRevision.new \
+    Task::Attributes::Computed::Revision.new \
       attribute_name: name,
       updated_value: value,
       updated_on: update_date,
       owner: task
   end
 
-  def create_revisable_attr_rev(name, value, update_date)
-    stub('Revisable attribute revision',  \
+  def create_editable_attr_rev(name, value, update_date)
+    stub('Editable attribute revision',  \
       attribute_name: name, updated_value: value, updated_on: update_date)
   end
 
   let(:class_with_computed_attributes) { Class.new(base_class) }
   before(:each) do
     class_with_computed_attributes.instance_eval do
-      include Task::ComputedAttributes
+      include Task::Attributes::Computed::TaskMethods
       define_method(:inspect) { '<task>' }
     end
   end
@@ -40,15 +43,15 @@ describe 'Task with computed attributes' do
 
     context 'for attribute that depends only on this task' do
       let(:attr1_rev0) { nil }
-      let(:attr2_rev0) { create_revisable_attr_rev \
+      let(:attr2_rev0) { create_editable_attr_rev \
         :other_attribute2, 'attribute2_value0', 1.day.until(beginning_date) }
-      let(:attr1_rev1) { create_revisable_attr_rev \
+      let(:attr1_rev1) { create_editable_attr_rev \
         :other_attribute1, 'attribute1_value1', date1 }
-      let(:attr2_rev1) { create_revisable_attr_rev \
+      let(:attr2_rev1) { create_editable_attr_rev \
         :other_attribute2, 'attribute2_value1', date2 }
-      let(:attr1_rev2) { create_revisable_attr_rev \
+      let(:attr1_rev2) { create_editable_attr_rev \
         :other_attribute1, 'attribute1_value2', date3 }
-      # let(:attr2_rev2) { create_revisable_attr_rev 'attribute2_value2', date3 }
+      # let(:attr2_rev2) { create_editable_attr_rev 'attribute2_value2', date3 }
       before do
         task.stub(:attribute_revisions).
           with(:other_attribute1, given_period).
