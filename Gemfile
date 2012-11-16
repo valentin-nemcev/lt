@@ -4,8 +4,7 @@ gem 'bundler', '~> 1.2.0'
 
 gem 'rails', '~> 3.2.2'
 
-gem 'mysql2',             '~> 0.3.11'
-gem 'awesome_nested_set', '~> 2.1.2'
+gem 'mysql2', '~> 0.3.11'
 
 gem 'unicorn' , '~> 4.3.0'
 
@@ -29,12 +28,7 @@ group :development, :test do
   gem 'capistrano_colors', '~> 0.5.5'
   gem 'rvm-capistrano',    '~> 1.2.0'
 
-  # Fix for recursive subject, it should be released in 2.11.2
-  gem 'rspec-core',  '=  2.11.1',
-    git: 'https://github.com/rspec/rspec-core.git',
-    ref: '35eb45a6b5eaec7377c04ef6c51b857c97704349'
-
-  gem 'rspec-rails', '~> 2.11.0'
+  gem 'rspec-rails', '~> 2.12.0'
 
   gem 'guard-jasmine', '~> 1.8.1'
   gem 'jasminerice'  , '~> 0.0.9'
@@ -42,7 +36,7 @@ group :development, :test do
 
   gem 'capybara',    '~> 1.1.2'
   gem 'poltergeist', '~> 1.0.0'
-  gem 'database_cleaner', '~> 0.8.0'
   gem 'spork-rails', '~> 3.2.0'
+  gem 'database_cleaner', '~> 0.8.0'
 end
 
