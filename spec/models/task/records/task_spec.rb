@@ -17,7 +17,8 @@ describe Task::Records::Task do
   let(:task_created_on) { 2.days.ago }
   let(:task) do
     TaskDouble.new.tap do |task|
-      task.stub created_on: task_created_on, attribute_revisions: [],
+      task.stub created_on: task_created_on,
+        all_editable_attribute_revisions: [],
         type: 'task_type'
     end
   end
@@ -52,14 +53,15 @@ describe Task::Records::Task do
     its(:user)       { should eq(user_fixture) }
     its(:type)       { should eq('task_type') }
 
-    let(:task_attribute_revisions) { [:rev1, :rev2] }
+    let(:task_editable_attribute_revisions) { [:rev1, :rev2] }
     let(:task_rev_records) { [revision_records.new] }
 
     before(:each) do
-      task.stub(attribute_revisions: task_attribute_revisions)
+      task.stub(
+        all_editable_attribute_revisions: task_editable_attribute_revisions)
       revision_records.should_receive(:save_revisions) do |rec, revs|
         @received_task_record = rec
-        revs.should eq(task_attribute_revisions)
+        revs.should eq(task_editable_attribute_revisions)
         task_rev_records
       end
     end
@@ -87,17 +89,18 @@ describe Task::Records::Task do
     its(:type) { should eq('task_type') }
     its(:created_on) { should eq_up_to_sec(task_created_on) }
 
-    let(:task_attribute_revisions) { [:rev1, :rev2] }
+    let(:task_editable_attribute_revisions) { [:rev1, :rev2] }
 
     before(:each) do
       revision_records.should_receive(:load_revisions) do |rec|
         @received_task_record = rec
-        task_attribute_revisions
+        task_editable_attribute_revisions
       end
     end
 
     it 'delegates loading attribute revisions' do
-      task.attribute_revisions.should eq(task_attribute_revisions)
+      task.all_editable_attribute_revisions.
+        should eq(task_editable_attribute_revisions)
       @received_task_record.should eq(task_record)
     end
   end

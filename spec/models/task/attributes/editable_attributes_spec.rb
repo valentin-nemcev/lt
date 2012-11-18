@@ -39,13 +39,13 @@ describe 'Object with editable attributes' do
     it { should eq(attr_revision) }
   end
 
-  describe '#attribute_revisions' do
+  describe '#all_editable_attribute_revisions' do
     before(:each) do
       attr_revisions1.stub(to_a: [:attr1_rev1])
       attr_revisions2.stub(to_a: [:attr2_rev1, :attr2_rev2])
     end
 
-    its(:attribute_revisions) do
+    its(:all_editable_attribute_revisions) do
       should match_array([:attr1_rev1, :attr2_rev1, :attr2_rev2])
     end
   end
@@ -67,7 +67,7 @@ describe 'Object with editable attributes' do
       let(:attr1_rev2) { stub(:attr1_rev2, attribute_name: :attr_name1) }
       let(:attr2_rev1) { stub(:attr2_rev1, attribute_name: :attr_name2) }
       let(:initial_attrs) { {
-        attribute_revisions: [attr1_rev1, attr1_rev2, attr2_rev1]
+        all_editable_attribute_revisions: [attr1_rev1, attr1_rev2, attr2_rev1]
       } }
 
       specify do

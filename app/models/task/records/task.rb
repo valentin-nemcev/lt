@@ -50,7 +50,8 @@ module Task
         self.type = task.type
         self.created_on = task.created_on
         self.attribute_revisions =
-          TaskAttributeRevision.save_revisions self, task.attribute_revisions
+          TaskAttributeRevision.save_revisions self,
+          task.all_editable_attribute_revisions
         self
       end
 
@@ -58,7 +59,8 @@ module Task
         ::Task.new_subtype(self.type,
           id: self.id,
           created_on: self.created_on,
-          attribute_revisions: TaskAttributeRevision.load_revisions(self),
+          all_editable_attribute_revisions:
+            TaskAttributeRevision.load_revisions(self),
         )
       end
 

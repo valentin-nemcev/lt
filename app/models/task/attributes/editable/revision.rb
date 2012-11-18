@@ -2,6 +2,7 @@ module Task
   module Attributes
     module Editable
       class Revision < Attributes::Revision
+        include Persistable
         def initialize(attributes = {})
           super
           @sequence_number = attributes[:sequence_number]

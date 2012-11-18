@@ -31,7 +31,7 @@ module Task
       @attribute_revisions = {}
 
       given_attribute_revisions = given_attributes.
-        fetch(:attribute_revisions, []).group_by(&:attribute_name)
+        fetch(:all_editable_attribute_revisions, []).group_by(&:attribute_name)
 
       editable_attributes_opts.each_pair do |attr, attr_opts|
         revision_sequence = initialize_revision_sequence attr, attr_opts
@@ -56,7 +56,7 @@ module Task
       )
     end
 
-    def attribute_revisions(*)
+    def all_editable_attribute_revisions(*)
       @attribute_revisions.values.flat_map(&:to_a)
     end
 
