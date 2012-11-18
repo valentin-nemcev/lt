@@ -24,6 +24,14 @@ module Task
       return self
     end
 
+    def effective_interval
+      TimeInterval.beginning_at created_on
+    end
+
+    def effective_in?(given_time_interval)
+      effective_interval.overlaps_with? given_time_interval
+    end
+
 
     def id
       object_id

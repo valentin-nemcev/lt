@@ -2,8 +2,6 @@ require 'lib/spec_helper'
 
 require 'models/task'
 require 'models/task/attributes/computed/task_methods'
-require 'interval'
-require 'time_period'
 
 
 describe 'Task with computed attributes' do
@@ -36,7 +34,7 @@ describe 'Task with computed attributes' do
   let(:date2)          { Time.zone.parse '2012-01-04' }
   let(:date3)          { Time.zone.parse '2012-01-05' }
   let(:ending_date)    { Time.zone.parse '2012-01-07' }
-  let(:given_period)   { TimePeriod.new beginning_date, ending_date }
+  let(:given_period)   { TimeInterval.new beginning_date, ending_date }
 
 
   describe 'computed attribute revisions' do

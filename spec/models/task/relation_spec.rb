@@ -59,13 +59,6 @@ describe Task::Relation do
         relation.remove on: test_date0
       end.to raise_error Task::InvalidRelationError
     end
-
-    describe 'its effective period' do
-      subject { relation.effective_period }
-      its(:left_endpoint)  { should eq(addition_date) }
-      it { should be_left_closed }
-      it { should be_right_unbounded }
-    end
   end
 
   context 'created with addition and valid removal date' do
@@ -77,14 +70,6 @@ describe Task::Relation do
 
     its(:added_on)   { should eq(addition_date) }
     its(:removed_on) { should eq(removal_date) }
-
-    describe 'its effective period' do
-      subject { relation.effective_period }
-      its(:left_endpoint)  { should eq(addition_date) }
-      its(:right_endpoint) { should eq(removal_date) }
-      it { should be_left_closed }
-      it { should be_right_open }
-    end
 
     it 'should allow "unremoving" by setting removal date to nil' do
       relation.remove on: nil

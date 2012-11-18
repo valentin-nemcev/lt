@@ -44,8 +44,12 @@ module Task
       nodes.child
     end
 
-    def effective_period
-      Interval.new left_closed: added_on, right_open: removed_on
+    def effective_interval
+      TimeInterval.new added_on, removed_on
+    end
+
+    def effective_in?(given_time_interval)
+      effective_interval.overlaps_with? given_time_interval
     end
 
 
@@ -79,7 +83,7 @@ module Task
 
       "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str} #{type}" \
       " of #{supertask} - #{subtask}>" \
-      " effective in #{effective_period.inspect}"
+      " effective in #{effective_interval.inspect}"
     end
 
   end

@@ -23,7 +23,7 @@ module Task
     def check_for_duplication(new_relation)
       # TODO: Improve edge_added and remove this check
       return if new_relation.incomplete?
-      duplicated_relation = effective_in(new_relation.effective_period)
+      duplicated_relation = effective_in(new_relation.effective_interval)
         .filter{ |r| r.type == new_relation.type }
         .filter{ |r| r != new_relation }
         .find{ |r|
@@ -38,7 +38,7 @@ module Task
     alias_method :tasks, :nodes
 
     def effective_in(given_period)
-      filter{ |r| r.effective_period.overlaps_with? given_period }
+      filter{ |r| r.effective_in? given_period }
     end
 
   end

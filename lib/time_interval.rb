@@ -1,14 +1,14 @@
-class TimePeriod < Interval
+class TimeInterval < Interval
 
   def self.for_all_time
     new nil, nil
   end
 
-  def self.from(beginning)
+  def self.beginning_at(beginning)
     new beginning, nil
   end
 
-  def self.to(ending)
+  def self.ending_at(ending)
     new nil, ending
   end
 

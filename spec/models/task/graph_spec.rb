@@ -15,7 +15,7 @@ describe Task::Graph do
 
       its(:tasks) { should be_empty }
       its(:relations) { should be_empty }
-      its(:revisions) { should be_empty }
+      its(:attribute_revisions) { should be_empty }
     end
 
     context 'with single task' do
@@ -114,6 +114,21 @@ describe Task::Graph do
       described_class.new_from_records tasks: [task1, task2]
     end
 
+    describe '#new_task' do
+      let(:new_task_args) { :new_task_args }
+      let(:new_task) { stub('New task') }
+      before do
+        new_task.stub(:with_connected_tasks_and_relations => [[new_task], []])
+        Task.should_receive(:new_subtype).
+          with(new_task_args).and_return(new_task)
+      end
+      it 'creates task, includes it in graph and returns it' do
+        graph.new_task(new_task_args).should be new_task
+
+        graph.tasks.should include(new_task)
+      end
+    end
+
     describe '#find_task_by_id' do
       it 'should find task by id comparing ids as strings' do
         graph.find_task_by_id('1').should eq(task1)
@@ -125,7 +140,7 @@ describe Task::Graph do
       it 'returns all tasks revisions' do
         task1.stub(attribute_revisions: [:task_rev1, :task_rev2])
         task2.stub(attribute_revisions: [:another_task_rev1])
-        graph.revisions.should match_array(
+        graph.attribute_revisions.should match_array(
           [:task_rev1, :task_rev2, :another_task_rev1])
       end
     end

@@ -7,25 +7,22 @@ class TasksController < ApplicationController
   before_filter :get_effective_date, only: [:create, :update]
 
   def index
-    graph = storage.fetch_graph
-    @revisions = graph.revisions +
-      graph.computed_revisions(:state, TimePeriod.for_all_time)
-    @tasks = graph.tasks
-    @relations = graph.relations
+    @tasks, @relations, @revisions = graph.events in: TimeInterval.for_all_time
 
     render :events
   end
 
   def create
-    @task = Task.new_subtype task_params[:type],
+    task = graph.new_task task_params[:type],
       task_attrs.merge(on: effective_date)
-    @task.update_related_tasks fetch_related_tasks(task_params),
+
+    task.update_related_tasks fetch_related_tasks(task_params),
       on: effective_date
 
-    storage.store @task
-    @tasks = [@task]
-    @revisions = @task.attribute_revisions
-    @relations = @task.relations
+    @tasks, @relations, @revisions =
+      graph.events for: task, in: TimeInterval.beginning_at(effective_date)
+
+    storage.store task
 
     render :events, :status => :created
   rescue Task::TaskError => e
@@ -34,20 +31,15 @@ class TasksController < ApplicationController
   end
 
   def update
-    graph = storage.fetch_graph
-    @task = storage.fetch params[:id]
-    task_updates = @task.update_attributes task_attrs,
-      on: effective_date
+    task = storage.fetch params[:id]
 
-    updated_relations =
-      @task.update_related_tasks fetch_related_tasks(task_params),
+    task.update_attributes task_attrs, on: effective_date
+    task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
+    @tasks, @relations, @revisions =
+      graph.events for: task, in: TimeInterval.beginning_at(effective_date)
 
-    storage.store @task
-    @tasks = []
-    @revisions = task_updates +
-      graph.computed_revisions(:state, TimePeriod.from(effective_date))
-    @relations = updated_relations
+    storage.store task
 
     render :events
   rescue Task::TaskError => e
@@ -56,8 +48,8 @@ class TasksController < ApplicationController
   end
 
   def destroy
-    @task = storage.fetch params[:id]
-    storage.destroy_task @task
+    task = storage.fetch params[:id]
+    storage.destroy_task task
     head :status => :ok
   end
 
@@ -91,5 +83,9 @@ class TasksController < ApplicationController
 
   def storage
     @storage ||= Task::Storage.new user: current_user
+  end
+
+  def graph
+    @graph ||= storage.fetch_graph
   end
 end
