@@ -47,7 +47,7 @@ module Task
       current_values = Hash.new
       depended_on_attributes.
         map do |attr|
-          last_editable_attribute_revision(for: attr, on: period.beginning)
+          last_editable_attribute_revision(for: attr, before: period.beginning)
         end.
         compact.
         map do |revision|

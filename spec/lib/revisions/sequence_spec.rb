@@ -165,4 +165,60 @@ describe Sequence do
       sequence.new_revision revision_attrs
     end
   end
+
+  describe '#last_before' do
+    context 'without revisions' do
+      it 'should return nothing' do
+        sequence.last_before(creation_date).should be_nil
+      end
+    end
+
+    context 'with revisions' do
+      before(:each) do
+        sequence.set_revisions [first_revision, second_revision]
+      end
+
+      specify 'without date it should return nothing' do
+        sequence.last_before(nil).should be_nil
+      end
+
+      specify 'with date in past it should return nothing' do
+        sequence.last_before(1.day.until creation_date).should be_nil
+      end
+
+      specify 'with date on revision it should return revision before it' do
+        sequence.last_before(update_date).should be first_revision
+      end
+
+      specify 'with date in future it should return revision before it' do
+        sequence.last_before(1.day.since update_date).should be second_revision
+      end
+    end
+  end
+
+  describe '#all_in_interval' do
+    context 'without revisions' do
+      it 'should return nothing' do
+        sequence.all_in_interval(TimeInterval.for_all_time).should be_empty
+      end
+    end
+
+    context 'with revisions' do
+      before(:each) do
+        sequence.set_revisions [first_revision, second_revision]
+      end
+
+      it 'should return revisions in given interval' do
+        sequence.all_in_interval(TimeInterval.new creation_date, update_date).
+          should eq([first_revision])
+        sequence.all_in_interval(TimeInterval.beginning_at update_date).
+          should eq([second_revision])
+      end
+
+      specify 'with unbounded interval it should return all revisions' do
+        sequence.all_in_interval(TimeInterval.for_all_time).
+          should eq([first_revision, second_revision])
+      end
+    end
+  end
 end

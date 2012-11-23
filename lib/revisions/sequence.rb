@@ -22,6 +22,16 @@ module Revisions
       @revisions.last
     end
 
+    def last_before(given_date)
+      given_date or return nil
+      last_index = @revisions.rindex{ |rev| rev.updated_on < given_date }
+      last_index and @revisions[last_index]
+    end
+
+    def all_in_interval(given_interval)
+      @revisions.select{ |r| r.updated_on.in? given_interval }
+    end
+
     def set_revisions(revisions)
       clear_revisions
       revisions.sort_by(&:sequence_number).each{ |r| add_revision r }

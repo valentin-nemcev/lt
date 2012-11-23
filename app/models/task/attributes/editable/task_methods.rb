@@ -60,7 +60,13 @@ module Task
       @attribute_revisions.values.flat_map(&:to_a)
     end
 
-    def last_attribute_revision(*)
+    def editable_attribute_revisions(args = {})
+      @attribute_revisions[args.fetch :for].
+        all_in_interval(args.fetch :in).to_a
+    end
+
+    def last_editable_attribute_revision(args = {})
+      @attribute_revisions[args.fetch :for].last_before args.fetch :before
     end
 
     def update_attributes(attrs = {}, opts = {})

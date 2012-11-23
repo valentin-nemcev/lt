@@ -13,7 +13,7 @@ module Task
     end
 
     def id
-      @id = self.class.new_id
+      @id ||= "c#{self.class.new_id}"
     end
 
     def == other
