@@ -38,5 +38,7 @@ group :development, :test do
   gem 'poltergeist', '~> 1.0.0'
   gem 'spork-rails', '~> 3.2.0'
   gem 'database_cleaner', '~> 0.8.0'
+
+  gem 'awesome_print', '~> 1.1'
 end
 
