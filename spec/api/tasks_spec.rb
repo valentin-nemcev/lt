@@ -20,8 +20,8 @@ describe 'tasks', :api do
   let(:project_creation_date) { Time.zone.parse('2012-01-01 9:00').httpdate }
 
   shared_examples :project_creation do
-    describe do
-      subject(:project_creation) {
+    describe 'new project creation event' do
+      subject {
         task_creations.find_struct(task_type: 'project')
       }
       its(:id)        { should_not be_nil }
@@ -32,8 +32,8 @@ describe 'tasks', :api do
   end
 
   shared_examples :new_project_updates do
-    describe do
-      subject(:objective_update) { task_updates.find_struct(
+    describe 'new project objective update event' do
+      subject { task_updates.find_struct(
         task_id:        project_id,
         attribute_name: 'objective',
         date:           project_creation_date
@@ -42,8 +42,8 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(project_id) }
     end
 
-    describe do
-      subject(:state_update) { task_updates.find_struct(
+    describe 'new project state update event' do
+      subject { task_updates.find_struct(
         task_id:        project_id,
         attribute_name: 'state',
         date:           project_creation_date
@@ -64,8 +64,8 @@ describe 'tasks', :api do
   let(:action_creation_date) { Time.zone.parse('2012-01-01 10:00').httpdate }
 
   shared_examples :action_creation do
-    describe do
-      subject(:action_creation) {
+    describe 'new action creation event' do
+      subject {
         task_creations.find_struct(task_type: 'action')
       }
       its(:id)        { should_not be_nil }
@@ -76,8 +76,8 @@ describe 'tasks', :api do
   end
 
   shared_examples :new_action_updates do
-    describe do
-      subject(:objective_update) { task_updates.find_struct(
+    describe 'new action objective update event' do
+      subject { task_updates.find_struct(
         attribute_name: 'objective',
         date:           action_creation_date
       )}
@@ -85,8 +85,8 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(action_id) }
     end
 
-    describe do
-      subject(:action_state_update) { task_updates.find_struct(
+    describe 'new action state update event' do
+      subject { task_updates.find_struct(
         task_id:        action_id,
         attribute_name: 'state',
         date:           action_creation_date,
@@ -96,8 +96,8 @@ describe 'tasks', :api do
   end
 
   shared_examples :new_action_relations do
-    describe do
-      subject(:composite_relation_addition) { relation_additions.find_struct(
+    describe 'new action to project relation addition' do
+      subject { relation_additions.find_struct(
         subtask_id: action_id,
         supertask_id: project_id
       )}
@@ -114,8 +114,8 @@ describe 'tasks', :api do
   let(:update_date)   { Time.zone.parse('2012-01-01 12:00').httpdate }
 
   shared_examples :updated_action_updates do
-    describe do
-      subject(:objective_update) { task_updates.find_struct(
+    describe 'updated action objective update' do
+      subject { task_updates.find_struct(
         attribute_name: 'objective',
         date:           update_date
       )}
@@ -123,8 +123,8 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(action_id) }
     end
 
-    describe do
-      subject(:state_update) { task_updates.find_struct(
+    describe 'updated action state update' do
+      subject { task_updates.find_struct(
         task_id:        action_id,
         attribute_name: 'state',
         date:           update_date
@@ -132,8 +132,8 @@ describe 'tasks', :api do
       its(:updated_value) { should eq('completed') }
     end
 
-    describe do
-      subject(:project_state_update) { task_updates.find_struct(
+    describe 'updated action project computed state update' do
+      subject { task_updates.find_struct(
         task_id:        project_id,
         attribute_name: 'state',
         date:           action_creation_date,

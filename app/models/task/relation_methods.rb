@@ -65,6 +65,47 @@ module Task
       e.nodes
     end
 
+    def related_tasks(args = {})
+      opts = relation_opts_for(args.fetch :for)
+      e = edges.dup
+      case opts[:relation]
+      when :super then e.incoming!
+      when :sub   then e.outgoing!
+      end
+      type = opts.fetch :type
+      e.filter!{ |r| r.type == type }
+      args[:in].try do |interval|
+        e.filter!{ |r| r.effective_in? interval }
+      end
+      tasks, relations = e.nodes_and_edges
+      tasks.zip(relations).map do |task, relation|
+        [task, relation.effective_interval]
+      end
+    end
+
+    # TODO: Remove duplication
+    def last_related_tasks(args = {})
+      opts = relation_opts_for(args.fetch :for)
+      e = edges.dup
+      case opts[:relation]
+      when :super then e.incoming!
+      when :sub   then e.outgoing!
+      end
+      type = opts.fetch :type
+      e.filter!{ |r| r.type == type }
+      args[:before].try do |date|
+        e.filter! do |r|
+          int = r.effective_interval
+          # TODO: Better comparison
+          int.ending && int.beginning <= date && date <= int.ending
+        end
+      end
+      tasks, relations = e.nodes_and_edges
+      tasks.zip(relations).map do |task, relation|
+        [task, relation.effective_interval]
+      end
+    end
+
     def destroy
       super
       relations.each(&:destroy)

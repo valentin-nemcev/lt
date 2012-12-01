@@ -24,7 +24,14 @@ module Task
     has_computed_attribute :state, computed_from:
       {self: :state, subtasks: :state} \
     do |self_state, subtasks_states|
-      self_state
+      # self_state.nil? and fail 'self_state is nil'
+      if self_state != :underway
+        self_state
+      elsif subtasks_states.all?{ |s| s == :completed }
+        :completed
+      else
+        :underway
+      end
     end
 
     include Attributes::TaskMethods
