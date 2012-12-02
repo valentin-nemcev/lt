@@ -5,6 +5,9 @@ module Task
       interval = args[:in]
       computed = self.class.computed_attributes
       editable = self.class.editable_attributes
+      attr = args[:for]
+      computed = computed.select{ |a| a == attr } if attr
+      editable = editable.select{ |a| a == attr } if attr
       computed.flat_map{ |attr|
         computed_attribute_revisions :for => attr, :in => interval
       } + (editable - computed).flat_map{ |attr|
@@ -13,7 +16,7 @@ module Task
     end
 
     def last_attribute_revision(args = {})
-      attr = args[:attr]
+      attr = args[:for]
       computed = self.class.computed_attributes
       editable = self.class.editable_attributes
       return last_computed_attribute_revision(args) if computed.include? attr

@@ -253,10 +253,11 @@ describe 'Task with computed attributes' do
       #       attr: --1---2---3---4---5----
 
       before do
-        related1_1, *_ = task.stub_related_tasks_in given_interval, :relation1, [{
-          added_on:   1.day.until(given_interval.beginning),
-          removed_on: date2,
-        }]
+        related1_1, *_ = task.stub_related_tasks_in given_interval,
+          :relation1, [{
+            added_on:   1.day.until(given_interval.beginning),
+            removed_on: date2,
+          }]
 
         related1_1.stub_attr_rev_before given_interval.beginning, [{
           :for    => :attr1_1,
@@ -265,22 +266,23 @@ describe 'Task with computed attributes' do
           :for    => :attr1_2,
           :value  => 'attr1_2 v0'
         }]
-        related1_1.stub_attr_revs_in given_interval, :attr1_2, [{
-          :on    => given_interval.beginning,
-          :value => 'attr1_2 v1'
-        }, {
-          :on    => date1,
-          :value => 'attr1_2 v2'
-        }]
-
-        related2_1, related2_2 =
-          task.stub_related_tasks_in given_interval, :relation2, [{
-            added_on:   1.day.until(given_interval.beginning),
-            removed_on: date4,
+        related1_1.stub_attr_revs_in TimeInterval.new(beginning, date2),
+          :attr1_2, [{
+            :on    => given_interval.beginning,
+            :value => 'attr1_2 v1'
           }, {
-            added_on:   date3,
-            removed_on: 1.day.since(given_interval.ending),
+            :on    => date1,
+            :value => 'attr1_2 v2'
           }]
+
+        related2_1, related2_2 = task.stub_related_tasks_in given_interval,
+          :relation2, [{
+              added_on:   1.day.until(given_interval.beginning),
+              removed_on: date4,
+            }, {
+              added_on:   date3,
+              removed_on: 1.day.since(given_interval.ending),
+            }]
 
         related2_1.stub_attr_rev_before given_interval.beginning, [{
           :for    => :attr2_1,
@@ -290,10 +292,11 @@ describe 'Task with computed attributes' do
         #   :for    => :attr2_1,
         #   :value  => 'attr2_1_2 v0'
         # }]
-        related2_2.stub_attr_revs_in given_interval, :attr2_1, [{
-          :on    => date3,
-          :value => 'attr2_1_2 v1'
-        }]
+        related2_2.stub_attr_revs_in TimeInterval.new(date3, ending),
+          :attr2_1, [{
+            :on    => date3,
+            :value => 'attr2_1_2 v1'
+          }]
       end
 
       before do

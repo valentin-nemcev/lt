@@ -22,6 +22,15 @@ class TimeInterval < Interval
     end
   end
 
+  def == other
+    self.beginning == other.beginning && self.ending == other.ending
+  end
+
+  def & other
+    self.class.new \
+      [self.beginning, other.beginning].max, [self.ending, other.ending].min
+  end
+
   alias_method :beginning, :left_endpoint
   alias_method :ending,    :right_endpoint
 end

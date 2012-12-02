@@ -7,6 +7,7 @@ class TasksController < ApplicationController
   before_filter :get_effective_date, only: [:create, :update]
 
   def index
+    storage.fetch_all
     @tasks, @relations, @revisions = graph.events in: TimeInterval.for_all_time
 
     render :events
@@ -86,6 +87,6 @@ class TasksController < ApplicationController
   end
 
   def graph
-    @graph ||= storage.fetch_graph
+    @graph ||= storage.graph
   end
 end

@@ -17,7 +17,7 @@ describe 'tasks', :api do
     state:     'underway',
   }}
 
-  let(:project_creation_date) { Time.zone.parse('2012-01-01 9:00').httpdate }
+  let(:project_creation_date) { Time.zone.parse('2012-01-01 12:00').httpdate }
 
   shared_examples :project_creation do
     describe 'new project creation event' do
@@ -61,7 +61,7 @@ describe 'tasks', :api do
     state:         'underway',
   }}
 
-  let(:action_creation_date) { Time.zone.parse('2012-01-01 10:00').httpdate }
+  let(:action_creation_date) { Time.zone.parse('2012-01-02 12:00').httpdate }
 
   shared_examples :action_creation do
     describe 'new action creation event' do
@@ -111,7 +111,7 @@ describe 'tasks', :api do
     state:     'completed'
   ) }
 
-  let(:update_date)   { Time.zone.parse('2012-01-01 12:00').httpdate }
+  let(:update_date)   { Time.zone.parse('2012-01-03 12:00').httpdate }
 
   shared_examples :updated_action_updates do
     describe 'updated action objective update' do
@@ -136,7 +136,7 @@ describe 'tasks', :api do
       subject { task_updates.find_struct(
         task_id:        project_id,
         attribute_name: 'state',
-        date:           action_creation_date,
+        date:           update_date,
       )}
       its(:updated_value) { should eq('completed') }
     end

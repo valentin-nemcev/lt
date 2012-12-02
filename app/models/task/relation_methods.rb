@@ -97,7 +97,7 @@ module Task
         e.filter! do |r|
           int = r.effective_interval
           # TODO: Better comparison
-          int.ending && int.beginning <= date && date <= int.ending
+          int.ending.nil? || int.beginning <= date && date <= int.ending
         end
       end
       tasks, relations = e.nodes_and_edges

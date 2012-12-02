@@ -36,7 +36,7 @@ module Task
 
       def <=> other
         if self.date == other.date
-          if    task_ev && value.in?([:beginning, :added]) 
+          if    task_ev && value.in?([:beginning, :added])
             -1
           elsif task_ev && value.in?([:ending, :removed])
             +1
@@ -46,6 +46,8 @@ module Task
             0
           end
         else
+          fail self.inspect if self.date.nil?
+          fail other.inspect if other.date.nil?
           self.date <=> other.date
         end
       end
@@ -89,7 +91,6 @@ module Task
           end
         end
       end
-      # p proc_arguments.to_a
       computed_value = attribute_proc.(*proc_arguments)
 
       Computed::Revision.new \
@@ -101,7 +102,7 @@ module Task
 
     def computed_attribute_revisions(args = {})
       attribute = args[:for]
-      period    = args[:in] || TimeInterval.for_all_time
+      interval    = args[:in] || TimeInterval.for_all_time
       opts = computed_attributes_opts.fetch attribute
 
       attribute_proc = opts[:proc]
@@ -116,25 +117,28 @@ module Task
       end
 
       events = depended_on_attributes.flat_map do |rel, attrs|
-        tasks = rel == :self ? [[self, period]]
-          : related_tasks(:for => rel, :in => period)
+        tasks = rel == :self ? [[self, interval]]
+          : related_tasks(:for => rel, :in => interval)
         tasks.flat_map do |(task, orig_task_int)|
-          task_int = orig_task_int & period
+          task_int = orig_task_int & interval
           Array(attrs).flat_map do |attr|
             msg = attr == attribute && task == self ?
               :editable_attribute_revisions : :attribute_revisions
-            evs = task.public_send(msg, :for => attr, :in => period).map do |rev|
+            evs = task.public_send(
+              msg, :for => attr, :in => task_int
+            ).map do |rev|
               Event.new rel, attr, task, \
                 rev.updated_on, false, rev.updated_value
             end
 
             task_ev = rel == :self || orig_task_int.beginning &&
-              orig_task_int.beginning < period.beginning ? :beginning : :added
+              orig_task_int.beginning < interval.beginning ? :beginning : :added
             evs << Event.new(rel, attr, task, task_int.beginning, true, task_ev)
 
             task_ev = rel == :self || orig_task_int.ending &&
-              orig_task_int.ending > period.ending ? :ending : :removed
-            evs << Event.new(rel, attr, task, task_int.ending, true, task_ev)
+              orig_task_int.ending > interval.ending ? :ending : :removed
+            ending = task_int.ending || Time::FOREVER
+            evs << Event.new(rel, attr, task, ending, true, task_ev)
 
             evs.compact
           end
@@ -142,14 +146,11 @@ module Task
       end
       events = events.sort.chunk(&:date)
 
-
       prev_revision = last_computed_attribute_revision \
-        :for => attribute, :before => period.beginning
+        :for => attribute, :before => interval.beginning
       prev_value = prev_revision.try(:updated_value)
 
       events.map do |date, evs|
-        # p date
-        # puts evs.to_a.join("\n")
         task_evs = []
         next if date == Time::FOREVER
         evs.each do |ev|
@@ -181,7 +182,7 @@ module Task
             end
           end
         end
-        # p proc_arguments.to_a
+
         computed_value = attribute_proc.(*proc_arguments)
 
         next if computed_value == prev_value

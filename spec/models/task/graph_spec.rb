@@ -1,11 +1,19 @@
 require 'spec_helper'
 
 describe Task::Graph do
+  def stub_task(name, methods = {})
+    stub(name).tap do |task|
+      task.stub(
+        methods.merge :with_connected_tasks_and_relations => [[task], []]
+      )
+    end
+  end
+
   context 'with passed tasks' do
-    let(:task) { stub('task') }
-    let(:another_task) { stub('task') }
-    let(:connected_task) { stub('connected_task') }
-    let(:disconnected_task) { stub('disconnected_task') }
+    let(:task)              { stub_task('task') }
+    let(:another_task)      { stub_task('task') }
+    let(:connected_task)    { stub_task('connected_task') }
+    let(:disconnected_task) { stub_task('disconnected_task') }
 
     let(:relation1) { stub('relation1') }
     let(:relation2) { stub('relation2') }
@@ -85,7 +93,7 @@ describe Task::Graph do
       stub('relation2', :incomplete? => false)
     ] }
     subject(:graph) do
-      described_class.new_from_records tasks: tasks, relations: relations
+      described_class.new.add_tasks tasks: tasks, relations: relations
     end
     it 'returns passed tasks and relations' do
       graph.tasks.to_a.should match_array(tasks)
@@ -101,17 +109,17 @@ describe Task::Graph do
     ] }
     it 'raises an error' do
       expect do
-        described_class.new_from_records tasks: tasks, relations: relations
+        described_class.new.add_tasks tasks: tasks, relations: relations
       end.to raise_error Task::Graph::IncompleteGraphError
     end
   end
 
   context 'with tasks' do
-    let(:task1) { stub('task1', id:  1 ) }
-    let(:task2) { stub('task2', id: '2') }
+    let(:task1) { stub_task('task1', id:  1 ) }
+    let(:task2) { stub_task('task2', id: '2') }
 
     subject(:graph) do
-      described_class.new_from_records tasks: [task1, task2]
+      described_class.new tasks: [task1, task2]
     end
 
     describe '#new_task' do

@@ -3,9 +3,10 @@ module Task
     class TaskNotFoundError < StandardError; end
     class IncompleteGraphError < StandardError; end
 
-    attr_reader :user
+    attr_reader :user, :graph
     def initialize(opts = {})
       @user = opts.fetch :user
+      @graph = Task::Graph.new
     end
 
     def store(task)
@@ -27,16 +28,16 @@ module Task
     end
 
     def fetch(task_id)
-      graph = fetch_scope(task_base.graph_scope(task_id))
-      graph.find_task_by_id(task_id) or fail TaskNotFoundError
-    end
-
-    def fetch_graph
-      fetch_scope(task_base.all_graph_scope)
+      task = graph.find_task_by_id(task_id)
+      fetch_scope(task_base.graph_scope(task_id)) if !task
+      task = graph.find_task_by_id(task_id)
+      fail TaskNotFoundError if !task
+      task
     end
 
     def fetch_all
       fetch_scope(task_base.all_graph_scope).tasks
+      graph
     end
 
     def destroy_task(task)
@@ -51,7 +52,7 @@ module Task
     def fetch_scope(task_scope)
       tasks = task_scope.load_tasks
       relations = task_scope.relations.load_relations(tasks.index_by(&:id))
-      Task::Graph.new_from_records tasks: tasks, relations: relations
+      graph.add_tasks tasks: tasks, relations: relations
     end
 
     def task_base

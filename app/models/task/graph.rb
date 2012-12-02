@@ -12,30 +12,39 @@ module Task
     end
 
 
-    def self.new_from_records(records = {})
-      allocate.tap{ |o| o.initialize_with_records(records) }
-    end
+    def add_tasks(args = {})
+      given_relations = args.fetch(:relations, [])
 
-    def initialize_with_records(opts = {})
-      relations = opts.fetch(:relations, [])
-
-      incomplete = relations.select(&:incomplete?)
+      incomplete = given_relations.select(&:incomplete?)
       fail IncompleteGraphError, incomplete if incomplete.present?
 
-      @tasks = Set.new(opts.fetch(:tasks, []))
-      @relations = Set.new(relations)
+      given_tasks = args.fetch(:tasks, [])
+
+      tasks.merge(given_tasks)
+      relations.merge(given_relations)
+      self
+    end
+
+    def add_tasks_with_connected given_tasks
+      given_tasks.each do |task|
+        next if tasks.include? task
+        new_tasks, new_relations = task.with_connected_tasks_and_relations
+        tasks.merge new_tasks
+        relations.merge new_relations
+      end
+      self
     end
 
 
     def new_task(*args)
       task = Task.new_subtype *args
-      add_tasks [task]
+      add_tasks_with_connected [task]
       task
     end
 
 
     def initialize(opts = {})
-      add_tasks opts.fetch :tasks, []
+      add_tasks_with_connected opts.fetch(:tasks, [])
     end
 
     def relations
@@ -72,16 +81,6 @@ module Task
         t.attribute_revisions in: interval
       end
       [created_tasks, relations, attribute_revisions]
-    end
-
-    protected
-    def add_tasks given_tasks
-      given_tasks.each do |task|
-        next if tasks.include? task
-        new_tasks, new_relations = task.with_connected_tasks_and_relations
-        tasks.merge new_tasks
-        relations.merge new_relations
-      end
     end
 
   end
