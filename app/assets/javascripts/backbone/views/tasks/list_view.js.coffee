@@ -6,11 +6,12 @@ class Views.ListView extends Backbone.View
   className: 'tasks'
 
   initialize: ->
-    @collection.bind 'reset'  , @reset,   @
-    @collection.bind 'add'    , @add,     @
-    @collection.bind 'remove' , @remove,  @
+    @collection.bind 'reset'   , @reset,   @
+    @collection.bind 'add'     , @add,     @
+    @collection.bind 'remove'  , @remove,  @
+    @collection.bind 'destroy' , @destroy,  @
 
-    @items = {}
+    @itemViews = {}
 
   updateEmptyItem: ->
     return unless @$emptyItem?
@@ -20,30 +21,35 @@ class Views.ListView extends Backbone.View
       @$emptyItem.detach()
 
   reset: ->
-    @remove cid for cid of @items
+    @remove cid for cid of @itemViews
     @add model for model in @collection.models
     @updateEmptyItem()
     return
 
   add: (model) ->
-    itemView = new Views.ItemView
+    cid = model.cid
+    @itemViews[cid] ?= new Views.ItemView(
       model: model
       tagName: 'li'
       attributes:
         record: 'task'
       id: 'task' + '-' + model.cid
+    ).render()
 
-    itemView.render().$el.appendTo(@$el)
-    @items[model.cid] = itemView
+    @itemViews[cid].$el.appendTo(@$el)
     @updateEmptyItem()
 
     return
 
   remove: (model) ->
     cid = model.cid ? model
-    @items[cid].$el.remove()
+    @itemViews[cid].$el.detach()
     @updateEmptyItem()
 
+  destroy: (model) ->
+    cid = model.cid ? model
+    @itemViews[cid].$el.remove()
+    delete @itemViews[cid]
 
   render: (opts = {})->
     if $emptyItem = opts.$emptyItem

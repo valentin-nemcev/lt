@@ -1,4 +1,5 @@
 class Lt.Models.Task extends Backbone.Model
+  @comparator: (task) -> task.getSortRank()
 
   initialize: (attributes = {}, options = {}) ->
     @on 'change:id', @onChangeId, @
@@ -30,6 +31,12 @@ class Lt.Models.Task extends Backbone.Model
     @trigger 'changeState', this, state, options
 
   isValidNextState: (state) -> yes
+
+  states = ['underway', 'considered', 'completed', 'canceled']
+  stateRanks = {}
+  stateRanks[rank] = state for rank, state in states
+
+  getSortRank: -> stateRanks[@get('state')]
 
   collectionsToIds = (collections) ->
     ids = {}
@@ -83,6 +90,7 @@ class Lt.Models.Task extends Backbone.Model
 class Lt.Collections.Tasks extends Backbone.Collection
   url: '/tasks'
   model: Lt.Models.Task
+  comparator: Lt.Models.Task.comparator
 
   initialize: ->
     @rootTasks = {}
@@ -96,4 +104,8 @@ class Lt.Collections.Tasks extends Backbone.Collection
 
 class Lt.Collections.RelatedTasks extends Backbone.Collection
   model: Lt.Models.Task
+  comparator:  Lt.Models.Task.comparator
+
+  initialize: ->
+    @on 'change:state', => @sort()
 
