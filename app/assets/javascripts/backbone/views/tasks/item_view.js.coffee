@@ -53,7 +53,15 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @toggleSelect(@model.getState() is 'new')
 
   change: ->
-    @$fields.find('[field=objective]').text @model.get('objective')
+    objective = @model.get('objective') || ''
+    $objective = @$fields.find('[field=objective]')
+    if objective.match(/\S/)
+      @$emptyObjective.detach()
+      $objective.text(objective)
+    else
+      $objective.text('')
+      @$emptyObjective.appendTo($objective)
+
     @$el.attr
       'task-type':  @model.get('type')
       'task-state': @model.get('state')
@@ -71,6 +79,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
     $emptyItem = @$el.children('.empty').detach()
     @subtasksView.render($emptyItem: $emptyItem).$el.appendTo @$el
+    @$emptyObjective = @$fields.find('[field=objective] .empty')
 
     @toggleSelect off
     @changeState()

@@ -1,6 +1,8 @@
 <div class="task">
   <div class="fields">
-    <div field="objective" control="select"> </div>
+    <div field="objective" control="select">
+      <span class="empty">Нет цели</span>
+    </div>
   </div>
 
   <div class="additional-controls minor">
