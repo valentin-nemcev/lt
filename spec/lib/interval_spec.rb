@@ -174,6 +174,7 @@ describe Interval do
       iv2 = Interval.new left_open: nil, right_open: 8
       iv1.should overlap_with iv2
       iv2.should overlap_with iv1
+    end
 
     example "
     123456789
