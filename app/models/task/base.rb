@@ -24,8 +24,14 @@ module Task
       # self_state.nil? and fail 'self_state is nil'
       if self_state != 'underway'
         self_state
-      elsif subtasks_states.present? && subtasks_states.all?{ |s| s == 'completed' }
+      elsif subtasks_states.present? && subtasks_states.all? do |s|
+          s.in? ['completed', 'canceled']
+        end
         'completed'
+      elsif subtasks_states.present? && subtasks_states.all? do |s|
+          s.in? ['completed', 'canceled', 'considered']
+        end
+        'considered'
       else
         'underway'
       end

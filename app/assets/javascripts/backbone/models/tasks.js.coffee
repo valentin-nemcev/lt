@@ -36,7 +36,11 @@ class Lt.Models.Task extends Backbone.Model
   stateRanks = {}
   stateRanks[rank] = state for rank, state in states
 
-  getSortRank: -> stateRanks[@get('state')]
+  types = ['action', 'project']
+  typeRanks = {}
+  typeRanks[rank] = type for rank, type in types
+
+  getSortRank: -> [stateRanks[@get('state')], typeRanks[@get('type')]]
 
   collectionsToIds = (collections) ->
     ids = {}
@@ -123,6 +127,7 @@ class Lt.Collections.Tasks extends Backbone.Collection
   getRootTasksFor: (relationType) ->
     @rootTasks[relationType] ?= new Backbone.FilteredCollection this,
       modelFilter: @relationFilterFor(relationType)
+      comparator: Lt.Models.Task.comparator
 
   getProjects: ->
     @projects ?= new Backbone.FilteredCollection this,
