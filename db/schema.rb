@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121013231648) do
+ActiveRecord::Schema.define(:version => 20121207191854) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -59,8 +59,10 @@ ActiveRecord::Schema.define(:version => 20121013231648) do
   add_index "ui_states", ["user_id"], :name => "index_ui_states_on_user_id"
 
   create_table "users", :force => true do |t|
-    t.string "login"
-    t.string "name"
+    t.string   "login"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end
