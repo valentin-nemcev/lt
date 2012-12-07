@@ -1,4 +1,4 @@
-Lt.Views.Tasks ||= {}
+Views = Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.FormView extends Backbone.View
   template  : JST['backbone/templates/tasks/form']
@@ -14,6 +14,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   initialize: ->
     @model.bind 'change'     , @change     , @
     @model.bind 'changeState', @changeState, @
+    @projectControlView = new Views.FormProjectControlView model: @model
 
   cancel: ->
     if @model.isNew()
@@ -56,6 +57,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
   render : ->
     $(@el).html @template()
+    @projectControlView.setElement(@$('[view=project-control]')).render()
     @change()
     @changeState()
 
