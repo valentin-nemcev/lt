@@ -57,6 +57,16 @@ class Lt.Models.Task extends Backbone.Model
 
     attrs
 
+  setCurrentProject: (newProject) ->
+    projects = @getSupertasks('composition')
+    newProject = @collection.getByCid(newProject)
+    currentProject = projects.at(0)
+    console.log currentProject, newProject
+    return if newProject is currentProject
+    @removeSupertask('composition', currentProject)
+    @addSupertask('composition', newProject) if newProject
+
+
   _initializeRelatedTasks: (attributes) ->
     @_supertasks = {}
     @_subtasks   = {}
@@ -113,6 +123,11 @@ class Lt.Collections.Tasks extends Backbone.Collection
   getRootTasksFor: (relationType) ->
     @rootTasks[relationType] ?= new Backbone.FilteredCollection this,
       modelFilter: @relationFilterFor(relationType)
+
+  getProjects: ->
+    @projects ?= new Backbone.FilteredCollection this,
+      modelFilter: (task) -> task.get('type') is 'project'
+      comparator: (task) -> task.get('objective')
 
 class Lt.Collections.RelatedTasks extends Backbone.Collection
   model: Lt.Models.Task

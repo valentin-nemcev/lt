@@ -32,6 +32,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
       state:     $f('[input=state] :checked').val(),
       objective: $f('[input=objective]').val(),
 
+    @model.setCurrentProject($f('[input=project]').val())
     @model.save(attrs)
     @trigger('close')
 

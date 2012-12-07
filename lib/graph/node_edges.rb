@@ -31,7 +31,7 @@ module Graph
     end
 
     def nodes_and_edges
-      visited_edges, visited_nodes = Set.new, Set.new
+      visited_edges, visited_nodes = Set.new, Array.new
 
       paths_to_visit = [[:start, self.node]]
       until paths_to_visit.empty? do

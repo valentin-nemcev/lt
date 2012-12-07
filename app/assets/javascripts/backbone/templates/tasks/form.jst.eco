@@ -35,7 +35,7 @@
   <div class='field-group minor'>
     <label view="project-control">
       Проект
-      <input name="project" type="text" input="project"/>
+      <select name="project" type="text" input="project"/></select>
     </label>
   </div>
   <div class='field-group minor'>
