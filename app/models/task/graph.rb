@@ -77,7 +77,8 @@ module Task
       end
       created_tasks = tasks.select{ |t| interval.include? t.created_on }
       relations = relations.select do |r|
-        interval.include?(r.added_on) || interval.include?(r.removed_on)
+        interval.include?(r.added_on) || 
+          r.removed_on && interval.include?(r.removed_on)
       end
       attribute_revisions = tasks.collect_concat do |t|
         t.attribute_revisions in: interval

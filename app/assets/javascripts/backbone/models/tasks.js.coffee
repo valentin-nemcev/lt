@@ -74,6 +74,9 @@ class Lt.Models.Task extends Backbone.Model
   addSupertask: (type, tasks...) -> @_addRelated('supertasks', type, tasks)
   addSubtask:   (type, tasks...) -> @_addRelated('subtasks'  , type, tasks)
 
+  removeSupertask: (type, tasks...) -> @_removeRelated('supertasks', type, tasks)
+  removeSubtask:   (type, tasks...) -> @_removeRelated('subtasks'  , type, tasks)
+
   getSupertasks: (type) -> @_getRelated('supertasks', type)
   getSubtasks:   (type) -> @_getRelated('subtasks'  , type)
 
@@ -84,8 +87,17 @@ class Lt.Models.Task extends Backbone.Model
   _addRelated: (field, type, tasks) ->
     collection = @_getRelated(field, type)
     collection.add tasks
-    @set "#{field}_#{type}", collection.pluck('id')
+    @_updateRelatedIds field, type, collection
     this
+
+  _removeRelated: (field, type, tasks) ->
+    collection = @_getRelated(field, type)
+    collection.remove tasks
+    @_updateRelatedIds field, type, collection
+    this
+
+  _updateRelatedIds: (field, type, collection) ->
+    @set "#{field}_#{type}", collection.pluck('id')
 
 class Lt.Collections.Tasks extends Backbone.Collection
   url: '/tasks'

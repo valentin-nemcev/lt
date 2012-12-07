@@ -41,6 +41,17 @@ class Lt.Models.RelationAddition extends Lt.Models.TaskEvent
     supertask.addSubtask type, subtask
     subtask.addSupertask type, supertask
 
+class Lt.Models.RelationRemoval extends Lt.Models.TaskEvent
+  type: 'relation_removal'
+
+  apply: (tasks) ->
+    supertask = tasks.get(@get('supertask_id'))
+    subtask   = tasks.get(@get('subtask_id'))
+    type = @get('relation_type')
+
+    supertask.removeSubtask type, subtask
+    subtask.removeSupertask type, supertask
+
 class Lt.TaskEvents extends Backbone.Collection
   url: '/tasks'
 
@@ -56,7 +67,7 @@ class Lt.TaskEvents extends Backbone.Collection
   applyEvent: (event) -> event.apply @tasks
 
   parse: (eventsJSON, updatedTask = null) ->
-    updatedTask = null unless updatedTask.cid?
+    updatedTask = null unless updatedTask?.cid?
     creations = for creation in eventsJSON.task_creations ? []
       new Lt.Models.TaskCreation(creation, updatedTask: updatedTask)
 
@@ -66,7 +77,10 @@ class Lt.TaskEvents extends Backbone.Collection
     additions = for addition in eventsJSON.relation_additions ? []
       new Lt.Models.RelationAddition(addition)
 
-    return creations.concat(updates).concat(additions)
+    removals = for removal in eventsJSON.relation_removals ? []
+      new Lt.Models.RelationRemoval(removal)
+
+    return creations.concat(updates).concat(additions).concat(removals)
 
   resetTasks: ->
     @applyEvent(event) for event in @models

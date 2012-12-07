@@ -2,6 +2,9 @@
 
 describe 'Task', ->
   describe 'related tasks', ->
+    sortedIdsOf = (collection) ->
+      _(collection.sortBy (task) -> task.id).pluck('id')
+
     it 'has no related task ids initially', ->
       task = new Lt.Models.Task
 
@@ -30,9 +33,6 @@ describe 'Task', ->
       task.addSubtask('relation_type2',
         tasks.get('subtask2'), tasks.get('subtask3'))
 
-      sortedIdsOf = (collection) ->
-        _(collection.sortBy (task) -> task.id).pluck('id')
-
       subtasks1   = task.getSubtasks('relation_type1')
       subtasks2   = task.getSubtasks('relation_type2')
       supertasks1 = task.getSupertasks('relation_type1')
@@ -41,6 +41,44 @@ describe 'Task', ->
       expect(sortedIdsOf subtasks2  ).toEqual(['subtask2', 'subtask3'])
       expect(sortedIdsOf supertasks1).toEqual(['supertask1'])
       expect(sortedIdsOf supertasks2).toEqual(['supertask2', 'supertask3'])
+
+    it 'removes related tasks', ->
+      tasks = new Lt.Collections.Tasks
+      tasks.add(task = new Lt.Models.Task)
+
+      supertasks = (new Lt.Models.Task id: id for id in [
+        'supertask1', 'supertask2', 'supertask3'
+      ])
+
+      subtasks = (new Lt.Models.Task id: id for id in [
+        'subtask1', 'subtask2', 'subtask3'
+      ])
+      tasks.add(supertasks)
+      tasks.add(subtasks)
+
+      task.addSupertask('relation_type1', tasks.get 'supertask1')
+      task.addSubtask('relation_type1', tasks.get 'subtask1')
+
+      task.addSupertask('relation_type2',
+        tasks.get('supertask2'), tasks.get('supertask3'))
+      task.addSubtask('relation_type2',
+        tasks.get('subtask2'), tasks.get('subtask3'))
+
+
+      task.removeSupertask('relation_type1', tasks.get 'supertask1')
+      task.removeSubtask('relation_type2', tasks.get('subtask2'))
+      task.removeSupertask('relation_type2',
+        tasks.get('supertask2'), tasks.get('supertask3'))
+
+      subtasks1   = task.getSubtasks('relation_type1')
+      subtasks2   = task.getSubtasks('relation_type2')
+      supertasks1 = task.getSupertasks('relation_type1')
+      supertasks2 = task.getSupertasks('relation_type2')
+      expect(sortedIdsOf subtasks1  ).toEqual(['subtask1'])
+      expect(sortedIdsOf subtasks2  ).toEqual(['subtask3'])
+      expect(sortedIdsOf supertasks1).toEqual([])
+      expect(sortedIdsOf supertasks2).toEqual([])
+
 
     it 'adds subtask only once', ->
       tasks = new Lt.Collections.Tasks
@@ -56,8 +94,6 @@ describe 'Task', ->
       project.newSubtask('relation', id: 'action1')
       expect(subtaskAdded).toHaveBeenCalledOnce()
       expect(rootTaskAdded).toHaveBeenCalledOnce()
-
-
 
 
     it 'makes new subtasks', ->
@@ -83,7 +119,7 @@ describe 'Tasks', ->
     action  = new Lt.Models.Task id: 'action'
     tasks.add [project, action]
 
-    expect(rootTasks.pluck 'id').toEqual(['project', 'action'])
+    expect(rootTasks.pluck 'id').toEqual(['action', 'project'])
 
     project.addSubtask  'composition', action
     action.addSupertask 'composition', project

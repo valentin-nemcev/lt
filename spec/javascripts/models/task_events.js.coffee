@@ -26,6 +26,12 @@ describe 'TaskEvents', ->
       expect(events.length).toBe(1)
       expect(events[0].type).toBe('relation_addition')
 
+    it 'creates relation removal events', ->
+      events = eventsCollection.parse relation_removals: [{id: 'eventId'}]
+
+      expect(events.length).toBe(1)
+      expect(events[0].type).toBe('relation_removal')
+
 describe 'TaskCreation', ->
   it 'creates new tasks', =>
     tasks = new Backbone.Collection
@@ -88,5 +94,30 @@ describe 'RelationAddition', ->
     expect(supertask.addSubtask)
       .toHaveBeenCalledWith('relation_type', subtask)
     expect(subtask.addSupertask)
+      .toHaveBeenCalledWith('relation_type', supertask)
+
+describe 'RelationRemoval', ->
+  it 'updates related tasks when applied', ->
+    tasks = new Backbone.Collection
+
+    supertask = new Backbone.Model id: 'supertask1'
+    subtask   = new Backbone.Model id: 'subtask1'
+
+    supertask.removeSubtask = sinon.spy()
+    subtask.removeSupertask = sinon.spy()
+
+    tasks.add [supertask, subtask]
+
+    event = new Lt.Models.RelationRemoval
+      id            : 'event1'
+      relation_type : 'relation_type'
+      supertask_id  : 'supertask1'
+      subtask_id    : 'subtask1'
+
+    event.apply(tasks)
+
+    expect(supertask.removeSubtask)
+      .toHaveBeenCalledWith('relation_type', subtask)
+    expect(subtask.removeSupertask)
       .toHaveBeenCalledWith('relation_type', supertask)
 
