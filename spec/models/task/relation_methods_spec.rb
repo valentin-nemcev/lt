@@ -57,15 +57,15 @@ describe 'Task with relations' do
           supertasks: [related_task1],
           subtasks:   [related_task2]}} }
 
-        let(:new_relations) do
+        let(:updated_relations) do
           task.update_related_tasks updates, on: addition_date
         end
-        specify { new_relations.should have(2).relations }
+        specify { updated_relations.should have(2).relations }
 
         let(:relation1) {
-          new_relations.find{ |r| r.supertask == related_task1 } }
+          updated_relations.find{ |r| r.supertask == related_task1 } }
         let(:relation2) {
-          new_relations.find{ |r| r.subtask == related_task2 } }
+          updated_relations.find{ |r| r.subtask == related_task2 } }
 
         specify { relation1.subtask.should be task }
         specify { relation2.supertask.should be task }
@@ -81,7 +81,8 @@ describe 'Task with relations' do
     context 'with exisiting relations' do
       let(:existing_updates) { { relation_type: {
         supertasks: [related_task1],
-        subtasks:   [related_task2]}} }
+        subtasks:   [related_task2]
+      } } }
 
       before do
         task.update_related_tasks existing_updates, on: addition_date
@@ -95,13 +96,13 @@ describe 'Task with relations' do
           supertasks: [related_task1],
           subtasks:   [related_task2, new_related_task]}} }
 
-        let!(:new_relations) do
+        let!(:updated_relations) do
           task.update_related_tasks updates, on: new_addition_date
         end
         specify { task.relations.should have(3).relations }
-        specify { new_relations.should have(1).relation }
+        specify { updated_relations.should have(1).relation }
 
-        let(:new_relation) { new_relations.first }
+        let(:new_relation) { updated_relations.first }
 
         specify { new_relation.subtask.should be new_related_task }
         specify { new_relation.supertask.should be task }
@@ -109,6 +110,30 @@ describe 'Task with relations' do
         specify { new_relation.type.should be :relation_type }
 
         specify { new_relation.added_on.should eq new_addition_date }
+      end
+
+      describe 'removing task' do
+        let(:removal_date) { addition_date + 1.day }
+
+        let(:updates) { { relation_type: {
+          supertasks: [related_task1],
+          subtasks:   []
+        } } }
+
+        let!(:updated_relations) do
+          task.update_related_tasks updates, on: removal_date
+        end
+        specify { task.relations.should have(2).relations }
+        specify { updated_relations.should have(1).relation }
+
+        let(:removed_relation) { updated_relations.first }
+
+        specify { removed_relation.subtask.should be related_task2 }
+        specify { removed_relation.supertask.should be task }
+
+        specify { removed_relation.type.should be :relation_type }
+
+        specify { removed_relation.should be_removed }
       end
     end
   end

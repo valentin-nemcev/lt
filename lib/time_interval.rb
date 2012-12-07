@@ -14,6 +14,10 @@ class TimeInterval < Interval
     new Time::NEVER, ending
   end
 
+  def include_with_end?(given_date)
+    self.beginning <= given_date && self.ending <= given_date
+  end
+
   def initialize(beginning, ending = nil)
     if beginning.is_a? Hash
       super beginning

@@ -13,6 +13,7 @@ class TasksController < ApplicationController
     render :events
   end
 
+  # TODO: Remove effective_date - 1.second hack
   def create
     task = graph.new_task task_params[:type],
       task_attrs.merge(on: effective_date)
@@ -21,7 +22,7 @@ class TasksController < ApplicationController
       on: effective_date
 
     @tasks, @relations, @revisions =
-      graph.events for: task, in: TimeInterval.beginning_at(effective_date)
+      graph.events for: task, in: TimeInterval.beginning_at(effective_date - 1.second)
 
     storage.store task
 
@@ -38,7 +39,7 @@ class TasksController < ApplicationController
     task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
     @tasks, @relations, @revisions =
-      graph.events for: task, in: TimeInterval.beginning_at(effective_date)
+      graph.events for: task, in: TimeInterval.beginning_at(effective_date - 1.second)
 
     storage.store task
 

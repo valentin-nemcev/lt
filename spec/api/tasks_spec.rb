@@ -58,7 +58,7 @@ describe 'tasks', :api do
     type:          'action',
     supertask_ids: {composition: [project_id]},
     objective:     'New action objective',
-    state:         'underway',
+    state:         'completed',
   }}
 
   let(:action_creation_date) { Time.zone.parse('2012-01-02 12:00').httpdate }
@@ -91,7 +91,16 @@ describe 'tasks', :api do
         attribute_name: 'state',
         date:           action_creation_date,
       )}
-      its(:updated_value) { should eq('underway') }
+      its(:updated_value) { should eq('completed') }
+    end
+
+    describe 'new action project computed state update' do
+      subject { task_updates.find_struct(
+        task_id:        project_id,
+        attribute_name: 'state',
+        date:           action_creation_date,
+      )}
+      its(:updated_value) { should eq('completed') }
     end
   end
 
@@ -107,8 +116,9 @@ describe 'tasks', :api do
   end
 
   let(:updated_action_fields) { new_action_fields.merge(
+    supertask_ids: {composition: []},
     objective: 'Updated action objective',
-    state:     'completed'
+    state:     'underway'
   ) }
 
   let(:update_date)   { Time.zone.parse('2012-01-03 12:00').httpdate }
@@ -129,7 +139,7 @@ describe 'tasks', :api do
         attribute_name: 'state',
         date:           update_date
       )}
-      its(:updated_value) { should eq('completed') }
+      its(:updated_value) { should eq('underway') }
     end
 
     describe 'updated action project computed state update' do
@@ -138,7 +148,18 @@ describe 'tasks', :api do
         attribute_name: 'state',
         date:           update_date,
       )}
-      its(:updated_value) { should eq('completed') }
+      its(:updated_value) { should eq('underway') }
+    end
+  end
+
+  shared_examples :updated_action_relations do
+    describe 'updated action to project relation removal' do
+      subject { relation_removals.find_struct(
+        subtask_id: action_id,
+        supertask_id: project_id
+      )}
+      its(:relation_type) { should eq('composition') }
+      its(:date)          { should eq(update_date) }
     end
   end
 
@@ -182,6 +203,7 @@ describe 'tasks', :api do
         its(:task_creations)     { should be_empty }
         its(:task_updates)       { should be_empty }
         its(:relation_additions) { should be_empty }
+        its(:relation_removals)  { should be_empty }
       end
       # its(:valid_new_task_states) { should_not be_empty }
     end
@@ -198,7 +220,9 @@ describe 'tasks', :api do
         let(:event_ids) do
           [response_body.task_creations,
            response_body.task_updates,
-           response_body.relation_additions].flatten.collect{ |u| u['id'] }
+           response_body.relation_additions,
+           response_body.relation_removals,
+          ].flatten.collect{ |u| u['id'] }
         end
         specify { event_ids.should be_unique }
 
@@ -211,7 +235,7 @@ describe 'tasks', :api do
 
         describe do
           subject(:task_updates) { response_body.task_updates }
-          it { should have(7).updates }
+          it { should have(8).updates }
           include_examples :new_project_updates
           include_examples :new_action_updates
           include_examples :updated_action_updates
@@ -221,6 +245,12 @@ describe 'tasks', :api do
           subject(:relation_additions) { response_body.relation_additions }
           it { should have(1).addition }
           include_examples :new_action_relations
+        end
+
+        describe do
+          subject(:relation_removals) { response_body.relation_removals }
+          it { should have(1).removal }
+          include_examples :updated_action_relations
         end
       end
     end
@@ -253,7 +283,7 @@ describe 'tasks', :api do
 
     describe do
       subject(:task_updates) { action_response_body.task_updates }
-      it { should have(2).updates }
+      it { should have(3).updates }
       include_examples :new_action_updates
     end
 
@@ -286,6 +316,12 @@ describe 'tasks', :api do
 
       include_examples :updated_action_updates
     end
+
+    describe do
+      subject(:relation_removals) { response_body.relation_removals }
+      it { should have(1).removal }
+      include_examples :updated_action_relations
+    end
   end
 
   describe 'delete a project with subtasks' do
@@ -295,13 +331,15 @@ describe 'tasks', :api do
       action_id
       request :delete, project_url
     end
-    let(:task_creations)   { get_response.json_body.task_creations }
-    let(:task_updates)     { get_response.json_body.task_updates }
+    let(:task_creations)     { get_response.json_body.task_creations }
+    let(:task_updates)       { get_response.json_body.task_updates }
     let(:relation_additions) { get_response.json_body.relation_additions }
+    let(:relation_removals)  { get_response.json_body.relation_removals }
 
     specify { delete_response.should be_successful }
     specify { task_creations.should have(0).creations }
     specify { task_updates.should have(0).updates }
     specify { relation_additions.should have(0).additions }
+    specify { relation_removals.should have(0).removals }
   end
 end

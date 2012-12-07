@@ -14,9 +14,28 @@ json.task_updates @revisions do |json, revision|
 end
 
 json.relation_additions @relations do |json, relation|
-  json.id [relation.id, relation.subtask.id, relation.supertask.id].join('-')
-  json.date relation.added_on.httpdate
+  json.id [
+    relation.id,
+    relation.subtask.id,
+    relation.supertask.id,
+    'a'
+  ].join('-')
+  json.date          relation.added_on.httpdate
   json.relation_type relation.type
-  json.supertask_id relation.supertask.id
-  json.subtask_id   relation.subtask.id
+  json.supertask_id  relation.supertask.id
+  json.subtask_id    relation.subtask.id
+end
+
+removed_relations = @relations.select{ |r| r.removed? }
+json.relation_removals removed_relations do |json, relation|
+  json.id [
+    relation.id,
+    relation.subtask.id,
+    relation.supertask.id,
+    'r'
+  ].join('-')
+  json.date          relation.removed_on.httpdate
+  json.relation_type relation.type
+  json.supertask_id  relation.supertask.id
+  json.subtask_id    relation.subtask.id
 end

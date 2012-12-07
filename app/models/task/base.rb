@@ -13,11 +13,6 @@ module Task
     include RelationMethods
     has_relation :composition, supers: :projects, subs: :subtasks
 
-    # TODO: change to related(:subtasks)
-    def subtasks
-      related :type => :composition, :relation => :sub
-    end
-
 
     include Attributes::Computed::TaskMethods
 

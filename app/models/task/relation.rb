@@ -52,6 +52,10 @@ module Task
       effective_interval.overlaps_with? given_time_interval
     end
 
+    def effective_on?(given_date)
+      effective_interval.include? given_date
+    end
+
 
     def incomplete?
       supertask.nil? or subtask.nil?
@@ -63,6 +67,10 @@ module Task
 
     def composition?
       type == :composition
+    end
+
+    def removed?
+      removed_on.present?
     end
 
 

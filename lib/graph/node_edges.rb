@@ -80,6 +80,11 @@ module Graph
       nodes_and_edges[0]
     end
 
+    def with_nodes
+      nodes, edges = nodes_and_edges
+      edges.zip(nodes)
+    end
+
 
     def edge_added(edge)
     end
