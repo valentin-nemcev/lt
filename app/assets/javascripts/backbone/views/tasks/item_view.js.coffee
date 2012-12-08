@@ -6,6 +6,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   events:
     'click [control=select]'       : -> @toggleSelect(on)  ; false
     'click [control=deselect]'     : -> @toggleSelect(off) ; false
+    'deselect'                     : -> @toggleSelect(off) ; false
     'click [control=toggle-select]': -> @toggleSelect()    ; false
 
     'click [control=update]'       : -> @toggleForm(on)    ; false
@@ -34,7 +35,9 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   toggleForm: (toggled = not @formToggled) ->
     @formView.$el.toggle(toggled)
     @$fields.toggle(not toggled)
+    @$task.toggleClass('updated', toggled)
     @formToggled = toggled
+    @toggleSelect off
 
     return this
 
@@ -44,8 +47,12 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       .attr control: if toggled then 'deselect' else 'select'
     showControls = toggled and @model.getState() isnt 'new'
     @$task.find('.additional-controls').toggle(showControls)
-    @selectToggled = toggled
 
+    if toggled
+      @$el.closest('[widget=tasks]')
+        .find('.task').not(@$task).trigger('deselect')
+
+    @selectToggled = toggled
     return this
 
   changeState: ->
