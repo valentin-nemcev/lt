@@ -36,12 +36,16 @@ class Views.ListView extends Backbone.View
       id: 'task' + '-' + model.cid
     ).render()
 
-    if options.index == 0
-      @itemViews[cid].$el.prependTo(@$el)
-    else if options.index > 0
-      @itemViews[cid].$el.insertAfter(@$el.children().eq(options.index))
+    $el = @itemViews[cid].$el
+    index = options.index
+    if index == 0
+      $el.prependTo @$el
+    else if index > 0
+      $beforeIndex = @$el.children().eq index - 1
+      $el.insertAfter $beforeIndex
     else
-      @itemViews[cid].$el.appendTo(@$el)
+      $el.appendTo @$el
+
     @updateEmptyItem()
 
     return

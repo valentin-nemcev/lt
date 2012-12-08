@@ -22,7 +22,7 @@ class Lt.Views.Tasks.FormProjectControlView extends Backbone.View
     @$projectsControl.empty()
     $('<option/>', value: null, text: 'Нет проекта')
       .appendTo(@$projectsControl)
-    for project in @allProjects.models
+    for project in @allProjects.without(@model)
       $('<option/>', value: project.cid, text: project.get('objective'))
         .appendTo(@$projectsControl)
 

@@ -12,7 +12,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     'click [control=update]'       : -> @toggleForm(on)    ; false
 
     'click [control=new-subtask]'  : -> @newSubtask()      ; false
-    'click [control=delete]'       : -> @delete()          ; false
 
   initialize: ->
     @model.bind 'change', @change, @
@@ -28,9 +27,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   newSubtask: ->
     @model.newSubtask('composition')
-
-  delete: ->
-    @model.destroy()
 
   toggleForm: (toggled = not @formToggled) ->
     @formView.$el.toggle(toggled)

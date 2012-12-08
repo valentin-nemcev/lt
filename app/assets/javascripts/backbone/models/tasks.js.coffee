@@ -65,7 +65,6 @@ class Lt.Models.Task extends Backbone.Model
     projects = @getSupertasks('composition')
     newProject = @collection.getByCid(newProject)
     currentProject = projects.at(0)
-    console.log currentProject, newProject
     return if newProject is currentProject
     @removeSupertask('composition', currentProject)
     @addSupertask('composition', newProject) if newProject
@@ -76,6 +75,8 @@ class Lt.Models.Task extends Backbone.Model
     @_subtasks   = {}
     @addSupertask(type, tasks...) for type, tasks of attributes.supertasks ? {}
     @addSubtask(type, tasks...)   for type, tasks of attributes.subtasks   ? {}
+    @unset 'supertasks'
+    @unset 'subtasks'
 
   newSubtask: (type, attributes = {}, options = {})->
     attributes.supertasks ?= {}
@@ -96,18 +97,22 @@ class Lt.Models.Task extends Backbone.Model
 
   _getRelated: (field, type) ->
     collections = @['_' + field]
-    collections[type] ?= new Lt.Collections.RelatedTasks
+    collections[type] ?= @_createRelated(field, type)
+
+  _createRelated: (field, type) ->
+    related = new Lt.Collections.RelatedTasks
+    related.on 'add'   , => @_updateRelatedIds(field, type, related)
+    related.on 'remove', => @_updateRelatedIds(field, type, related)
+    related.on 'reset' , => @_updateRelatedIds(field, type, related)
 
   _addRelated: (field, type, tasks) ->
     collection = @_getRelated(field, type)
     collection.add tasks
-    @_updateRelatedIds field, type, collection
     this
 
   _removeRelated: (field, type, tasks) ->
     collection = @_getRelated(field, type)
     collection.remove tasks
-    @_updateRelatedIds field, type, collection
     this
 
   _updateRelatedIds: (field, type, collection) ->
