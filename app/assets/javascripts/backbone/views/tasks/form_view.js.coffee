@@ -7,9 +7,10 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   className : 'form'
 
   events:
-    'submit form'            : -> @save(); false
-    'click [control=save]'   : -> @save(); false
-    'click [control=cancel]' : -> @cancel(); false
+    'submit form'            : -> @save()   ; false
+    'click [control=save]'   : -> @save()   ; false
+    'click [control=cancel]' : -> @cancel() ; false
+    'click [control=delete]' : (ev) -> @delete($(ev.currentTarget)) ; false
 
   initialize: ->
     @model.bind 'change'     , @change     , @
@@ -24,6 +25,10 @@ class Lt.Views.Tasks.FormView extends Backbone.View
       @change()
 
     return
+
+  delete: ($button)->
+    if confirm($button.attr('confirmation'))
+      @model.destroy()
 
   save: ->
     $f = _.bind($.fn.find, @$('form'))

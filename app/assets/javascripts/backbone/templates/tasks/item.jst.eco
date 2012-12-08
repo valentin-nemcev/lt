@@ -8,7 +8,6 @@
   <div class="additional-controls minor">
     <button control="update">Обновить</button>
     <button control="new-subtask">Добавить подзадачу</button>
-    <button control="delete" class="right destructive">Удалить</button>
   </div>
 </div>
 <span class="empty">Нет подзадач</span>
