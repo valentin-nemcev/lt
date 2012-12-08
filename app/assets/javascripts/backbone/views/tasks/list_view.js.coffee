@@ -26,7 +26,7 @@ class Views.ListView extends Backbone.View
     @updateEmptyItem()
     return
 
-  add: (model) ->
+  add: (model, collection = null, options = {}) ->
     cid = model.cid
     @itemViews[cid] ?= new Views.ItemView(
       model: model
@@ -36,7 +36,12 @@ class Views.ListView extends Backbone.View
       id: 'task' + '-' + model.cid
     ).render()
 
-    @itemViews[cid].$el.appendTo(@$el)
+    if options.index == 0
+      @itemViews[cid].$el.prependTo(@$el)
+    else if options.index > 0
+      @itemViews[cid].$el.insertAfter(@$el.children().eq(options.index))
+    else
+      @itemViews[cid].$el.appendTo(@$el)
     @updateEmptyItem()
 
     return

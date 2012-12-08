@@ -40,7 +40,7 @@ class Lt.Models.Task extends Backbone.Model
   typeRanks = {}
   typeRanks[rank] = type for rank, type in types
 
-  getSortRank: -> [stateRanks[@get('state')], typeRanks[@get('type')]]
+  getSortRank: -> [!@isNew(), stateRanks[@get('state')], typeRanks[@get('type')]]
 
   collectionsToIds = (collections) ->
     ids = {}
