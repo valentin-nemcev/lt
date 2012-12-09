@@ -33,7 +33,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   save: ->
     $f = _.bind($.fn.find, @$('form'))
     attrs =
-      type:      $f('[input=type] :checked').val(),
       state:     $f('[input=state] :checked').val(),
       objective: $f('[input=objective]').val(),
 
@@ -46,13 +45,11 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   changeState: ->
     isNew = @model.getState() is 'new'
     @$('form').attr form: if isNew then 'new-task' else 'update-task'
-    @$('[input=type]').toggle(isNew)
 
     return this
 
   change: ->
     $f = _.bind($.fn.find, @$('form'))
-    $f("[input=type]  [value=#{@model.get('type')}]").prop(checked: true)
     $f("[input=state] [value=#{@model.get('state')}]").prop(checked: true)
     $f('[input=objective]').val(@model.get('objective'))
 

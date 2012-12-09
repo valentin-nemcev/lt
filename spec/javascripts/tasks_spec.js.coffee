@@ -40,12 +40,10 @@ describe 'Tasks', ->
         task_creations: [
           id         : '1'
           task_id    : 'action1'
-          task_type  : 'action'
           date       : 'Tue, 18 Sep 2012 16:00:00 GMT'
         ,
           id         : '2'
           task_id    : 'project1'
-          task_type  : 'project'
           date       : 'Thu, 20 Sep 2012 17:00:00 GMT'
         ]
         task_updates: [
@@ -88,19 +86,17 @@ describe 'Tasks', ->
         ]
 
       expectedTasks = [
-        id            : 'action1'
-        type          : 'action'
-        state         : 'considered'
-        objective     : 'New objective'
-        supertask_ids : {composition: ['project1']}
-        subtask_ids   : {}
-      ,
         id            : 'project1'
-        type          : 'project'
         state         : 'underway'
         objective     : 'Updated project objective'
         supertask_ids : {}
         subtask_ids   : {composition: ['action1']}
+      ,
+        id            : 'action1'
+        state         : 'considered'
+        objective     : 'New objective'
+        supertask_ids : {composition: ['project1']}
+        subtask_ids   : {}
       ]
 
       server.respondWith 'GET', '/tasks', (request) ->
@@ -110,7 +106,7 @@ describe 'Tasks', ->
       server.respond()
 
       expect(taskEvents.length).toBe(8)
-      expect(tasks.toJSON()).toEqualProperties(expectedTasks)
+      expect(tasks.toJSON().sort()).toEqualProperties(expectedTasks)
 
   describe 'Create', ->
     it 'posts a tasks and handles response', ->
@@ -118,7 +114,6 @@ describe 'Tasks', ->
         task_creations: [
           id             : 'creation1'
           task_id        : 'action1'
-          task_type      : 'action'
           date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
         ]
         task_updates: [
@@ -137,7 +132,6 @@ describe 'Tasks', ->
 
       expectedTasks = [
         id            : 'action1'
-        type          : 'action'
         objective     : 'Test objective'
         state         : 'considered'
         subtask_ids   : {}
@@ -145,7 +139,6 @@ describe 'Tasks', ->
       ]
 
       expectedTaskRequestJSON =
-        type          : 'action'
         objective     : 'Test objective'
         state         : 'considered'
         subtask_ids   : {}
@@ -157,7 +150,6 @@ describe 'Tasks', ->
         request.respond jsonResponse(taskEventsResponseJSON)...
 
       tasks.create
-        type      : 'action'
         objective : 'Test objective'
         state     : 'considered'
 

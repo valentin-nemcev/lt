@@ -42,11 +42,13 @@ class Lt.Models.Task extends Backbone.Model
 
   getSortRank: -> [!@isNew(), stateRanks[@get('state')], typeRanks[@get('type')]]
 
-  collectionsToIds = (collections) ->
-    ids = {}
-    for type, collection of collections
-      ids["#{field}_#{type}"] = collection.pluck('id')
-    ids
+
+  # TODO: Use some kind of backbone computed attributes
+  getType: ->
+    if @get('subtasks_composition')?.length
+      'project'
+    else
+      'action'
 
   # TODO: Maybe use https://github.com/powmedia/backbone-deep-model
   toJSON: ->
@@ -133,11 +135,6 @@ class Lt.Collections.Tasks extends Backbone.Collection
     @rootTasks[relationType] ?= new Backbone.FilteredCollection this,
       modelFilter: @relationFilterFor(relationType)
       comparator: Lt.Models.Task.comparator
-
-  getProjects: ->
-    @projects ?= new Backbone.FilteredCollection this,
-      modelFilter: (task) -> task.get('type') is 'project'
-      comparator: (task) -> task.get('objective')
 
 class Lt.Collections.RelatedTasks extends Backbone.Collection
   model: Lt.Models.Task

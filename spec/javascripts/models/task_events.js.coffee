@@ -39,11 +39,9 @@ describe 'TaskCreation', ->
     event = new Lt.Models.TaskCreation
       id        : 'event1'
       task_id   : 'task1'
-      task_type : 'Task type'
 
     expectedTaskProperties =
       id   : 'task1'
-      type : 'Task type'
 
     event.apply(tasks)
 
@@ -58,13 +56,11 @@ describe 'TaskCreation', ->
     event = new Lt.Models.TaskCreation
       id        : 'event1'
       task_id   : 'task1'
-      task_type : 'Task type'
     ,
       updatedTask: updatedTask
 
     expectedTaskProperties =
       id   : 'task1'
-      type : 'Task type'
 
     event.apply(tasks)
 

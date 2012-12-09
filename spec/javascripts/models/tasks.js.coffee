@@ -83,9 +83,7 @@ describe 'Task', ->
     it 'adds subtask only once', ->
       tasks = new Lt.Collections.Tasks
       rootTasks = tasks.getRootTasksFor('relation')
-      rootTasks.on 'add', rootTaskAdded = sinon.spy(
-        (task) -> console.log task.id
-      )
+      rootTasks.on 'add', rootTaskAdded = sinon.spy()
       project = new Lt.Models.Task id: 'project1'
       tasks.add(project)
 
@@ -119,7 +117,7 @@ describe 'Tasks', ->
     action  = new Lt.Models.Task id: 'action'
     tasks.add [project, action]
 
-    expect(rootTasks.pluck 'id').toEqual(['action', 'project'])
+    expect(rootTasks.pluck('id').sort()).toEqual(['action', 'project'])
 
     project.addSubtask  'composition', action
     action.addSupertask 'composition', project

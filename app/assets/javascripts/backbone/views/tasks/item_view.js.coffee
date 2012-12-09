@@ -66,11 +66,11 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       @$emptyObjective.appendTo($objective)
 
     @$el.attr
-      'task-type':  @model.get('type')
+      'task-type':  @model.getType()
       'task-state': @model.get('state')
 
-    @$task.find('[control=new-subtask]').toggle(@model.get('type') is 'project')
-    @subtasksView.$el.toggle @model.get('type') is 'project'
+    # @$task.find('[control=new-subtask]').toggle(@model.get('type') is 'project')
+    @subtasksView.$el.toggle @model.getType() is 'project'
 
   render: ->
     @$el.html @template()
