@@ -32,6 +32,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @formView.$el.toggle(toggled)
     @$fields.toggle(not toggled)
     @$task.toggleClass('updated', toggled)
+    @formView.render() if toggled
     @formToggled = toggled
     @toggleSelect off
 
@@ -77,7 +78,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$task = @$el.children('.task')
     @$fields = @$task.children('.fields')
 
-    @formView.render().$el.insertAfter(@$fields)
+    @formView.$el.insertAfter(@$fields)
     @toggleForm @model.isNew()
 
     $emptyItem = @$el.children('.empty').detach()
