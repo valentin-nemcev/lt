@@ -19,21 +19,14 @@ module Task
     has_computed_attribute :state, computed_from:
       {self: :state, subtasks: :state} \
     do |self_state, subtasks_states|
-      state = subtasks_states.first
-      fail state if state && state.include?('objective')
-      # self_state.nil? and fail 'self_state is nil'
-      if self_state != 'underway'
+      if subtasks_states.empty? || self_state != 'underway'
         self_state
-      elsif subtasks_states.present? && subtasks_states.all? do |s|
-          s.in? ['completed', 'canceled']
-        end
-        'completed'
-      elsif subtasks_states.present? && subtasks_states.all? do |s|
-          s.in? ['completed', 'canceled', 'considered']
-        end
+      elsif subtasks_states.any? { |s| s == 'underway' }
+        'underway'
+      elsif subtasks_states.any? { |s| s == 'considered' }
         'considered'
       else
-        'underway'
+        'completed'
       end
     end
 
