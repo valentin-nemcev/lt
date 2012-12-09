@@ -35,7 +35,7 @@ module Task
       effective_related_tasks(:on => effective_date).
         each do |relation_type, related|
         related.flat_map do |relation_dir, tasks_with_relations|
-          new_tasks = new_related_tasks.fetch(relation_type.to_s, {}).
+          new_tasks = new_related_tasks.fetch(relation_type, {}).
             fetch(relation_dir, [])
           existing_tasks = tasks_with_relations.collect(&:second)
           (new_tasks - existing_tasks).map do |task|

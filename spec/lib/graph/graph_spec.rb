@@ -180,7 +180,7 @@ describe Graph do
           node1.edges.to_a.should match_array([edge12, edge31])
         end
         it 'should have references to indirectly connected nodes and self' do
-          nodes = node1.edges.with_indirect.nodes.to_a
+          nodes = node1.edges.with_indirect.nodes.uniq.to_a
           nodes.should match_array([node1, node2, node3])
         end
       end

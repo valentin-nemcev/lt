@@ -20,10 +20,10 @@ describe TasksHelper do
         fetch_related_tasks({
           some_other_params: :param_value,
           supertask_ids: {
-            task_rel1_name: [:task_id3],
-            task_rel2_name: [:task_id1, :task_id2]
+            'task_rel1_name' => [:task_id3],
+            'task_rel2_name' => [:task_id1, :task_id2]
           },
-          subtask_ids: {
+          'subtask_ids' => {
             task_rel2_name: [:task_id4]
           }
         }).should eq({
