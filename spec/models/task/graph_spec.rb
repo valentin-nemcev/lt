@@ -127,7 +127,7 @@ describe Task::Graph do
       let(:new_task) { stub('New task') }
       before do
         new_task.stub(:with_connected_tasks_and_relations => [[new_task], []])
-        Task.should_receive(:new_subtype).
+        Task::Base.should_receive(:new).
           with(new_task_args).and_return(new_task)
       end
       it 'creates task, includes it in graph and returns it' do

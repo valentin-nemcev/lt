@@ -37,7 +37,7 @@ module Task
 
 
     def new_task(*args)
-      task = Task.new_subtype *args
+      task = Task::Base.new *args
       add_tasks_with_connected [task]
       task
     end

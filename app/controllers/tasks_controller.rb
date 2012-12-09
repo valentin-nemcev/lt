@@ -15,8 +15,9 @@ class TasksController < ApplicationController
 
   # TODO: Remove effective_date - 1.second hack
   def create
-    task = graph.new_task task_params[:type],
-      task_attrs.merge(on: effective_date)
+    task = graph.new_task task_attrs.merge(
+      on: effective_date, type: task_params[:type]
+    )
 
     task.update_related_tasks fetch_related_tasks(task_params),
       on: effective_date

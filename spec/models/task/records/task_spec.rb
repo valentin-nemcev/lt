@@ -79,9 +79,7 @@ describe Task::Records::Task do
       task_records.create! created_on: task_created_on, type: 'task_type'
     end
     before(:each) do
-      Task.should_receive(:new_subtype) { |type, a|
-        OpenStruct.new(a).tap{ |s| s.type = type }
-      }
+      Task::Base.should_receive(:new) { |a| OpenStruct.new(a) }
     end
     subject(:task) { task_record.map_to_task }
 

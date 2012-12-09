@@ -56,7 +56,8 @@ module Task
       end
 
       def map_to_task
-        ::Task.new_subtype(self.type,
+        ::Task::Base.new(
+          type: self.type,
           id: self.id,
           created_on: self.created_on,
           all_editable_attribute_revisions:
