@@ -4,15 +4,6 @@ module Task
   class Base < Core
     include Persistable
 
-    def initialize(attrs = {})
-      super
-      type = attrs.fetch(:type).to_sym
-      type.in? [:project, :action] or raise TaskError,
-                                                  "Incorrect task type #{type}"
-      @type = type
-    end
-    attr_reader :type
-
     # TODO: Reduce nesting and remove TaskMethods
     include Attributes::Editable::TaskMethods
     has_editable_attribute :state,     revision_class: Attributes::StateRevision

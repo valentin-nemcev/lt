@@ -16,7 +16,7 @@ module Task
         class_name: ::Task::Records::TaskRelation, foreign_key: 'supertask_id',
         :dependent => :destroy
 
-      attr_accessible :user, :type, :created_on
+      attr_accessible :user, :created_on
 
 
       scope :for_user, ->(user) { where(user_id: user.id) }
@@ -47,7 +47,6 @@ module Task
       end
 
       def map_from_task(task)
-        self.type = task.type
         self.created_on = task.created_on
         self.attribute_revisions =
           TaskAttributeRevision.save_revisions self,
@@ -57,7 +56,6 @@ module Task
 
       def map_to_task
         ::Task::Base.new(
-          type: self.type,
           id: self.id,
           created_on: self.created_on,
           all_editable_attribute_revisions:

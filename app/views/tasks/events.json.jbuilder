@@ -1,7 +1,6 @@
 json.task_creations @tasks do |json, task|
   json.id        task.id
   json.task_id   task.id
-  json.task_type task.type
   json.date      task.created_on.httpdate
 end
 

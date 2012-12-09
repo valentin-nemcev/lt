@@ -18,8 +18,7 @@ describe Task::Records::Task do
   let(:task) do
     TaskDouble.new.tap do |task|
       task.stub created_on: task_created_on,
-        all_editable_attribute_revisions: [],
-        type: 'task_type'
+        all_editable_attribute_revisions: []
     end
   end
   let(:not_persisted_task) { task.id = nil; task }
@@ -51,7 +50,6 @@ describe Task::Records::Task do
     it { should_not be_nil }
     its(:created_on) { should eq_up_to_sec(task_created_on) }
     its(:user)       { should eq(user_fixture) }
-    its(:type)       { should eq('task_type') }
 
     let(:task_editable_attribute_revisions) { [:rev1, :rev2] }
     let(:task_rev_records) { [revision_records.new] }
@@ -76,7 +74,7 @@ describe Task::Records::Task do
 
   describe '#map_to_task' do
     let(:task_record) do
-      task_records.create! created_on: task_created_on, type: 'task_type'
+      task_records.create! created_on: task_created_on
     end
     before(:each) do
       Task::Base.should_receive(:new) { |a| OpenStruct.new(a) }
@@ -84,7 +82,6 @@ describe Task::Records::Task do
     subject(:task) { task_record.map_to_task }
 
     its(:id)   { should eq(task_record.id) }
-    its(:type) { should eq('task_type') }
     its(:created_on) { should eq_up_to_sec(task_created_on) }
 
     let(:task_editable_attribute_revisions) { [:rev1, :rev2] }

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121207191854) do
+ActiveRecord::Schema.define(:version => 20121209075203) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -42,7 +42,6 @@ ActiveRecord::Schema.define(:version => 20121207191854) do
 
   create_table "tasks", :force => true do |t|
     t.integer  "user_id"
-    t.string   "type"
     t.datetime "created_on"
     t.datetime "completed_on"
   end

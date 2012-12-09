@@ -12,7 +12,6 @@ describe 'tasks', :api do
 
 
   let(:new_project_fields) {{
-    type:      'project',
     objective: 'New project objective',
     state:     'underway',
   }}
@@ -22,11 +21,10 @@ describe 'tasks', :api do
   shared_examples :project_creation do
     describe 'new project creation event' do
       subject {
-        task_creations.find_struct(task_type: 'project')
+        task_creations.find_struct(date: project_creation_date)
       }
       its(:id)        { should_not be_nil }
       its(:task_id)   { should eq(project_id) }
-      its(:task_type) { should eq('project') }
       its(:date)      { should eq(project_creation_date) }
     end
   end
@@ -55,7 +53,6 @@ describe 'tasks', :api do
 
 
   let(:new_action_fields) {{
-    type:          'action',
     supertask_ids: {composition: [project_id]},
     objective:     'New action objective',
     state:         'completed',
@@ -66,11 +63,10 @@ describe 'tasks', :api do
   shared_examples :action_creation do
     describe 'new action creation event' do
       subject {
-        task_creations.find_struct(task_type: 'action')
+        task_creations.find_struct(date: action_creation_date)
       }
       its(:id)        { should_not be_nil }
       its(:task_id)   { should_not be_nil }
-      its(:task_type) { should eq('action') }
       its(:date)      { should eq(action_creation_date) }
     end
   end
@@ -170,7 +166,7 @@ describe 'tasks', :api do
 
   let(:project_id) do
     project_create_response.json_body.task_creations
-      .find_struct(task_type: 'project').id
+      .find_struct(date: project_creation_date).id
   end
 
   let(:project_url) { "/tasks/#{project_id}" }
@@ -188,7 +184,7 @@ describe 'tasks', :api do
 
   let(:action_id) do
     action_create_response.json_body.task_creations
-      .find_struct(task_type: 'action').id
+      .find_struct(date: action_creation_date).id
   end
 
   let(:action_url) { "/tasks/#{action_id}" }
