@@ -8,7 +8,7 @@ module TasksHelper
       :subtask_ids => :subtasks
     }.each do |rel_ids, rel|
       params.symbolize_keys.fetch(rel_ids, {}).each do |rel_name, ids|
-        rel_tasks = ids.map{ |id| storage.fetch id }
+        rel_tasks = ids.compact.map{ |id| storage.fetch id }
         tasks[rel_name.to_sym][rel.to_sym] = rel_tasks
       end
     end
