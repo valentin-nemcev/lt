@@ -42,6 +42,7 @@ module Graph
           visited_edges << current_edge
         end
 
+        # TODO: Clarify ↓
         edges = if current_node && (current_node == self.node || with_indirect?)
                   filter_edges!(current_node.edges.unfiltered, current_node)
                 else [] end

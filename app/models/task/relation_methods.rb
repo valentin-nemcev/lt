@@ -130,7 +130,7 @@ module Task
     end
 
     def with_connected_tasks_and_relations
-      tasks, relations = edges.nodes_and_edges
+      tasks, relations = edges.with_indirect.nodes_and_edges
       [tasks << self, relations]
     end
 
