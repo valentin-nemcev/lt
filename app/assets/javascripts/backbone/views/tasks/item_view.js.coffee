@@ -4,14 +4,16 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   template: JST['backbone/templates/tasks/item']
 
   events:
-    'click [control=select]'       : -> @toggleSelect(on)  ; false
-    'click [control=deselect]'     : -> @toggleSelect(off) ; false
-    'deselect'                     : -> @toggleSelect(off) ; false
-    'click [control=toggle-select]': -> @toggleSelect()    ; false
+    'click [control=select]'       : -> @toggleSelect(on)   ; false
+    'click [control=deselect]'     : -> @toggleSelect(off)  ; false
+    'deselect'                     : -> @toggleSelect(off)  ; false
+    'click [control=toggle-select]': -> @toggleSelect()     ; false
 
-    'click [control=update]'       : -> @toggleForm(on)    ; false
+    'click [control=update]'       : -> @toggleForm(on)     ; false
+    'click [control=show-subtasks]': -> @toggleSubtasks(on) ; false
+    'click [control=hide-subtasks]': -> @toggleSubtasks(off); false
 
-    'click [control=new-subtask]'  : -> @newSubtask()      ; false
+    'click [control=new-subtask]'  : -> @newSubtask()       ; false
 
   initialize: ->
     @model.bind 'change', @change, @
@@ -27,6 +29,14 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   newSubtask: ->
     @model.newSubtask('composition')
+
+  subtasksAreShown: ->
+    @model.getType() is 'project' and @model.get('state') is 'underway'
+
+  toggleSubtasks: (toggled) ->
+    @subtasksView.$el.toggle(toggled)
+    @$task.find('[control=show-subtasks]').toggle(not toggled)
+    @$task.find('[control=hide-subtasks]').toggle(toggled)
 
   toggleForm: (toggled = not @formToggled) ->
     @formView.$el.toggle(toggled)
@@ -70,7 +80,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       'task-type':  @model.getType()
       'task-state': @model.get('state')
 
-    # @$task.find('[control=new-subtask]').toggle(@model.get('type') is 'project')
     @subtasksView.$el.toggle @model.getType() is 'project'
 
   render: ->
@@ -88,5 +97,8 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @toggleSelect off
     @changeState()
     @change()
+
+    @toggleSubtasks(@subtasksAreShown())
+
 
     return this
