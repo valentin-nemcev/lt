@@ -11,26 +11,10 @@ window.Lt =
   Routers: {}
   Views: {}
 
-
-  bindTasksToTimeline: () ->
-    @tasks.bindToTimeline(@timeline) if @tasks? and @timeline?
-
-
-  initTimeline: (selector) ->
-    @timeline = new Lt.Models.Timeline
-    @bindTasksToTimeline()
-    @timelineView = new Lt.Views.Tasks.Timeline
-      model: @timeline
-      el: $(selector)[0]
-
-    @timelineView.render()
-
-
   initTaskView: (selector, tasks, taskViewState) ->
     @tasks = new Lt.Collections.Tasks
     @taskEvents = new Lt.TaskEvents([], tasks: @tasks)
     @tasks.events = @taskEvents
-    # @bindTasksToTimeline()
 
     @taskViewState = new Lt.Models.TaskViewState taskViewState
 
@@ -40,4 +24,3 @@ window.Lt =
         state: @taskViewState
         el: $(selector)[0]
       @taskView.render()
-

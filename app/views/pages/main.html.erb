@@ -1,10 +1,8 @@
 <h1>Задачи</h1>
 
-<div id="timeline"></div>
 <div id="tasks" widget="tasks"></div>
 
 <script type="text/javascript">
-  // Lt.initTimeline('#timeline');
   Lt.initTaskView(
       '#tasks', [],
       <%=raw ui_state_of(:task_view).state.to_json -%>);
