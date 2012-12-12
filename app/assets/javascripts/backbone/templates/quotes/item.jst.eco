@@ -1,3 +1,0 @@
-<div> <%- @contentHtml %> </div>
-<a href="<%= @source %>"><%= @sourceTitle %></a>
-

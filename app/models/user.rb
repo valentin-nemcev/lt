@@ -4,7 +4,6 @@ class User < ActiveRecord::Base
   validates :login, :uniqueness => { :case_sensitive => false }
 
   has_many :tasks
-  has_many :quotes
 
   has_many :ui_states
 end

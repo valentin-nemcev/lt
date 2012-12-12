@@ -41,22 +41,3 @@ window.Lt =
         el: $(selector)[0]
       @taskView.render()
 
-
-
-  initQuotesList: (selector, quotes) ->
-    @quotes = new Lt.Collections.QuotesCollection quotes
-    @quotesView = new Lt.Views.Quotes.ListView
-      collection: @quotes
-      el: $(selector)[0]
-
-    @quotesView.render()
-
-
-  initRandomQuote: (selector, quote) ->
-    @randomQuote = new Lt.Models.RandomQuote quote
-    @randomQuoteView = new Lt.Views.Quotes.RandomQuoteView
-      model: @randomQuote
-      el: $(selector)[0]
-
-    @randomQuoteView.render()
-

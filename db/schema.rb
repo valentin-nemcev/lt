@@ -11,15 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121212160611) do
-
-  create_table "quotes", :force => true do |t|
-    t.text     "content",    :null => false
-    t.string   "source",     :null => false
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-    t.integer  "user_id"
-  end
+ActiveRecord::Schema.define(:version => 20121212162634) do
 
   create_table "task_attribute_revisions", :force => true do |t|
     t.integer  "task_id"

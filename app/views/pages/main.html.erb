@@ -1,12 +1,9 @@
-<div id="random_quote"></div>
-
 <h1>Задачи</h1>
 
 <div id="timeline"></div>
 <div id="tasks" widget="tasks"></div>
 
 <script type="text/javascript">
-  Lt.initRandomQuote('#random_quote', <%= @quote.to_json.html_safe -%>);
   // Lt.initTimeline('#timeline');
   Lt.initTaskView(
       '#tasks', [],
