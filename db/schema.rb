@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121209075203) do
+ActiveRecord::Schema.define(:version => 20121212160611) do
 
   create_table "quotes", :force => true do |t|
     t.text     "content",    :null => false
@@ -43,7 +43,6 @@ ActiveRecord::Schema.define(:version => 20121209075203) do
   create_table "tasks", :force => true do |t|
     t.integer  "user_id"
     t.datetime "created_on"
-    t.datetime "completed_on"
   end
 
   add_index "tasks", ["user_id"], :name => "index_tasks_on_user_id"
