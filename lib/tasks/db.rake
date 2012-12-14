@@ -6,7 +6,7 @@ namespace :db do
 
     file = "db/dumps/#{Time.now.strftime('%FT%R')}_#{database}.sql"
 
-    %x(mkdir -p db/dumps && mysqldump #{database} > #{file})
+    %x(mkdir -p db/dumps && mysqldump #{database} | gzip -c > #{file}.gz)
   end
 
 end
