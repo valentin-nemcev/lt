@@ -30,7 +30,6 @@ class TimeInterval < Interval
     self.beginning == other.beginning && self.ending == other.ending
   end
 
-  # TODO: Remove compact (don't use nil as time infinity)
   def & other
     self.class.new \
       [self.beginning, other.beginning].compact.max,

@@ -28,7 +28,6 @@ module Task
 
     attr_reader :edges
 
-    # TODO: Do something with to_s conversion
     def update_related_tasks(new_related_tasks = {}, opts = {})
       effective_date = opts.fetch :on, Time.current
       changed_relations = []
@@ -115,7 +114,6 @@ module Task
       args[:before].try do |date|
         e.filter! do |r|
           int = r.effective_interval
-          # TODO: Better comparison
           int.beginning <= date && (int.ending.nil? || date <= int.ending)
         end
       end

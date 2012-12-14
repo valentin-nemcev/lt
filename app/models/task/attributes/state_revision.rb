@@ -2,7 +2,7 @@ module Task
   module Attributes
   class InvalidTaskError < StandardError; end
   class InvalidStateError < InvalidTaskError; end
-  #TODO: Remove duplication with ObjectiveRevision
+
   class StateRevision < Editable::Revision
     include Persistable
 
@@ -25,7 +25,6 @@ module Task
       super
     end
 
-    #TODO: Whitelisting states, validation of state for tasks and projects
     def validate_state(state)
       if state.blank?
         raise InvalidStateError, "State is empty"

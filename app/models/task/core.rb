@@ -4,7 +4,6 @@ module Task
     attr_reader :effective_date
 
     def ==(other)
-      # TODO: Task identity map for better comparison
       other && other.respond_to?(:id) && other.id == self.id
     end
 

@@ -43,14 +43,12 @@ class Lt.Models.Task extends Backbone.Model
   getSortRank: -> [!@isNew(), stateRanks[@get('state')], typeRanks[@get('type')]]
 
 
-  # TODO: Use some kind of backbone computed attributes
   getType: ->
     if @get('subtasks_composition')?.length
       'project'
     else
       'action'
 
-  # TODO: Maybe use https://github.com/powmedia/backbone-deep-model
   toJSON: ->
     attrs = super
     for field in ['supertask', 'subtask']
