@@ -12,7 +12,7 @@ class Lt.Views.Tasks.FormProjectControlView extends Backbone.View
 
   changeCurrentProject: ->
     @currentProject = @currentProjects.at(0)
-    @$projectsControl.val(@currentProject?.cid)
+    @$projectsControl?.val(@currentProject?.cid)
 
   resetProjects: ->
     @$projectsControl.empty()
