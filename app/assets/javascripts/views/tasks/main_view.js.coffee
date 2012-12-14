@@ -2,7 +2,7 @@ Views = Lt.Views.Tasks ||= {}
 
 class Views.MainView extends Backbone.View
 
-  template: JST['backbone/templates/tasks/main']
+  template: JST['templates/tasks/main']
 
   initialize: ->
     rootTasks = @collection.getRootTasksFor 'composition'

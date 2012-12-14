@@ -1,7 +1,7 @@
 Views = Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.ItemView extends Backbone.View
-  template: JST['backbone/templates/tasks/item']
+  template: JST['templates/tasks/item']
 
   events:
     'click [control=select]'       : -> @toggleSelect(on)   ; false

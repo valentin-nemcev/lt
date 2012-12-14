@@ -1,7 +1,7 @@
 Views = Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.FormView extends Backbone.View
-  template  : JST['backbone/templates/tasks/form']
+  template  : JST['templates/tasks/form']
 
   tagName   : 'div'
   className : 'form'
