@@ -1,5 +1,3 @@
-require 'interval'
-
 module Task
   class InvalidRelationError < StandardError; end;
   class Relation

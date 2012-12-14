@@ -1,6 +1,7 @@
 require 'time_infinity'
+require 'singleton'
 
-class TimeInterval < Interval
+class TimeInterval
 
   def self.for_all_time
     new Time::NEVER, Time::FOREVER
@@ -14,28 +15,81 @@ class TimeInterval < Interval
     new Time::NEVER, ending
   end
 
-  def include_with_end?(given_date)
-    self.beginning <= given_date && self.ending <= given_date
+  def self.empty
+    Empty.instance
   end
 
-  def initialize(beginning, ending = nil)
-    if beginning.is_a? Hash
-      super beginning
-    else
-      super left_closed: beginning, right_open: ending
-    end
+  def self.new(beginning, ending)
+    beginning = Time::NEVER if beginning.nil?
+    ending = Time::FOREVER if ending.nil?
+    ending <= beginning ? empty : super
+  end
+
+  attr_reader :beginning, :ending
+  def initialize(beginning, ending)
+    @beginning, @ending = beginning, ending
   end
 
   def == other
     self.beginning == other.beginning && self.ending == other.ending
   end
 
+  def include?(given_date)
+    beginning <= given_date && given_date < ending
+  end
+  alias_method :includes?, :include?
+
+  def include_with_end?(given_date)
+    beginning <= given_date && given_date <= ending
+  end
+  alias_method :includes_with_end?, :include_with_end?
+
   def & other
+    return other if other.empty?
     self.class.new \
-      [self.beginning, other.beginning].compact.max,
-      [self.ending, other.ending].compact.min
+      [self.beginning, other.beginning].max,
+      [self.ending, other.ending].min
   end
 
-  alias_method :beginning, :left_endpoint
-  alias_method :ending,    :right_endpoint
+  def overlaps_with?(other)
+    not (self & other).empty?
+  end
+
+  def empty?
+    false
+  end
+
+  class Empty
+    include Singleton
+
+    def beginning
+      raise NoMethodError, 'Empty interval has no beginning'
+    end
+
+    def ending
+      raise NoMethodError, 'Empty interval has no ending'
+    end
+
+    def include?(_)
+      false
+    end
+    alias_method :includes?, :include?
+
+    def include_with_end?(_)
+      false
+    end
+    alias_method :includes_with_end?, :include_with_end?
+
+    def & other
+      self
+    end
+
+    def overlaps_with?(_)
+      false
+    end
+
+    def empty?
+      true
+    end
+  end
 end
