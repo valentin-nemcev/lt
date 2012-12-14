@@ -17,7 +17,6 @@ end
 
 describe Graph do
   context 'two nodes' do
-    # TODO: Remove Graph::Node and Graph::Edge
     let(:edge)   { stub('edge').extend FakeEdge }
     let(:parent) { stub('parent').extend FakeNode }
     let(:child)  { stub('child').extend FakeNode }
