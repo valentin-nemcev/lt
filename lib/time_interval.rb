@@ -20,8 +20,6 @@ class TimeInterval
   end
 
   def self.new(beginning, ending)
-    beginning = Time::NEVER if beginning.nil?
-    ending = Time::FOREVER if ending.nil?
     ending <= beginning ? empty : super
   end
 

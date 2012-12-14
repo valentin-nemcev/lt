@@ -21,6 +21,7 @@ describe Task::Relation do
   let(:test_date0) { 7.hours.ago }
   let(:test_date1) { 4.hours.ago }
   let(:test_date2) { 2.hours.ago }
+  let(:test_date3) { 1.hour.ago }
 
   context 'created with sub- and supertasks' do
     let(:supertask) { create_task }
@@ -52,7 +53,8 @@ describe Task::Relation do
       relation_on.added_on.should eq(addition_date)
       relation_added_on.added_on.should eq(addition_date)
     end
-    its(:removed_on) { should be_nil }
+    its(:removed_on) { should be Time::FOREVER }
+    it { should_not be_removed }
 
     it "couldn't be removed earlier than it was created" do
       expect do
@@ -70,10 +72,12 @@ describe Task::Relation do
 
     its(:added_on)   { should eq(addition_date) }
     its(:removed_on) { should eq(removal_date) }
+    it { should be_removed }
 
-    it 'should allow "unremoving" by setting removal date to nil' do
-      relation.remove on: nil
-      relation.removed_on.should be_nil
+    it 'should not allow changing changing removal date' do
+      expect do
+        relation.remove on: test_date3
+      end.to raise_error Task::InvalidRelationError
     end
   end
 

@@ -27,7 +27,7 @@ module Task
       def map_from_relation(relation, task_records_map)
         self.type       = relation.type
         self.added_on   = relation.added_on
-        self.removed_on = relation.removed_on
+        self.removed_on = relation.removed? ? relation.removed_on : nil
 
         self.supertask  = task_records_map[relation.supertask.id]
         self.subtask    = task_records_map[relation.subtask.id]
@@ -35,14 +35,15 @@ module Task
       end
 
       def map_to_relation(task_map)
-        ::Task::Relation.new(
+        attrs = {
           id:         self.id,
           type:       self.type,
           supertask:  task_map[self.supertask_id],
           subtask:    task_map[self.subtask_id],
           added_on:   self.added_on,
-          removed_on: self.removed_on,
-        )
+        }
+        attrs[:removed_on] = self.removed_on unless self.removed_on.nil?
+        ::Task::Relation.new attrs
       end
     end
   end

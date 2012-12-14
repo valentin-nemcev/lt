@@ -18,7 +18,8 @@ describe Task::Records::TaskRelation do
     RelationDouble.new.tap do |relation|
       relation.stub added_on: relation_added_on,
         removed_on: relation_removed_on, type: 'relation_type',
-        subtask: task1, supertask: task2
+        subtask: task1, supertask: task2,
+        removed?: relation_removed_on.present?
     end
   end
 
@@ -66,6 +67,12 @@ describe Task::Records::TaskRelation do
     its(:type)       { should eq('relation_type') }
     its(:subtask)    { should eq(task_record1) }
     its(:supertask)  { should eq(task_record2) }
+
+    context 'not removed relation' do
+      before { relation.stub(:removed? => false) }
+
+      its(:removed_on) { should be_nil }
+    end
   end
 
   describe '#map_to_relation' do
@@ -86,5 +93,11 @@ describe Task::Records::TaskRelation do
     its(:removed_on) { should eq_up_to_sec(relation_removed_on) }
     its(:subtask)    { should eq(task1) }
     its(:supertask)  { should eq(task2) }
+
+    context 'not removed relation' do
+      let(:relation_removed_on) { nil }
+
+      it { should_not respond_to(:removed_on) }
+    end
   end
 end

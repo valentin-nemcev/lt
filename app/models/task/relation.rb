@@ -19,20 +19,26 @@ module Task
       @type = attrs.fetch(:type).to_sym
       now = attrs.fetch(:clock, Time).current
       @added_on = attrs[:on] || attrs[:added_on] || now
-      remove on: attrs[:removed_on]
+      @removed_on = Time::FOREVER
+      remove on: attrs[:removed_on] if attrs.has_key? :removed_on
       self.nodes.parent = attrs.fetch :supertask
       self.nodes.child = attrs.fetch :subtask
     end
 
     def remove(opts={})
       removed_on = opts.fetch :on, Time.current
-      if removed_on && removed_on < added_on
-        raise InvalidRelationError,
-          "Relation couldn't be removed earlier than it was created"
-      end
+      assert_removed_on_valid removed_on
       @removed_on = removed_on
       return self
     end
+
+    def assert_removed_on_valid(removal_date)
+      !removed? or raise InvalidRelationError,
+        "Couldn't redefine relation removal date"
+      removal_date >= added_on or raise InvalidRelationError,
+                    "Relation couldn't be removed earlier than it was created"
+    end
+    protected :assert_removed_on_valid
 
     def supertask
       nodes.parent
@@ -68,7 +74,7 @@ module Task
     end
 
     def removed?
-      removed_on.present?
+      removed_on != Time::FOREVER
     end
 
 
