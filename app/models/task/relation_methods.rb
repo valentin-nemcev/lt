@@ -113,8 +113,7 @@ module Task
       e = filtered_relations(args)
       args[:before].try do |date|
         e.filter! do |r|
-          int = r.effective_interval
-          int.beginning <= date && (int.ending.nil? || date <= int.ending)
+          r.effective_interval.include_with_end? date
         end
       end
       e.with_nodes.map do |relation, task|
