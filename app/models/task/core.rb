@@ -3,10 +3,6 @@ module Task
   class Core
     attr_reader :effective_date
 
-    def ==(other)
-      other && other.respond_to?(:id) && other.id == self.id
-    end
-
     def initialize(attrs={})
       now = attrs.fetch(:clock, Time).current
       @creation_date = attrs[:on] || attrs[:creation_date] || now
