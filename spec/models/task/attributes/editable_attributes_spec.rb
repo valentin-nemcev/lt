@@ -56,7 +56,7 @@ describe 'Object with editable attributes' do
 
       example do
         attr_revisions1.should_receive(:new_revision).
-         with(:updated_value => :attr_value, updated_on: created_on).
+         with(:updated_value => :attr_value, update_date: creation_date).
          and_return(attr_revision)
         task
       end
@@ -91,11 +91,11 @@ describe 'Object with editable attributes' do
     before(:each) do
       attr_revisions1.should_receive(:new_revision)
         .with(:updated_value => :new_attr_value1,
-              updated_on: update_date)
+              update_date: update_date)
         .and_return(attr_revision)
       attr_revisions2.should_receive(:new_revision)
         .with(:updated_value => :new_attr_value2,
-              updated_on: update_date)
+              update_date: update_date)
         .and_return(attr_revision)
     end
     example do
@@ -118,7 +118,7 @@ describe 'Object with editable attributes' do
         attrs.delete(:owner).should \
           be_an_instance_of class_with_editable_attributes
         attrs.should == {
-          created_on: created_on,
+          creation_date: creation_date,
           revision_class: revision_class,
         }
         revisions
@@ -137,11 +137,11 @@ describe 'Object with editable attributes' do
   before(:each) do
     base_class.any_instance.tap do |b|
       b.should_receive(:initial_attrs).with(initial_attrs)
-      b.stub(created_on: created_on)
+      b.stub(creation_date: creation_date)
     end
   end
 
-  let(:created_on)     { 'creation date' }
+  let(:creation_date)     { 'creation date' }
   let(:update_date)    { 'update date' }
   let(:attr_revisions1) { stub(:attr_revision_sequence1, empty?: false) }
   let(:attr_revisions2) { stub(:attr_revision_sequence2, empty?: false) }

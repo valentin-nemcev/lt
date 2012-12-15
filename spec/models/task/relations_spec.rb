@@ -33,21 +33,21 @@ describe Task::Relations do
       Task::Relation.new({
         type: some_relation_type,
         supertask: task1, subtask: task2,
-        added_on: date1, removed_on: date3}.merge(attrs))
+        addition_date: date1, removal_date: date3}.merge(attrs))
     end
 
     def create_other_relation
       Task::Relation.new({
         type: some_relation_type,
         supertask: task1, subtask: task0,
-        added_on: date1})
+        addition_date: date1})
     end
 
     def create_second_relation attrs = {}
       Task::Relation.new({
         type: some_relation_type,
         supertask: task2, subtask: task1,
-        added_on: date2}.merge(attrs))
+        addition_date: date2}.merge(attrs))
     end
     alias_method :create_first_relation_duplicate, :create_second_relation
 
@@ -63,8 +63,8 @@ describe Task::Relations do
     end
 
     it "doesn't raise error for non-ovelapping relations" do
-      create_first_relation added_on: date1, removed_on: date2
-      create_second_relation added_on: date2
+      create_first_relation addition_date: date1, removal_date: date2
+      create_second_relation addition_date: date2
     end
 
     it "doesn't raise error for relations with different type" do

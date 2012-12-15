@@ -255,8 +255,8 @@ describe 'Task with computed attributes' do
       before do
         related1_1, *_ = task.stub_related_tasks_in given_interval,
           :relation1, [{
-            added_on:   1.day.until(given_interval.beginning),
-            removed_on: date2,
+            addition_date:   1.day.until(given_interval.beginning),
+            removal_date: date2,
           }]
 
         related1_1.stub_attr_rev_before given_interval.beginning, [{
@@ -277,11 +277,11 @@ describe 'Task with computed attributes' do
 
         related2_1, related2_2 = task.stub_related_tasks_in given_interval,
           :relation2, [{
-              added_on:   1.day.until(given_interval.beginning),
-              removed_on: date4,
+              addition_date:   1.day.until(given_interval.beginning),
+              removal_date: date4,
             }, {
-              added_on:   date3,
-              removed_on: 1.day.since(given_interval.ending),
+              addition_date:   date3,
+              removal_date: 1.day.since(given_interval.ending),
             }]
 
         related2_1.stub_attr_rev_before given_interval.beginning, [{
@@ -409,7 +409,7 @@ describe 'Task with computed attributes' do
       def stub_related_tasks_in(interval, relation, rels_attrs = [])
         task_stubs = rels_attrs.map do |rel_attrs|
           task = self.class.new
-          [task, TimeInterval.new(rel_attrs[:added_on], rel_attrs[:removed_on])]
+          [task, TimeInterval.new(rel_attrs[:addition_date], rel_attrs[:removal_date])]
         end
         self.stub(:related_tasks).
           with(:for => relation, :in => interval).and_return(task_stubs)
@@ -447,14 +447,14 @@ describe 'Task with computed attributes' do
 
       def stubbed_attr_rev(name, value, update_date)
         example_group.stub('Attribute revision',  \
-          attribute_name: name, updated_value: value, updated_on: update_date)
+          attribute_name: name, updated_value: value, update_date: update_date)
       end
 
       def create_computed_attr_rev(name, value, update_date)
         Task::Attributes::Computed::Revision.new \
           attribute_name: name,
           updated_value: value,
-          updated_on: update_date,
+          update_date: update_date,
           owner: self
       end
     end

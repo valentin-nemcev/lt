@@ -11,12 +11,12 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121212162634) do
+ActiveRecord::Schema.define(:version => 20121215171316) do
 
   create_table "task_attribute_revisions", :force => true do |t|
     t.integer  "task_id"
     t.integer  "sequence_number", :null => false
-    t.datetime "updated_on"
+    t.datetime "update_date"
     t.string   "attribute_name",  :null => false
     t.string   "updated_value"
   end
@@ -25,8 +25,8 @@ ActiveRecord::Schema.define(:version => 20121212162634) do
     t.integer  "subtask_id"
     t.integer  "supertask_id"
     t.string   "type"
-    t.datetime "added_on"
-    t.datetime "removed_on"
+    t.datetime "addition_date"
+    t.datetime "removal_date"
   end
 
   add_index "task_relations", ["subtask_id"], :name => "index_task_relations_on_subtask_id"
@@ -34,7 +34,7 @@ ActiveRecord::Schema.define(:version => 20121212162634) do
 
   create_table "tasks", :force => true do |t|
     t.integer  "user_id"
-    t.datetime "created_on"
+    t.datetime "creation_date"
   end
 
   add_index "tasks", ["user_id"], :name => "index_tasks_on_user_id"

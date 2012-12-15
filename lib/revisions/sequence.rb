@@ -1,12 +1,12 @@
 module Revisions
   class Sequence
     def initialize(opts = {})
-      @created_on = opts.fetch :created_on
+      @creation_date = opts.fetch :creation_date
       @revision_class = opts[:revision_class]
       @owner = opts.fetch :owner
       set_revisions opts[:revisions] || []
     end
-    attr_reader :created_on, :revision_class, :owner
+    attr_reader :creation_date, :revision_class, :owner
 
     include Enumerable
     def each(*args, &block)
@@ -24,12 +24,12 @@ module Revisions
 
     def last_before(given_date)
       given_date or return nil
-      last_index = @revisions.rindex{ |rev| rev.updated_on < given_date }
+      last_index = @revisions.rindex{ |rev| rev.update_date < given_date }
       last_index and @revisions[last_index]
     end
 
     def all_in_interval(given_interval)
-      @revisions.select{ |r| r.updated_on.in? given_interval }
+      @revisions.select{ |r| r.update_date.in? given_interval }
     end
 
     def set_revisions(revisions)
@@ -49,16 +49,16 @@ module Revisions
       @revisions.last.try(:sequence_number) || 0
     end
 
-    def last_updated_on
-      @revisions.last.try(:updated_on) || created_on
+    def last_update_date
+      @revisions.last.try(:update_date) || creation_date
     end
 
     def add_revision(revision)
       last_sequence_number < revision.sequence_number or
         raise SequenceNumberError.new last_sequence_number,
                                         revision.sequence_number
-      last_updated_on <= revision.updated_on or
-        raise DateSequenceError.new last_updated_on, revision.updated_on
+      last_update_date <= revision.update_date or
+        raise DateSequenceError.new last_update_date, revision.update_date
 
       revision.owner = owner
       @revisions << revision

@@ -14,10 +14,10 @@ describe Task::Records::Task do
   let(:task_records) { Task::Records::Task.for_user user_fixture }
   let(:revision_records) { Task::Records::TaskAttributeRevision }
 
-  let(:task_created_on) { 2.days.ago }
+  let(:task_creation_date) { 2.days.ago }
   let(:task) do
     TaskDouble.new.tap do |task|
-      task.stub created_on: task_created_on,
+      task.stub creation_date: task_creation_date,
         all_editable_attribute_revisions: []
     end
   end
@@ -48,7 +48,7 @@ describe Task::Records::Task do
     subject(:task_record) { task_records.new.map_from_task task }
 
     it { should_not be_nil }
-    its(:created_on) { should eq_up_to_sec(task_created_on) }
+    its(:creation_date) { should eq_up_to_sec(task_creation_date) }
     its(:user)       { should eq(user_fixture) }
 
     let(:task_editable_attribute_revisions) { [:rev1, :rev2] }
@@ -74,7 +74,7 @@ describe Task::Records::Task do
 
   describe '#map_to_task' do
     let(:task_record) do
-      task_records.create! created_on: task_created_on
+      task_records.create! creation_date: task_creation_date
     end
     before(:each) do
       Task::Base.should_receive(:new) { |a| OpenStruct.new(a) }
@@ -82,7 +82,7 @@ describe Task::Records::Task do
     subject(:task) { task_record.map_to_task }
 
     its(:id)   { should eq(task_record.id) }
-    its(:created_on) { should eq_up_to_sec(task_created_on) }
+    its(:creation_date) { should eq_up_to_sec(task_creation_date) }
 
     let(:task_editable_attribute_revisions) { [:rev1, :rev2] }
 

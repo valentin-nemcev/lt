@@ -1,7 +1,7 @@
 json.task_creations @tasks do |json, task|
   json.id        task.id
   json.task_id   task.id
-  json.date      task.created_on.httpdate
+  json.date      task.creation_date.httpdate
 end
 
 json.task_updates @revisions do |json, revision|
@@ -9,7 +9,7 @@ json.task_updates @revisions do |json, revision|
   json.task_id        revision.task_id
   json.attribute_name revision.attribute_name
   json.updated_value  revision.updated_value
-  json.date           revision.updated_on.httpdate
+  json.date           revision.update_date.httpdate
 end
 
 json.relation_additions @relations do |json, relation|
@@ -19,7 +19,7 @@ json.relation_additions @relations do |json, relation|
     relation.supertask.id,
     'a'
   ].join('-')
-  json.date          relation.added_on.httpdate
+  json.date          relation.addition_date.httpdate
   json.relation_type relation.type
   json.supertask_id  relation.supertask.id
   json.subtask_id    relation.subtask.id
@@ -33,7 +33,7 @@ json.relation_removals removed_relations do |json, relation|
     relation.supertask.id,
     'r'
   ].join('-')
-  json.date          relation.removed_on.httpdate
+  json.date          relation.removal_date.httpdate
   json.relation_type relation.type
   json.supertask_id  relation.supertask.id
   json.subtask_id    relation.subtask.id

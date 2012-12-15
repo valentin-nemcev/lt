@@ -12,14 +12,14 @@ describe Task::Records::TaskRelation do
   let(:relation_records) { Task::Records::TaskRelation }
   let(:task_records) { Task::Records::Task }
 
-  let(:relation_removed_on) { 1.day.ago }
-  let(:relation_added_on)   { 2.days.ago }
+  let(:relation_removal_date) { 1.day.ago }
+  let(:relation_addition_date)   { 2.days.ago }
   let(:relation) do
     RelationDouble.new.tap do |relation|
-      relation.stub added_on: relation_added_on,
-        removed_on: relation_removed_on, type: 'relation_type',
+      relation.stub addition_date: relation_addition_date,
+        removal_date: relation_removal_date, type: 'relation_type',
         subtask: task1, supertask: task2,
-        removed?: relation_removed_on.present?
+        removed?: relation_removal_date.present?
     end
   end
 
@@ -62,8 +62,8 @@ describe Task::Records::TaskRelation do
     end
 
     it { should_not be_nil }
-    its(:added_on)   { should eq_up_to_sec(relation_added_on) }
-    its(:removed_on) { should eq_up_to_sec(relation_removed_on) }
+    its(:addition_date)   { should eq_up_to_sec(relation_addition_date) }
+    its(:removal_date) { should eq_up_to_sec(relation_removal_date) }
     its(:type)       { should eq('relation_type') }
     its(:subtask)    { should eq(task_record1) }
     its(:supertask)  { should eq(task_record2) }
@@ -71,14 +71,14 @@ describe Task::Records::TaskRelation do
     context 'not removed relation' do
       before { relation.stub(:removed? => false) }
 
-      its(:removed_on) { should be_nil }
+      its(:removal_date) { should be_nil }
     end
   end
 
   describe '#map_to_relation' do
     let(:relation_record) do
-      relation_records.create! added_on: relation_added_on,
-        removed_on: relation_removed_on, type: 'relation_type',
+      relation_records.create! addition_date: relation_addition_date,
+        removal_date: relation_removal_date, type: 'relation_type',
         subtask: task_record1, supertask: task_record2
     end
 
@@ -89,15 +89,15 @@ describe Task::Records::TaskRelation do
 
     its(:id)         { should eq(relation_record.id) }
     its(:type)       { should eq('relation_type') }
-    its(:added_on)   { should eq_up_to_sec(relation_added_on) }
-    its(:removed_on) { should eq_up_to_sec(relation_removed_on) }
+    its(:addition_date)   { should eq_up_to_sec(relation_addition_date) }
+    its(:removal_date) { should eq_up_to_sec(relation_removal_date) }
     its(:subtask)    { should eq(task1) }
     its(:supertask)  { should eq(task2) }
 
     context 'not removed relation' do
-      let(:relation_removed_on) { nil }
+      let(:relation_removal_date) { nil }
 
-      it { should_not respond_to(:removed_on) }
+      it { should_not respond_to(:removal_date) }
     end
   end
 end

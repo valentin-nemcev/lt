@@ -3,7 +3,7 @@ module Task
     class TaskAttributeRevision < ActiveRecord::Base
       self.record_timestamps  = false
       attr_accessible :attribute_name, :updated_value,
-        :updated_on, :sequence_number
+        :update_date, :sequence_number
 
       belongs_to :task
 
@@ -29,7 +29,7 @@ module Task
             rec.attribute_name.to_sym,
             id:              rec.id,
             updated_value:   rec.updated_value,
-            updated_on:      rec.updated_on,
+            update_date:      rec.update_date,
             sequence_number: rec.sequence_number,
           )
         end
@@ -37,7 +37,7 @@ module Task
 
       def map_from_revision(revision)
         self.sequence_number = revision.sequence_number
-        self.updated_on      = revision.updated_on
+        self.update_date      = revision.update_date
         self.attribute_name  = revision.attribute_name.to_s
         self.updated_value   = revision.updated_value
         self

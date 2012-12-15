@@ -8,16 +8,16 @@ describe Task::Core do
   let(:current_time) { Time.current }
   let(:clock) { stub('Clock', current: current_time) }
 
-  describe '#created_on' do
+  describe '#creation_date' do
     context 'created without date' do
       subject(:task) { described_class.new clock: clock }
-      its(:created_on) { should eq(current_time) }
+      its(:creation_date) { should eq(current_time) }
     end
 
     context 'created with passed creation date' do
       let(:task_creation_date) { 2.days.ago }
-      subject(:task) { described_class.new created_on: task_creation_date }
-      its(:created_on) { should eq(task_creation_date) }
+      subject(:task) { described_class.new creation_date: task_creation_date }
+      its(:creation_date) { should eq(task_creation_date) }
     end
   end
 

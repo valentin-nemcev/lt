@@ -16,13 +16,13 @@ describe 'Task with relations' do
   end
 
   def create_task(name)
-    TaskWithRelations.new(created_on: created_on).tap do |task|
+    TaskWithRelations.new(creation_date: creation_date).tap do |task|
       task.define_singleton_method(:inspect) { "<task #{name}>" }
     end
   end
 
   let(:addition_date) { Time.zone.parse('2012-01-02') }
-  let(:created_on)    { Time.zone.parse('2012-01-01') }
+  let(:creation_date)    { Time.zone.parse('2012-01-01') }
   let(:related_task1) { create_task(:related_task1) }
   let(:related_task2) { create_task(:related_task2) }
 
@@ -73,8 +73,8 @@ describe 'Task with relations' do
         specify { relation1.type.should be :relation_type }
         specify { relation2.type.should be :relation_type }
 
-        specify { relation1.added_on.should eq addition_date }
-        specify { relation2.added_on.should eq addition_date }
+        specify { relation1.addition_date.should eq addition_date }
+        specify { relation2.addition_date.should eq addition_date }
       end
     end
 
@@ -109,7 +109,7 @@ describe 'Task with relations' do
 
         specify { new_relation.type.should be :relation_type }
 
-        specify { new_relation.added_on.should eq new_addition_date }
+        specify { new_relation.addition_date.should eq new_addition_date }
       end
 
       describe 'removing task' do

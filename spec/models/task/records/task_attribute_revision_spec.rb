@@ -13,7 +13,7 @@ describe Task::Records::TaskAttributeRevision do
 
   let(:test_value) { 'Test value' }
   let(:updated_test_value) { 'Test value updated' }
-  let(:test_updated_on) { 4.days.ago }
+  let(:test_update_date) { 4.days.ago }
   let(:test_sn) { 2 }
 
   let(:task_record) { Task::Records::Task.create! }
@@ -26,7 +26,7 @@ describe Task::Records::TaskAttributeRevision do
           rev.stub(
             attribute_name: :attr_name,
             updated_value: "Test value #{i}",
-            updated_on: test_updated_on,
+            update_date: test_update_date,
             sequence_number: i,
           )
         end
@@ -47,7 +47,7 @@ describe Task::Records::TaskAttributeRevision do
         rev.stub(
           attribute_name: :attr_name,
           updated_value: test_value,
-          updated_on: test_updated_on,
+          update_date: test_update_date,
           sequence_number: test_sn,
         )
       end
@@ -63,7 +63,7 @@ describe Task::Records::TaskAttributeRevision do
         revision_record.id.should eq(attribute_revision.id)
         revision_record.updated_value.should eq(test_value)
         revision_record.attribute_name.should eq('attr_name')
-        revision_record.updated_on.should eq_up_to_sec(test_updated_on)
+        revision_record.update_date.should eq_up_to_sec(test_update_date)
       end
     end
 
@@ -90,7 +90,7 @@ describe Task::Records::TaskAttributeRevision do
           task_record.attribute_revisions.create!(
             attribute_name: :attr_name,
             updated_value: "Test value #{i}",
-            updated_on: test_updated_on,
+            update_date: test_update_date,
             sequence_number: i,
           )
         end
@@ -107,7 +107,7 @@ describe Task::Records::TaskAttributeRevision do
       revision_record = task_record.attribute_revisions.create! do |rec|
         rec.attribute_name = 'attr_name'
         rec.updated_value = test_value
-        rec.updated_on = test_updated_on
+        rec.update_date = test_update_date
         rec.sequence_number = test_sn
       end
 
@@ -116,7 +116,7 @@ describe Task::Records::TaskAttributeRevision do
         attrs = OpenStruct.new attrs
         attrs.owner = task
         attrs.updated_value.should eq(test_value)
-        attrs.updated_on.should eq_up_to_sec(test_updated_on)
+        attrs.update_date.should eq_up_to_sec(test_update_date)
         attrs.sequence_number.should eq(test_sn)
         attrs.id.should eq(revision_record.id)
       end

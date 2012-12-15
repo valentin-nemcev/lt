@@ -6,7 +6,7 @@ module Task
 
       belongs_to :subtask, class_name: Task
       belongs_to :supertask, class_name: Task
-      attr_accessible :type, :added_on, :removed_on, :subtask, :supertask
+      attr_accessible :type, :addition_date, :removal_date, :subtask, :supertask
 
 
       def self.load_relations(task_map)
@@ -26,8 +26,8 @@ module Task
 
       def map_from_relation(relation, task_records_map)
         self.type       = relation.type
-        self.added_on   = relation.added_on
-        self.removed_on = relation.removed? ? relation.removed_on : nil
+        self.addition_date   = relation.addition_date
+        self.removal_date = relation.removed? ? relation.removal_date : nil
 
         self.supertask  = task_records_map[relation.supertask.id]
         self.subtask    = task_records_map[relation.subtask.id]
@@ -40,9 +40,9 @@ module Task
           type:       self.type,
           supertask:  task_map[self.supertask_id],
           subtask:    task_map[self.subtask_id],
-          added_on:   self.added_on,
+          addition_date:   self.addition_date,
         }
-        attrs[:removed_on] = self.removed_on unless self.removed_on.nil?
+        attrs[:removal_date] = self.removal_date unless self.removal_date.nil?
         ::Task::Relation.new attrs
       end
     end

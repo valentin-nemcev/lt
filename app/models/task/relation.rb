@@ -13,32 +13,32 @@ module Task
       nodes.other(task)
     end
 
-    attr_reader :type, :added_on, :removed_on
+    attr_reader :type, :addition_date, :removal_date
     def initialize(attrs={})
       self.id = attrs[:id]
       @type = attrs.fetch(:type).to_sym
       now = attrs.fetch(:clock, Time).current
-      @added_on = attrs[:on] || attrs[:added_on] || now
-      @removed_on = Time::FOREVER
-      remove on: attrs[:removed_on] if attrs.has_key? :removed_on
+      @addition_date = attrs[:on] || attrs[:addition_date] || now
+      @removal_date = Time::FOREVER
+      remove on: attrs[:removal_date] if attrs.has_key? :removal_date
       self.nodes.parent = attrs.fetch :supertask
       self.nodes.child = attrs.fetch :subtask
     end
 
     def remove(opts={})
-      removed_on = opts.fetch :on, Time.current
-      assert_removed_on_valid removed_on
-      @removed_on = removed_on
+      removal_date = opts.fetch :on, Time.current
+      assert_removal_date_valid removal_date
+      @removal_date = removal_date
       return self
     end
 
-    def assert_removed_on_valid(removal_date)
+    def assert_removal_date_valid(removal_date)
       !removed? or raise InvalidRelationError,
         "Couldn't redefine relation removal date"
-      removal_date >= added_on or raise InvalidRelationError,
+      removal_date >= addition_date or raise InvalidRelationError,
                     "Relation couldn't be removed earlier than it was created"
     end
-    protected :assert_removed_on_valid
+    protected :assert_removal_date_valid
 
     def supertask
       nodes.parent
@@ -49,7 +49,7 @@ module Task
     end
 
     def effective_interval
-      TimeInterval.new added_on, removed_on
+      TimeInterval.new addition_date, removal_date
     end
 
     def effective_in?(given_time_interval)
@@ -74,7 +74,7 @@ module Task
     end
 
     def removed?
-      removed_on != Time::FOREVER
+      removal_date != Time::FOREVER
     end
 
 

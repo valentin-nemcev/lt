@@ -3,11 +3,11 @@ module Task
   class Revision
     def initialize(opts={})
       @updated_value   = opts.fetch :updated_value
-      @updated_on      = opts.fetch :updated_on
+      @update_date      = opts.fetch :update_date
       @owner = opts[:owner]
     end
 
-    attr_reader :owner, :updated_on, :updated_value
+    attr_reader :owner, :update_date, :updated_value
     def attribute_name; end
 
     def owner=(new_owner)
@@ -17,7 +17,7 @@ module Task
 
     def == other
       self.updated_value == other.updated_value &&
-        self.updated_on == other.updated_on &&
+        self.update_date == other.update_date &&
         self.owner == other.owner
     end
 

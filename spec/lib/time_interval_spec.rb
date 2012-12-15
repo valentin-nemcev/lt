@@ -13,7 +13,7 @@ describe TimeInterval do
   let(:forever) { Time::FOREVER }
 
   context 'beginning at given date' do
-    subject { described_class.beginning_at given_date }
+    subject { described_class.beginning_on given_date }
 
     its(:beginning) { should be given_date }
     its(:ending)    { should be forever }
@@ -26,7 +26,7 @@ describe TimeInterval do
   end
 
   context 'ending at given date' do
-    subject { described_class.ending_at given_date }
+    subject { described_class.ending_on given_date }
 
     its(:beginning) { should be never }
     its(:ending)    { should be given_date }
@@ -101,8 +101,8 @@ describe TimeInterval do
     end
 
     context 'with unbounded' do
-      let(:first)        { described_class.beginning_at date1 }
-      let(:second)       { described_class.ending_at date4 }
+      let(:first)        { described_class.beginning_on date1 }
+      let(:second)       { described_class.ending_on date4 }
       let(:intersection) { described_class.new date1, date4 }
       specify { (first & second).should eq intersection }
       specify { (first.overlaps_with? second).should be_true }

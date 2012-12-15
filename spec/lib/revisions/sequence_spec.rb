@@ -18,12 +18,12 @@ describe Sequence do
   end
 
   let(:first_revision)  { stub_revision(
-    'first revision',  updated_on: creation_date, sequence_number: 1) }
+    'first revision',  update_date: creation_date, sequence_number: 1) }
   let(:second_revision) { stub_revision(
-    'second revision', updated_on: update_date,   sequence_number: 2) }
+    'second revision', update_date: update_date,   sequence_number: 2) }
 
   let(:initial_arguments) do
-    { created_on: creation_date, revision_class: RevisionClass, owner: owner }
+    { creation_date: creation_date, revision_class: RevisionClass, owner: owner }
   end
 
 
@@ -63,9 +63,9 @@ describe Sequence do
 
       let(:revisions_with_incorrect_dates) { [
         stub_revision(
-          'first revision',  updated_on: update_date,   sequence_number: 1),
+          'first revision',  update_date: update_date,   sequence_number: 1),
         stub_revision(
-          'second revision', updated_on: creation_date, sequence_number: 2),
+          'second revision', update_date: creation_date, sequence_number: 2),
       ] }
       it 'should not allow revision list with incorrect dates' do
         expect do
@@ -75,9 +75,9 @@ describe Sequence do
 
       let(:revisions_with_incorrect_sns) { [
         stub_revision(
-          'first revision',  updated_on: creation_date, sequence_number: 1),
+          'first revision',  update_date: creation_date, sequence_number: 1),
         stub_revision(
-          'second revision', updated_on: update_date,   sequence_number: 1),
+          'second revision', update_date: update_date,   sequence_number: 1),
       ] }
       it 'should not allow revision list with incorrect sequence numbers' do
         expect do
@@ -105,7 +105,7 @@ describe Sequence do
   end
 
   describe '#new_revision' do
-    let(:revision_attrs) { {updated_value: :value, updated_on: creation_date} }
+    let(:revision_attrs) { {updated_value: :value, update_date: creation_date} }
     let(:new_sn) { 1 }
     let(:new_revision) { stub_revision('new revision', revision_attrs) }
 
@@ -127,7 +127,7 @@ describe Sequence do
       end
 
       it 'should not allow revisions before sequence was created' do
-        new_revision.stub updated_on: 1.second.until(creation_date)
+        new_revision.stub update_date: 1.second.until(creation_date)
         expect do
           sequence.new_revision revision_attrs
         end.to raise_error DateSequenceError
@@ -141,20 +141,20 @@ describe Sequence do
       let(:new_sn) { 3 }
 
       it 'should create new revision and add it to sequence' do
-        new_revision.stub updated_on: 1.second.since(update_date)
+        new_revision.stub update_date: 1.second.since(update_date)
         sequence.new_revision revision_attrs
         sequence.to_a.should eq([first_revision, second_revision, new_revision])
       end
 
       it 'should not allow adding revisions with incorrect date order' do
-        new_revision.stub updated_on: 1.second.until(update_date)
+        new_revision.stub update_date: 1.second.until(update_date)
         expect do
           sequence.new_revision revision_attrs
         end.to raise_error DateSequenceError
       end
 
       it 'should preserve order of revisions with same date' do
-        new_revision.stub updated_on: update_date
+        new_revision.stub update_date: update_date
         sequence.new_revision revision_attrs
         sequence.to_a.should eq([first_revision, second_revision, new_revision])
       end
@@ -211,7 +211,7 @@ describe Sequence do
       it 'should return revisions in given interval' do
         sequence.all_in_interval(TimeInterval.new creation_date, update_date).
           should eq([first_revision])
-        sequence.all_in_interval(TimeInterval.beginning_at update_date).
+        sequence.all_in_interval(TimeInterval.beginning_on update_date).
           should eq([second_revision])
       end
 

@@ -7,7 +7,7 @@ describe Task::Attributes::Revision do
 
   let(:initialize_args) { {
     :updated_value => :attr_value,
-    :updated_on => :updated_on,
+    :update_date => :update_date,
   } }
 
   context 'with owner passed on creation' do
@@ -29,7 +29,7 @@ describe Task::Attributes::Revision do
   describe 'attributes' do
     specify do
       revision.updated_value.should eq(:attr_value)
-      revision.updated_on.should eq(:updated_on)
+      revision.update_date.should eq(:update_date)
     end
   end
 

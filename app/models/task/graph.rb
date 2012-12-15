@@ -75,10 +75,10 @@ module Task
       else
         tasks, relations = self.tasks, self.relations
       end
-      created_tasks = tasks.select{ |t| interval.include? t.created_on }
+      created_tasks = tasks.select{ |t| interval.include? t.creation_date }
       relations = relations.select do |r|
-        interval.include?(r.added_on) ||
-          r.removed_on && interval.include?(r.removed_on)
+        interval.include?(r.addition_date) ||
+          r.removal_date && interval.include?(r.removal_date)
       end
       attribute_revisions = tasks.collect_concat do |t|
         t.attribute_revisions in: interval

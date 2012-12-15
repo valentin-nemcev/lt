@@ -7,11 +7,11 @@ class TimeInterval
     new Time::NEVER, Time::FOREVER
   end
 
-  def self.beginning_at(beginning)
+  def self.beginning_on(beginning)
     new beginning, Time::FOREVER
   end
 
-  def self.ending_at(ending)
+  def self.ending_on(ending)
     new Time::NEVER, ending
   end
 

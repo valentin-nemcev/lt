@@ -41,7 +41,7 @@ module Task
         end
 
         given_attributes[attr].try do |val|
-          update_attributes({attr => val}, on: created_on)
+          update_attributes({attr => val}, on: creation_date)
         end
 
         raise MissingAttributeError, attr if revision_sequence.empty?
@@ -51,7 +51,7 @@ module Task
     def initialize_revision_sequence(attribute, options)
       @attribute_revisions[attribute] = Revisions::Sequence.new(
         owner: self,
-        created_on: created_on,
+        creation_date: creation_date,
         revision_class: options[:revision_class]
       )
     end
@@ -73,7 +73,7 @@ module Task
       attrs.map do |name, val|
         @attribute_revisions[name].new_revision(
           updated_value: val,
-          updated_on: opts.fetch(:on))
+          update_date: opts.fetch(:on))
       end
     end
   end

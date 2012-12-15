@@ -7,9 +7,9 @@ describe Task::Attributes::ObjectiveRevision, :pending do
 
   it 'should have objective, update date and sequence number' do
     rev = described_class.new objective: test_objective,
-      updated_on: test_date, sequence_number: test_sn
+      update_date: test_date, sequence_number: test_sn
     rev.objective.should eq(test_objective)
-    rev.updated_on.should eq(test_date)
+    rev.update_date.should eq(test_date)
     rev.sequence_number.should eq(test_sn)
   end
 
@@ -17,7 +17,7 @@ describe Task::Attributes::ObjectiveRevision, :pending do
     [nil, '', '    '].each do |empty_objective|
       expect do
         described_class.new objective: empty_objective,
-          updated_on: test_date, sequence_number: test_sn
+          update_date: test_date, sequence_number: test_sn
       end.to raise_error(Task::EmptyObjectiveError)
     end
   end

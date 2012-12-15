@@ -39,21 +39,21 @@ describe Task::Relation do
     let(:relation) { create_relation clock: clock }
 
     it 'should have default addition date' do
-      relation.added_on.should eq(current_time)
+      relation.addition_date.should eq(current_time)
     end
   end
 
   context 'created with addition date' do
     let(:addition_date)     { test_date1 }
     let(:relation_on)       { create_relation       on: addition_date }
-    let(:relation_added_on) { create_relation added_on: addition_date }
+    let(:relation_addition_date) { create_relation addition_date: addition_date }
     subject(:relation) { relation_on }
 
     it 'should have passed addition date' do
-      relation_on.added_on.should eq(addition_date)
-      relation_added_on.added_on.should eq(addition_date)
+      relation_on.addition_date.should eq(addition_date)
+      relation_addition_date.addition_date.should eq(addition_date)
     end
-    its(:removed_on) { should be Time::FOREVER }
+    its(:removal_date) { should be Time::FOREVER }
     it { should_not be_removed }
 
     it "couldn't be removed earlier than it was created" do
@@ -67,11 +67,11 @@ describe Task::Relation do
     let(:addition_date) { test_date1 }
     let(:removal_date)  { test_date2 }
     subject(:relation) do
-      create_relation added_on: addition_date, removed_on: removal_date
+      create_relation addition_date: addition_date, removal_date: removal_date
     end
 
-    its(:added_on)   { should eq(addition_date) }
-    its(:removed_on) { should eq(removal_date) }
+    its(:addition_date)   { should eq(addition_date) }
+    its(:removal_date) { should eq(removal_date) }
     it { should be_removed }
 
     it 'should not allow changing changing removal date' do

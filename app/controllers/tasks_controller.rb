@@ -21,7 +21,7 @@ class TasksController < ApplicationController
       on: effective_date
 
     @tasks, @relations, @revisions =
-      graph.events for: task, in: TimeInterval.beginning_at(effective_date - 1.second)
+      graph.events for: task, in: TimeInterval.beginning_on(effective_date - 1.second)
 
     storage.store task
 
@@ -38,7 +38,7 @@ class TasksController < ApplicationController
     task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
     @tasks, @relations, @revisions =
-      graph.events for: task, in: TimeInterval.beginning_at(effective_date - 1.second)
+      graph.events for: task, in: TimeInterval.beginning_on(effective_date - 1.second)
 
     storage.store task
 

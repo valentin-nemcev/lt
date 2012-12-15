@@ -97,7 +97,7 @@ module Task
         owner: self,
         attribute_name: attribute,
         updated_value: computed_value,
-        updated_on: date
+        update_date: date
     end
 
     def computed_attribute_revisions(args = {})
@@ -128,7 +128,7 @@ module Task
               msg, :for => attr, :in => task_int
             ).map do |rev|
               Event.new rel, attr, task, \
-                rev.updated_on, false, rev.updated_value
+                rev.update_date, false, rev.updated_value
             end
 
             task_ev = rel == :self || orig_task_int.beginning &&
@@ -192,7 +192,7 @@ module Task
           owner: self,
           attribute_name: attribute,
           updated_value: computed_value,
-          updated_on: date
+          update_date: date
       end.compact
     end
     # ↑ Worst code of the year
