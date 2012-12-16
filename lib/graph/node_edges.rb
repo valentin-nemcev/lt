@@ -18,16 +18,14 @@ module Graph
       @edges.clone
     end
 
-    def filter_edges!(es, current_node)
+    def filter_edges!(edges, current_node)
       case direction
-      when :outgoing then es.select!{ |e| e.nodes.parent == current_node }
-      when :incoming then es.select!{ |e| e.nodes.child  == current_node }
+      when :outgoing then edges.select!{ |e| e.nodes.parent == current_node }
+      when :incoming then edges.select!{ |e| e.nodes.child  == current_node }
       end
 
-      filters.each do |filter|
-        es.select! &filter
-      end
-      return es
+      filters.each { |filter| edges.select! &filter }
+      return edges
     end
 
     def nodes_and_edges
@@ -42,7 +40,7 @@ module Graph
           visited_edges << current_edge
         end
 
-        edges = if current_node && (current_node == self.node || with_indirect?)
+        edges = if current_node == self.node || with_indirect?
                   filter_edges!(current_node.edges.unfiltered, current_node)
                 else [] end
 
