@@ -40,7 +40,8 @@ module Revisions
 
     def new_revision(revision_attrs)
       attrs = revision_attrs.merge sequence_number: last_sequence_number + 1
-      add_revision revision_class.new(attrs)
+      new_revision = revision_class.new(attrs)
+      add_revision new_revision if empty? || new_revision.different_from?(last)
     end
 
     protected

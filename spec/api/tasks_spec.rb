@@ -114,7 +114,7 @@ describe 'tasks', :api do
   let(:updated_action_fields) { new_action_fields.merge(
     supertask_ids: {composition: []},
     objective: 'Updated action objective',
-    state:     'underway'
+    state:     'completed'
   ) }
 
   let(:update_date)   { Time.zone.parse('2012-01-03 12:00').httpdate }
@@ -127,15 +127,6 @@ describe 'tasks', :api do
       )}
       its(:updated_value) { should eq('Updated action objective') }
       its(:task_id)       { should eq(action_id) }
-    end
-
-    describe 'updated action state update' do
-      subject { task_updates.find_struct(
-        task_id:        action_id,
-        attribute_name: 'state',
-        date:           update_date
-      )}
-      its(:updated_value) { should eq('underway') }
     end
 
     describe 'updated action project computed state update' do
@@ -231,7 +222,7 @@ describe 'tasks', :api do
 
         describe do
           subject(:task_updates) { response_body.task_updates }
-          it { should have(8).updates }
+          it { should have(7).updates }
           include_examples :new_project_updates
           include_examples :new_action_updates
           include_examples :updated_action_updates
@@ -308,7 +299,7 @@ describe 'tasks', :api do
 
     describe do
       subject(:task_updates) { response_body.task_updates }
-      it { should have(3).updates }
+      it { should have(2).updates }
 
       include_examples :updated_action_updates
     end

@@ -33,5 +33,26 @@ describe Task::Attributes::Revision do
     end
   end
 
+  describe '#differs_from?' do
+    def create_revision(attr, value)
+      revision = described_class.new \
+        :updated_value => value,
+        :update_date => :update_date
+      revision.stub(:attribute_name => attr)
+      revision
+    end
+
+    specify do
+      revision1 = create_revision(:attr1, :attr_value1)
+      revision2 = create_revision(:attr2, :attr_value1)
+      revision3 = create_revision(:attr2, :attr_value2)
+      revision4 = create_revision(:attr2, :attr_value2)
+
+      revision1.should be_different_from(revision2)
+      revision2.should be_different_from(revision3)
+      revision3.should_not be_different_from(revision4)
+    end
+  end
+
   let(:owner) { stub(:owner) }
 end

@@ -136,6 +136,8 @@ describe Sequence do
 
     context 'with revisions' do
       before(:each) do
+        new_revision.stub(:different_from?).with(second_revision)
+          .and_return(true)
         sequence.set_revisions [first_revision, second_revision]
       end
       let(:new_sn) { 3 }
@@ -157,6 +159,14 @@ describe Sequence do
         new_revision.stub update_date: update_date
         sequence.new_revision revision_attrs
         sequence.to_a.should eq([first_revision, second_revision, new_revision])
+      end
+
+      it 'should not create revision that is not different from previous' do
+        new_revision.stub update_date: update_date
+        new_revision.stub(:different_from?).with(second_revision)
+          .and_return(false)
+        sequence.new_revision(revision_attrs).should be_nil
+        sequence.to_a.should_not include(new_revision)
       end
     end
 

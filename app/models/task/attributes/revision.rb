@@ -21,6 +21,11 @@ module Task
         self.owner == other.owner
     end
 
+    def different_from?(other)
+      self.attribute_name != other.attribute_name ||
+        self.updated_value != other.updated_value
+    end
+
     alias_method :task, :owner
 
     def task_id
