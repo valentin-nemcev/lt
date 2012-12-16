@@ -33,24 +33,32 @@ module Task
 
       def self.save_task(task)
         record = if task.persisted?
-          self.find_by_id! task.id
+          task_records_cache.fetch(task.id) { self.find_by_id! task.id }
         else
           self.new
         end
-        record.map_from_task(task).save!
+        record.map_from_task(task)
+        record.save! if record.changed?
         task.id = record.id
         record
       end
 
+      def self.task_records_cache
+        @task_records_cache ||= {}
+      end
+
       def self.load_tasks
-        all.map { |rec| rec.map_to_task }
+        includes(:attribute_revisions).all.map do |rec|
+          task = rec.map_to_task
+          task_records_cache[task.id] = rec
+          task
+        end
       end
 
       def map_from_task(task)
         self.creation_date = task.creation_date
-        self.attribute_revisions =
-          TaskAttributeRevision.save_revisions self,
-          task.all_editable_attribute_revisions
+        TaskAttributeRevision.save_revisions self,
+                                  task.all_editable_attribute_revisions
         self
       end
 

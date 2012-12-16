@@ -13,7 +13,6 @@ module Task
 
     def add_tasks_with_connected given_tasks
       given_tasks.each do |task|
-        next if tasks.include? task
         new_tasks, new_relations = task.with_connected_tasks_and_relations
         tasks.merge new_tasks
         relations.merge new_relations

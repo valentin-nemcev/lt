@@ -1,7 +1,6 @@
 module Task
   class Storage
     class TaskNotFoundError < StandardError; end
-    class IncompleteGraphError < StandardError; end
 
     attr_reader :user, :graph
     def initialize(opts = {})
@@ -10,13 +9,12 @@ module Task
     end
 
     def store(task)
-      graph = Task::Graph.new tasks: [task]
-      store_graph graph
+      graph.add_tasks_with_connected [task]
+      store_graph
     end
 
-    def store_graph(graph)
+    def store_graph
       task_records = graph.tasks.map do |task|
-        fail IncompleteGraphError if task.nil?
         task_base.save_task(task)
       end
 

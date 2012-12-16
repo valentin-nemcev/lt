@@ -8,17 +8,15 @@ module Task
       belongs_to :task
 
       def self.save_revisions(task_record, revisions)
-        revisions.map{ |rev| save_revision(task_record, rev) }
+        revisions.map{ |rev| save_revision(task_record, rev) }.compact
       end
 
       def self.save_revision(task_record, revision)
         scope = task_record.attribute_revisions
-        if revision.persisted?
-          scope.find_by_id! revision.id
-        else
-          scope.build
-        end.tap do |record|
-          record.map_from_revision(revision).save!
+        return if revision.persisted?
+        scope.build.tap do |record|
+          record.map_from_revision(revision)
+          record.save! if record.changed?
           revision.id = record.id
         end
       end

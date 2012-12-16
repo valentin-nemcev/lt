@@ -9,23 +9,34 @@ module Task
       attr_accessible :type, :addition_date, :removal_date, :subtask, :supertask
 
 
+      def self.task_relation_records_cache
+        @task_rrelation_ecords_cache ||= {}
+      end
+
       def self.load_relations(task_map)
-        all.map { |rec| rec.map_to_relation(task_map) }
+        all.map do |rec|
+          relation = rec.map_to_relation(task_map)
+          task_relation_records_cache[relation.id] = rec
+          relation
+        end
       end
 
       def self.save_relation(relation, task_records_map)
         record = if relation.persisted?
-          self.find_by_id! relation.id
+          task_relation_records_cache.fetch(relation.id) do
+            self.find_by_id! relation.id
+          end
         else
           self.new
         end
-        record.map_from_relation(relation, task_records_map).save!
+        record.map_from_relation(relation, task_records_map)
+        record.save! if record.changed?
         relation.id = record.id
         record
       end
 
       def map_from_relation(relation, task_records_map)
-        self.type       = relation.type
+        self.type       = relation.type.to_s
         self.addition_date   = relation.addition_date
         self.removal_date = relation.removed? ? relation.removal_date : nil
 

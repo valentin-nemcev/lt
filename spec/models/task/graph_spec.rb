@@ -46,7 +46,6 @@ describe Task::Graph do
       before(:each) do
         task.should_receive(:with_connected_tasks_and_relations)
           .and_return([[task, connected_task], []])
-        connected_task.should_not_receive(:with_connected_tasks_and_relations)
       end
 
       it 'returns all tasks connected to passed tasks' do
