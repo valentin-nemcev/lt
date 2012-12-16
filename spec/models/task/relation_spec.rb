@@ -81,11 +81,6 @@ describe Task::Relation do
     end
   end
 
-  context 'incomplete' do
-    subject(:relation) { create_relation supertask: nil }
-    it { should be_incomplete }
-  end
-
 
   describe '#destroy' do
     subject(:relation) { create_relation }

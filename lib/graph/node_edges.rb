@@ -86,34 +86,17 @@ module Graph
     end
 
 
+    def add_edge edge
+      @edges.add edge
+    end
+
+    def remove_edge edge
+      @edges.delete edge
+    end
+
     def edge_added(edge)
     end
 
-    def add_incoming edge
-      if @edges.add? edge
-        edge.nodes.child = node
-        edge_added edge
-      end
-    end
-
-    def add_outgoing edge
-      if @edges.add? edge
-        edge.nodes.parent = node
-        edge_added edge
-      end
-    end
-
-    def remove_incoming edge
-      if @edges.delete? edge
-        edge.nodes.child = nil
-      end
-    end
-
-    def remove_outgoing edge
-      if @edges.delete? edge
-        edge.nodes.parent = nil
-      end
-    end
 
 
     attr_reader :direction

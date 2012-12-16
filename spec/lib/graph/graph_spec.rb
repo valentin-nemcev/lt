@@ -22,6 +22,19 @@ describe Graph do
     let(:child)  { stub('child').extend FakeNode }
 
     shared_examples 'two connected nodes' do
+    end
+
+    shared_examples 'two disconnected nodes' do
+    end
+
+    context 'connected' do
+      before(:each) do
+        child.edges.should_receive(:edge_added).with(edge)
+        parent.edges.should_receive(:edge_added).with(edge)
+
+        edge.nodes.connect(child, parent)
+      end
+
       describe 'edge' do
         it 'should have references to child and parent' do
           edge.nodes.parent.should eq(parent)
@@ -60,71 +73,36 @@ describe Graph do
           child.edges.outgoing.nodes.should be_empty
         end
       end
-    end
 
-    shared_examples 'two disconnected nodes' do
-      describe 'edge' do
-        it 'should have no references to child and parent' do
-          edge.nodes.parent.should be_nil
-          edge.nodes.child.should be_nil
-        end
-      end
-
-      describe 'parent' do
-        it 'should have no reference to child via edge' do
-          parent.edges.nodes.should be_empty
-          parent.edges.with_indirect.nodes.should be_empty
-          parent.edges.outgoing.nodes.should be_empty
-          parent.edges.incoming.nodes.should be_empty
-        end
-      end
-
-      describe 'child' do
-        it 'should have no reference to parent via edge' do
-          child.edges.nodes.should be_empty
-          child.edges.with_indirect.nodes.should be_empty
-          child.edges.incoming.nodes.should be_empty
-          child.edges.outgoing.nodes.should be_empty
-        end
-      end
-    end
-
-    context 'connected via edge' do
-      before(:each) do
-        edge.nodes.parent = parent
-        edge.nodes.child  = child
-      end
-      include_examples 'two connected nodes'
-    end
-
-    context 'connected via nodes' do
-      before(:each) do
-        parent.edges.add_outgoing edge
-        child.edges.add_incoming edge
-      end
-      include_examples 'two connected nodes'
-    end
-
-    context 'connected' do
-      before(:each) do
-        edge.nodes.parent = parent
-        edge.nodes.child  = child
-      end
-
-      context 'then disconnected via edge' do
+      context 'then disconnected' do
         before(:each) do
-          edge.nodes.parent = nil
-          edge.nodes.child  = nil
+          edge.nodes.disconnect
         end
-        include_examples 'two disconnected nodes'
-      end
 
-      context 'then disconnected via nodes' do
-        before(:each) do
-          parent.edges.remove_outgoing edge
-          child.edges.remove_incoming edge
+        describe 'edge' do
+          it 'should have no references to child and parent' do
+            edge.nodes.parent.should be_nil
+            edge.nodes.child.should be_nil
+          end
         end
-        include_examples 'two disconnected nodes'
+
+        describe 'parent' do
+          it 'should have no reference to child via edge' do
+            parent.edges.nodes.should be_empty
+            parent.edges.with_indirect.nodes.should be_empty
+            parent.edges.outgoing.nodes.should be_empty
+            parent.edges.incoming.nodes.should be_empty
+          end
+        end
+
+        describe 'child' do
+          it 'should have no reference to parent via edge' do
+            child.edges.nodes.should be_empty
+            child.edges.with_indirect.nodes.should be_empty
+            child.edges.incoming.nodes.should be_empty
+            child.edges.outgoing.nodes.should be_empty
+          end
+        end
       end
     end
   end
@@ -137,10 +115,8 @@ describe Graph do
     let(:node3)  { stub('node3').extend FakeNode }
 
     before(:each) do
-      edge12.nodes.parent = node1
-      edge12.nodes.child  = node2
-      edge23.nodes.parent = node2
-      edge23.nodes.child  = node3
+      edge12.nodes.connect(node2, node1)
+      edge23.nodes.connect(node3, node2)
     end
 
     describe 'node 1' do
@@ -161,8 +137,7 @@ describe Graph do
     context 'with loop' do
       let(:edge31) { stub('edge31').extend FakeEdge }
       before(:each) do
-        edge31.nodes.parent = node3
-        edge31.nodes.child  = node1
+        edge31.nodes.connect(node1, node3)
       end
 
       describe 'node 1' do
@@ -182,24 +157,6 @@ describe Graph do
           nodes = node1.edges.with_indirect.nodes.uniq.to_a
           nodes.should match_array([node1, node2, node3])
         end
-      end
-    end
-  end
-
-  context 'node with dangling connection' do
-    let(:edge) { stub('edge').extend FakeEdge }
-    let(:node) { stub('node').extend FakeNode }
-
-    before(:each) { edge.nodes.parent = node }
-
-    describe 'node' do
-      it 'should return its edges without errors' do
-        node.edges.to_a.should match_array([edge])
-      end
-
-      it 'should return connected nodes without errors' do
-        node.edges.nodes.to_a.should match_array([nil])
-        node.edges.with_indirect.nodes.to_a.should match_array([nil])
       end
     end
   end

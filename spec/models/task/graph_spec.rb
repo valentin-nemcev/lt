@@ -88,29 +88,13 @@ describe Task::Graph do
 
   context 'with passed tasks and relations' do
     let(:tasks) { [stub('task1'), stub('task2')] }
-    let(:relations) { [
-      stub('relation1', :incomplete? => false),
-      stub('relation2', :incomplete? => false)
-    ] }
+    let(:relations) { [ stub('relation1'), stub('relation2') ] }
     subject(:graph) do
       described_class.new.add_tasks tasks: tasks, relations: relations
     end
     it 'returns passed tasks and relations' do
       graph.tasks.to_a.should match_array(tasks)
       graph.relations.to_a.should match_array(relations)
-    end
-  end
-
-  context 'with passed tasks and incomplete relations' do
-    let(:tasks) { [stub('task1'), stub('task2')] }
-    let(:relations) { [
-      stub('relation1', :incomplete? => false),
-      stub('relation2', :incomplete? => true)
-    ] }
-    it 'raises an error' do
-      expect do
-        described_class.new.add_tasks tasks: tasks, relations: relations
-      end.to raise_error Task::Graph::IncompleteGraphError
     end
   end
 

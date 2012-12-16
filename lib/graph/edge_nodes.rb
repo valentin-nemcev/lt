@@ -13,24 +13,20 @@ module Graph
       end
     end
 
-    def child=(node)
-      return if @child == node
-      if node.present?
-        node.edges.add_incoming edge
-      else
-        @child.edges.remove_incoming edge
-      end
-      @child = node
+    def connect(child, parent)
+      !(@child || @parent) or raise 'Edge already connected'
+      child.edges.add_edge edge
+      parent.edges.add_edge edge
+      @child, @parent = child, parent
+      child.edges.edge_added edge
+      parent.edges.edge_added edge
+      self
     end
 
-    def parent=(node)
-      return if @parent == node
-      if node.present?
-        node.edges.add_outgoing edge
-      else
-        @parent.edges.remove_outgoing edge
-      end
-      @parent = node
+    def disconnect
+      child.edges.remove_edge edge
+      parent.edges.remove_edge edge
+      @child, @parent = nil, nil
     end
   end
 end

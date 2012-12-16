@@ -1,22 +1,8 @@
 module Task
   class Graph
 
-    class IncompleteGraphError < StandardError
-      def initialize(incomplete)
-        @incomplete = incomplete
-      end
-
-      def message
-        "Incomplete relations: " + @incomplete.map(&:inspect).join(', ')
-      end
-    end
-
-
     def add_tasks(args = {})
       given_relations = args.fetch(:relations, [])
-
-      incomplete = given_relations.select(&:incomplete?)
-      fail IncompleteGraphError, incomplete if incomplete.present?
 
       given_tasks = args.fetch(:tasks, [])
 

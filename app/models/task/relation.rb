@@ -21,8 +21,7 @@ module Task
       @addition_date = attrs[:on] || attrs[:addition_date] || now
       @removal_date = Time::FOREVER
       remove on: attrs[:removal_date] if attrs.has_key? :removal_date
-      self.nodes.parent = attrs.fetch :supertask
-      self.nodes.child = attrs.fetch :subtask
+      self.nodes.connect(attrs.fetch(:subtask), attrs.fetch(:supertask))
     end
 
     def remove(opts={})
@@ -61,10 +60,6 @@ module Task
     end
 
 
-    def incomplete?
-      supertask.nil? or subtask.nil?
-    end
-
     def dependency?
       type == :dependency
     end
@@ -81,8 +76,7 @@ module Task
     def destroy
       @old_supertask = self.nodes.parent
       @old_subtask   = self.nodes.child
-      self.nodes.parent = nil
-      self.nodes.child  = nil
+      self.nodes.disconnect
     end
 
 

@@ -21,7 +21,6 @@ module Task
     end
 
     def check_for_duplication(new_relation)
-      return if new_relation.incomplete?
       duplicated_relation = effective_in(new_relation.effective_interval)
         .filter{ |r| r.type == new_relation.type }
         .filter{ |r| r != new_relation }
