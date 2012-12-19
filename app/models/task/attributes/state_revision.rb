@@ -6,11 +6,7 @@ module Task
   class StateRevision < Editable::Revision
     include Persistable
 
-    VALID_STATES = {
-        new_task: [:considered, :underway],
-        project:  [:considered, :underway, :canceled],
-        action:   [:considered, :underway, :canceled, :completed],
-      }.freeze
+    VALID_STATES = [:considered, :underway, :canceled, :completed].freeze
 
     def self.valid_next_states_for(what)
       what = what.type if what != :new_task
@@ -25,9 +21,15 @@ module Task
       super
     end
 
-    def validate_state(state)
+    def normalize_value(state)
+      state.to_sym
+    end
+
+    def validate_value(state)
       if state.blank?
         raise InvalidStateError, "State is empty"
+      elsif !state.in? VALID_STATES
+        raise InvalidStateError, "Invalid state: #{state}"
       else
         return state
       end

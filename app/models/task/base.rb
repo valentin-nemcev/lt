@@ -18,14 +18,14 @@ module Task
     has_computed_attribute :state, computed_from:
       {self: :state, subtasks: :state} \
     do |self_state, subtasks_states|
-      if subtasks_states.empty? || self_state != 'underway'
+      if subtasks_states.empty? || self_state != :underway
         self_state
-      elsif subtasks_states.any? { |s| s == 'underway' }
-        'underway'
-      elsif subtasks_states.any? { |s| s == 'considered' }
-        'considered'
+      elsif subtasks_states.any? { |s| s == :underway }
+        :underway
+      elsif subtasks_states.any? { |s| s == :considered }
+        :considered
       else
-        'completed'
+        :completed
       end
     end
 

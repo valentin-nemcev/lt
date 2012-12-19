@@ -1,10 +1,10 @@
 module Task
   module Attributes
   class Revision
-    def initialize(opts={})
-      @updated_value   = opts.fetch :updated_value
-      @update_date      = opts.fetch :update_date
-      @owner = opts[:owner]
+    def initialize(attrs = {})
+      @updated_value = attrs.fetch :updated_value
+      @update_date   = attrs.fetch :update_date
+      @owner         = attrs[:owner]
     end
 
     attr_reader :owner, :update_date, :updated_value

@@ -18,7 +18,11 @@ module Task
     end
 
 
-    def validate_objective(objective)
+    def normalize_value(objective)
+      objective.to_s.strip.gsub(/\s+/, ' ')
+    end
+
+    def validate_value(objective)
       if objective.blank?
         raise EmptyObjectiveError
       else
