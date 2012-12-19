@@ -65,8 +65,7 @@ describe Task::Records::Task do
     end
 
     it 'delegates attribute revisions saving' do
-
-      task_record.attribute_revisions.should eq(task_rev_records)
+      task_record
       @received_task_record.should eq(task_record)
     end
 

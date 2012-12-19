@@ -66,21 +66,6 @@ describe Task::Records::TaskAttributeRevision do
         revision_record.update_date.should eq_up_to_sec(test_update_date)
       end
     end
-
-    context 'existing revision' do
-
-      before(:each) do
-        revision_records.save_revision task_record, attribute_revision
-        attribute_revision.stub(updated_value: updated_test_value)
-        revision_records.save_revision task_record, attribute_revision
-      end
-
-      it 'stores updated fields' do
-        revision_record = task_record.attribute_revisions
-          .find(attribute_revision.id)
-        revision_record.updated_value.should eq(updated_test_value)
-      end
-    end
   end
 
   describe '#load_revisions' do
