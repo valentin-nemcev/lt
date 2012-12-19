@@ -54,11 +54,11 @@ module Task
     end
 
     def task_base
-      Task::Records::Task.for_user user
+      Task::Record.for_user user
     end
 
     def relation_base
-      Task::Records::TaskRelation
+      Task::RelationRecord
     end
 
   end
