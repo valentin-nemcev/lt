@@ -1,6 +1,6 @@
 module Task
   class Relations < ::Graph::NodeEdges
-    class DuplicateRelationError < Task::TaskError
+    class DuplicateRelationError < TaskError
       def initialize existing, duplicate
         @existing, @duplicate = existing, duplicate
       end
@@ -15,7 +15,7 @@ module Task
 
     def edge_added(new_relation)
       check_for_duplication(new_relation)
-    rescue Task::TaskError => e
+    rescue TaskError => e
       new_relation.destroy
       raise e
     end

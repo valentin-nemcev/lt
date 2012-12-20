@@ -1,6 +1,4 @@
 module Task
-  class TaskError < StandardError; end;
-
   class Base < Core
     include Persistable
 

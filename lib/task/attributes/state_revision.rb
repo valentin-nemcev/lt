@@ -1,7 +1,6 @@
 module Task
   module Attributes
-  class InvalidTaskError < StandardError; end
-  class InvalidStateError < InvalidTaskError; end
+  class InvalidStateError < TaskError; end
 
   class StateRevision < Editable::Revision
     include Persistable

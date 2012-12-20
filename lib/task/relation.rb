@@ -1,5 +1,5 @@
 module Task
-  class InvalidRelationError < StandardError; end;
+  class InvalidRelationError < TaskError; end;
   class Relation
 
     def nodes
