@@ -1,5 +1,5 @@
-module Revisions
-  class Sequence
+module Task
+  class Attributes::Sequence
     def initialize(opts = {})
       @creation_date = opts.fetch :creation_date
       @revision_class = opts[:revision_class]
@@ -70,30 +70,29 @@ module Revisions
       @revisions = []
       return self
     end
-  end
 
+    class Error < TaskError; end
 
-  class SequenceError < StandardError; end
+    class DateSequenceError < Error
+      def initialize(last, current)
+        @last, @current = last, current
+      end
 
-  class DateSequenceError < SequenceError
-    def initialize(last, current)
-      @last, @current = last, current
+      def message
+        'Revision updates should be in chronological order;'\
+          " last: #{@last}, current: #{@current}"
+      end
     end
 
-    def message
-      'Revision updates should be in chronological order;'\
-        " last: #{@last}, current: #{@current}"
-    end
-  end
+    class SequenceNumberError < Error
+      def initialize(last, current)
+        @last, @current = last, current
+      end
 
-  class SequenceNumberError < SequenceError
-    def initialize(last, current)
-      @last, @current = last, current
-    end
-
-    def message
-      'Revision sequence numbers should be in ascending order;'\
-        " last: #{@last}, current: #{@current}"
+      def message
+        'Revision sequence numbers should be in ascending order;'\
+          " last: #{@last}, current: #{@current}"
+      end
     end
   end
 end

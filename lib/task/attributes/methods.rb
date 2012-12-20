@@ -1,6 +1,5 @@
 module Task
-  module Attributes
-  module TaskMethods
+  module Attributes::Methods
     def attribute_revisions(args = {})
       interval = args[:in]
       computed = self.class.computed_attributes
@@ -22,6 +21,5 @@ module Task
       return last_computed_attribute_revision(args) if computed.include? attr
       return last_editable_attribute_revision(args) if editable.include? attr
     end
-  end
   end
 end
