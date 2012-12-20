@@ -1,9 +1,11 @@
 require 'lib/spec_helper'
 
+require 'task'
 require 'task/attributes/revision'
 
 describe Task::Attributes::Revision do
-  subject(:revision) { described_class.new initialize_args}
+  Revision = Task::Attributes::Revision
+  subject(:revision) { Revision.new initialize_args}
 
   let(:initialize_args) { {
     :updated_value => :attr_value,
@@ -22,7 +24,7 @@ describe Task::Attributes::Revision do
     specify do
       expect do
         revision.owner = stub(:new_owner)
-      end.to raise_error(Task::Attributes::AttributeRevisionError)
+      end.to raise_error(Revision::OwnerError)
     end
   end
 

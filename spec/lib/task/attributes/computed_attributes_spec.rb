@@ -1,8 +1,8 @@
-require 'spec_helper'
+require 'lib/spec_helper'
 
-# require 'models/task'
-# require 'models/task/attributes/computed/task_methods'
-# require 'interval'
+require 'time_interval'
+require 'task'
+require 'task/attributes/computed/methods'
 
 describe 'Task with computed attributes' do
   subject(:task) { class_with_computed_attributes.new initial_attrs }
@@ -348,7 +348,7 @@ describe 'Task with computed attributes' do
   let(:class_with_computed_attributes) { Class.new(base_class) }
   before(:each) do
     class_with_computed_attributes.instance_eval do
-      include Task::Attributes::Computed::TaskMethods
+      include Task::Attributes::Computed::Methods
       define_method(:inspect) { '<task>' }
     end
   end

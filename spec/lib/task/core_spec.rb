@@ -1,8 +1,8 @@
 require 'lib/spec_helper'
 
 require 'persistable'
-require 'models/task'
-require 'models/task/core'
+require 'task'
+require 'task/core'
 
 describe Task::Core do
   let(:current_time) { Time.current }

@@ -1,8 +1,8 @@
 require 'lib/spec_helper'
 
-require 'models/task'
-require 'models/task/relations'
-require 'models/task/relation'
+require 'task'
+require 'task/relations'
+require 'task/relation'
 
 describe Task::Relations do
   before(:each) do

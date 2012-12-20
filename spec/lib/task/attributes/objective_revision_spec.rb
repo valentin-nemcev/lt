@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'lib/spec_helper'
 
 describe Task::Attributes::ObjectiveRevision do
   let(:test_objective) { 'Test objective' }

@@ -8,7 +8,7 @@ class AttributeRevisionDouble
 end
 
 
-describe Task::Records::TaskAttributeRevision do
+describe Task::AttributeRevisionRecord do
   let(:revision_records) { described_class }
 
   let(:test_value) { 'Test value' }
@@ -16,7 +16,7 @@ describe Task::Records::TaskAttributeRevision do
   let(:test_update_date) { 4.days.ago }
   let(:test_sn) { 2 }
 
-  let(:task_record) { Task::Records::Task.create! }
+  let(:task_record) { Task::Record.create! }
   let(:task) { stub('task') }
 
   describe '#save_revisions' do

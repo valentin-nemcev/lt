@@ -1,9 +1,10 @@
 require 'lib/spec_helper'
 
-require 'revisions/sequence'
-include Revisions
+require 'task'
+require 'task/attributes/sequence'
 
-describe Sequence do
+describe Task::Attributes::Sequence do
+  Sequence = described_class
   before(:each) { stub_const('RevisionClass', stub()) }
 
   let(:owner) { stub('Attribute owner') }
@@ -70,7 +71,7 @@ describe Sequence do
       it 'should not allow revision list with incorrect dates' do
         expect do
           sequence.set_revisions revisions_with_incorrect_dates
-        end.to raise_error DateSequenceError
+        end.to raise_error Sequence::DateSequenceError
       end
 
       let(:revisions_with_incorrect_sns) { [
@@ -82,7 +83,7 @@ describe Sequence do
       it 'should not allow revision list with incorrect sequence numbers' do
         expect do
           sequence.set_revisions revisions_with_incorrect_sns
-        end.to raise_error SequenceNumberError
+        end.to raise_error Sequence::SequenceNumberError
       end
     end
 
@@ -130,7 +131,7 @@ describe Sequence do
         new_revision.stub update_date: 1.second.until(creation_date)
         expect do
           sequence.new_revision revision_attrs
-        end.to raise_error DateSequenceError
+        end.to raise_error Sequence::DateSequenceError
       end
     end
 
@@ -152,7 +153,7 @@ describe Sequence do
         new_revision.stub update_date: 1.second.until(update_date)
         expect do
           sequence.new_revision revision_attrs
-        end.to raise_error DateSequenceError
+        end.to raise_error Sequence::DateSequenceError
       end
 
       it 'should preserve order of revisions with same date' do

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'lib/spec_helper'
 
 describe Task::Relation do
   class TaskStub

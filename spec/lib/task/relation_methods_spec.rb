@@ -1,8 +1,8 @@
 require 'lib/spec_helper'
 
-require 'models/task'
-require 'models/task/relation_methods'
-require 'models/task/relation'
+require 'task'
+require 'task/relation_methods'
+require 'task/relation'
 
 describe 'Task with relations' do
   before(:each) { stub_const('TaskWithRelations', Class.new(Task::Core)) }

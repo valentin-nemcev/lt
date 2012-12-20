@@ -1,8 +1,8 @@
 require 'lib/spec_helper'
 
 require 'persistable'
-require 'models/task'
-require 'models/task/attributes/editable/task_methods'
+require 'task'
+require 'task/attributes/editable/methods'
 
 describe 'Object with editable attributes' do
 
@@ -11,7 +11,7 @@ describe 'Object with editable attributes' do
     stub_const('AttrNameRevision1', stub())
     stub_const('AttrNameRevision2', stub())
     class_with_editable_attributes.instance_eval do
-      include Task::Attributes::Editable::TaskMethods
+      include Task::Attributes::Editable::Methods
       has_editable_attribute :attr_name1, :revision_class => AttrNameRevision1
       has_editable_attribute :attr_name2, :revision_class => AttrNameRevision2
       define_method(:inspect) { '<task>' }
@@ -82,7 +82,7 @@ describe 'Object with editable attributes' do
     context 'without attribute or revisions passed' do
       specify do
         attr_revisions2.stub empty?: true
-        expect{ task }.to raise_error Task::Attributes::Editable::MissingAttributeError
+        expect{ task }.to raise_error Task::Attributes::MissingAttributeError
       end
     end
   end
@@ -108,13 +108,13 @@ describe 'Object with editable attributes' do
 
 
   before(:each) do
-    stub_const('Revisions::Sequence', stub())
+    stub_const('Task::Attributes::Sequence', stub())
 
     {
       attr_revisions1 => AttrNameRevision1,
       attr_revisions2 => AttrNameRevision2
     }.each do |revisions, revision_class|
-      Revisions::Sequence.should_receive(:new) do |attrs|
+      Task::Attributes::Sequence.should_receive(:new) do |attrs|
         attrs.delete(:owner).should \
           be_an_instance_of class_with_editable_attributes
         attrs.should == {

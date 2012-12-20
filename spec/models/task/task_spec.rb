@@ -7,12 +7,12 @@ class TaskDouble
   end
 end
 
-describe Task::Records::Task do
+describe Task::Record do
 
   let(:user_fixture) { User.create! login: 'test_user' }
 
-  let(:task_records) { Task::Records::Task.for_user user_fixture }
-  let(:revision_records) { Task::Records::TaskAttributeRevision }
+  let(:task_records) { Task::Record.for_user user_fixture }
+  let(:revision_records) { Task::AttributeRevisionRecord }
 
   let(:task_creation_date) { 2.days.ago }
   let(:task) do

@@ -7,10 +7,10 @@ class RelationDouble
   end
 end
 
-describe Task::Records::TaskRelation do
+describe Task::RelationRecord do
 
-  let(:relation_records) { Task::Records::TaskRelation }
-  let(:task_records) { Task::Records::Task }
+  let(:relation_records) { Task::RelationRecord }
+  let(:task_records) { Task::Record }
 
   let(:relation_removal_date) { 1.day.ago }
   let(:relation_addition_date)   { 2.days.ago }
