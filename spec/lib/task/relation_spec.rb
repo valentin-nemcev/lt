@@ -90,6 +90,4 @@ describe Task::Relation do
       relation.supertask.should be_nil
     end
   end
-
-  # TODO: Spec loop check
 end

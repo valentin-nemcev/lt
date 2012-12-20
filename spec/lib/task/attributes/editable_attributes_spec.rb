@@ -18,9 +18,6 @@ describe 'Object with editable attributes' do
     end
   end
 
-  #TODO: Specs for updating non-existing attributes
-  #TODO: Specs for updates that doesn't change anything
-
   let(:initial_attrs) { Hash.new }
   subject(:task) { class_with_editable_attributes.new initial_attrs }
 

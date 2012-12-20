@@ -301,7 +301,6 @@ describe 'Task with computed attributes' do
 
       before do
         attr_proc = stub_proc [
-          # TODO: Better example
           [[], [], []],
           'computed v0',
           [['attr1_1 v0'], ['attr1_2 v1'], ['attr2_1_1 v0']],
