@@ -1,9 +1,6 @@
 class TasksController < ApplicationController
   include TasksHelper
 
-  rescue_from Task::Storage::TaskNotFoundError,
-    with: -> { head :status => :not_found }
-
   before_filter :get_effective_date, only: [:create, :update]
 
   def index
@@ -26,14 +23,12 @@ class TasksController < ApplicationController
     storage.store task
 
     render :events, :status => :created
-  rescue Task::Error => e
-    logger.error e
-    render :status => :bad_request, :json => {task_errors: [e]}
   end
 
-  def update
-    task = storage.fetch params[:id]
+  before_filter :fetch_task, only: [:update, :destroy]
+  attr_reader :task
 
+  def update
     task.update_attributes task_attrs, on: effective_date
     task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
@@ -43,19 +38,22 @@ class TasksController < ApplicationController
     storage.store task
 
     render :events
-  rescue Task::Error => e
-    logger.error e
-    render :status => :bad_request, :json => {task_errors: [e]}
   end
 
   def destroy
-    task = storage.fetch params[:id]
     storage.destroy_task task
     head :status => :ok
   end
 
 
   protected
+
+  def fetch_task
+    @task = storage.fetch params[:id]
+  rescue Task::Storage::TaskNotFoundError
+    head :status => :not_found
+  end
+
 
   def task_params
     params[:task].symbolize_keys
