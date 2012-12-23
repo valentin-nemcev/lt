@@ -27,6 +27,24 @@ module Task
       end
     end
 
+    has_computed_attribute :type, computed_from:
+      {subtasks: :state} \
+    do |subtasks|
+      subtasks.empty? ? :action : :project
+    end
+
+    def self.order_hash(els)
+      els.each.with_index.with_object({}) { |(e, i), h| h[e] = i }.freeze
+    end
+
+    STATES_ORDER = order_hash [:underway, :considered, :completed, :canceled]
+    TYPES_ORDER = order_hash [:action, :project]
+    has_computed_attribute :sort_rank, computed_from:
+      {self: [:state, :type]} \
+    do |state, type|
+      [STATES_ORDER[state], TYPES_ORDER[type]]
+    end
+
     include Attributes::Methods
 
     def destroy(&related_task_destroyer)

@@ -1,6 +1,7 @@
 Views = Lt.Views.Tasks ||= {}
 
 class Lt.Views.Tasks.ItemView extends Backbone.View
+
   template: JST['templates/tasks/item']
 
   events:
@@ -28,9 +29,10 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   newSubtask: ->
     @model.newSubtask('composition')
+    @toggleSubtasks on
 
   subtasksAreShown: ->
-    @model.getType() is 'project' and @model.get('state') is 'underway'
+    @model.get('type') is 'project' and @model.get('state') is 'underway'
 
   toggleSubtasks: (toggled) ->
     @subtasksView.$el.toggle(toggled)
@@ -74,10 +76,10 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       @$emptyObjective.appendTo($objective)
 
     @$el.attr
-      'task-type':  @model.getType()
+      'task-type':  @model.get('type')
       'task-state': @model.get('state')
 
-    @subtasksView.$el.toggle @model.getType() is 'project'
+    @subtasksView.$el.toggle @model.get('type') is 'project'
     @toggleSelect(@model.isNew())
 
   render: ->

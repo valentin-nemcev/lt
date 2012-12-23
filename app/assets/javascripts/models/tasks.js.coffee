@@ -1,5 +1,5 @@
 class Lt.Models.Task extends Backbone.Model
-  @comparator: (task) -> task.getSortRank()
+  @comparator: (task) -> [!task.isNew(), task.get('sort_rank')]
 
   initialize: (attributes = {}, options = {}) ->
     @on 'destroy', @onDestroy, @
@@ -14,23 +14,6 @@ class Lt.Models.Task extends Backbone.Model
   onAdd: (model, collection, options = {}) ->
 
   isValidNextState: (state) -> yes
-
-  states = ['underway', 'considered', 'completed', 'canceled']
-  stateRanks = {}
-  stateRanks[rank] = state for rank, state in states
-
-  types = ['action', 'project']
-  typeRanks = {}
-  typeRanks[rank] = type for rank, type in types
-
-  getSortRank: -> [!@isNew(), stateRanks[@get('state')], typeRanks[@get('type')]]
-
-
-  getType: ->
-    if @get('subtasks_composition')?.length
-      'project'
-    else
-      'action'
 
   toJSON: ->
     attrs = super
@@ -122,5 +105,5 @@ class Lt.Collections.RelatedTasks extends Backbone.Collection
   comparator:  Lt.Models.Task.comparator
 
   initialize: ->
-    @on 'change:state', => @sort()
-
+    @on 'change:id'       , => @sort()
+    @on 'change:sort_rank', => @sort()
