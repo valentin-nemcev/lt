@@ -1,5 +1,12 @@
 require 'lib/spec_helper'
 
+require 'persistable'
+require 'task'
+require 'task/attributes'
+require 'task/attributes/revision'
+require 'task/attributes/editable_revision'
+require 'task/attributes/objective_revision'
+
 describe Task::Attributes::ObjectiveRevision do
   let(:test_objective) { 'Test objective' }
   let(:test_date)      { Time.current }
@@ -14,7 +21,7 @@ describe Task::Attributes::ObjectiveRevision do
     [nil, '', '    '].each do |empty_objective|
       expect do
         create_objective_revision(empty_objective)
-      end.to raise_error(Task::EmptyObjectiveError)
+      end.to raise_error(Task::Attributes::EmptyObjectiveError)
     end
   end
 

@@ -1,5 +1,12 @@
 require 'lib/spec_helper'
 
+require 'time_infinity'
+require 'persistable'
+require 'graph/edge_nodes'
+require 'graph/node_edges'
+require 'task'
+require 'task/relation'
+
 describe Task::Relation do
   class TaskStub
     def edges

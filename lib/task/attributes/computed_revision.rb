@@ -1,6 +1,6 @@
 module Task
   module Attributes
-    class Computed::Revision < Attributes::Revision
+    class ComputedRevision < Revision
       def initialize(attributes = {})
         @attribute_name = attributes.fetch :attribute_name
         super
@@ -13,11 +13,6 @@ module Task
 
       def id
         @id ||= "c#{self.class.new_id}"
-      end
-
-      def == other
-        super &&
-          self.attribute_name == other.attribute_name
       end
     end
   end

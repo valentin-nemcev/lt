@@ -1,6 +1,6 @@
 module Task
   module Attributes
-    class Editable::Revision < Attributes::Revision
+    class EditableRevision < Revision
       include Persistable
       def initialize(attrs = {})
         updated_value = attrs.fetch :updated_value

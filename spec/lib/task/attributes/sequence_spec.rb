@@ -1,6 +1,8 @@
 require 'lib/spec_helper'
 
+require 'time_interval'
 require 'task'
+require 'task/attributes'
 require 'task/attributes/sequence'
 
 describe Task::Attributes::Sequence do

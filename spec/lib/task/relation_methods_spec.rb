@@ -1,8 +1,15 @@
 require 'lib/spec_helper'
 
+require 'time_infinity'
+require 'time_interval'
+require 'persistable'
 require 'task'
-require 'task/relation_methods'
+require 'task/core'
+require 'graph/node_edges'
+require 'graph/edge_nodes'
 require 'task/relation'
+require 'task/relations'
+require 'task/relation_methods'
 
 describe 'Task with relations' do
   before(:each) { stub_const('TaskWithRelations', Class.new(Task::Core)) }

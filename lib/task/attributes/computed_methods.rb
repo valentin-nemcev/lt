@@ -1,6 +1,6 @@
 module Task
   module Attributes
-    module Computed::Methods
+    module ComputedMethods
 
       extend ActiveSupport::Concern
 
@@ -92,7 +92,7 @@ module Task
         end
         computed_value = attribute_proc.(*proc_arguments)
 
-        Computed::Revision.new \
+        ComputedRevision.new \
           owner: self,
           attribute_name: attribute,
           updated_value: computed_value,
@@ -187,7 +187,7 @@ module Task
           next if computed_value == prev_value
           prev_value = computed_value
 
-          Computed::Revision.new \
+          ComputedRevision.new \
             owner: self,
             attribute_name: attribute,
             updated_value: computed_value,

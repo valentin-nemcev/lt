@@ -1,6 +1,7 @@
 require 'lib/spec_helper'
 
 require 'task'
+require 'task/attributes'
 require 'task/attributes/revision'
 
 describe Task::Attributes::Revision do

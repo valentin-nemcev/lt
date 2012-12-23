@@ -2,7 +2,8 @@ require 'lib/spec_helper'
 
 require 'persistable'
 require 'task'
-require 'task/attributes/editable/methods'
+require 'task/attributes'
+require 'task/attributes/editable_methods'
 
 describe 'Object with editable attributes' do
 
@@ -11,7 +12,7 @@ describe 'Object with editable attributes' do
     stub_const('AttrNameRevision1', stub())
     stub_const('AttrNameRevision2', stub())
     class_with_editable_attributes.instance_eval do
-      include Task::Attributes::Editable::Methods
+      include Task::Attributes::EditableMethods
       has_editable_attribute :attr_name1, :revision_class => AttrNameRevision1
       has_editable_attribute :attr_name2, :revision_class => AttrNameRevision2
       define_method(:inspect) { '<task>' }

@@ -1,5 +1,7 @@
 require 'lib/spec_helper'
 
+require 'task/graph'
+
 describe Task::Graph do
   def stub_task(name, methods = {})
     stub(name).tap do |task|
@@ -110,6 +112,7 @@ describe Task::Graph do
       let(:new_task) { stub('New task') }
       before do
         new_task.stub(:with_connected_tasks_and_relations => [[new_task], []])
+        stub_const('Task::Base', Class.new)
         Task::Base.should_receive(:new).
           with(new_task_args).and_return(new_task)
       end

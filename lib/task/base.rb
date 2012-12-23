@@ -2,7 +2,7 @@ module Task
   class Base < Core
     include Persistable
 
-    include Attributes::Editable::Methods
+    include Attributes::EditableMethods
     has_editable_attribute :state,     revision_class: Attributes::StateRevision
     has_editable_attribute :objective, revision_class: Attributes::ObjectiveRevision
 
@@ -11,7 +11,7 @@ module Task
     has_relation :composition, supers: :projects, subs: :subtasks
 
 
-    include Attributes::Computed::Methods
+    include Attributes::ComputedMethods
 
     has_computed_attribute :state, computed_from:
       {self: :state, subtasks: :state} \

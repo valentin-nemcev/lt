@@ -1,6 +1,6 @@
 module Task
   module Attributes
-    module Editable::Methods
+    module EditableMethods
 
       extend ActiveSupport::Concern
 

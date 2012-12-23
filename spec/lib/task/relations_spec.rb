@@ -1,6 +1,11 @@
 require 'lib/spec_helper'
 
+require 'time_infinity'
+require 'time_interval'
+require 'persistable'
 require 'task'
+require 'graph/edge_nodes'
+require 'graph/node_edges'
 require 'task/relations'
 require 'task/relation'
 

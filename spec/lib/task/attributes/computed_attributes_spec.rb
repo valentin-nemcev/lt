@@ -2,7 +2,10 @@ require 'lib/spec_helper'
 
 require 'time_interval'
 require 'task'
-require 'task/attributes/computed/methods'
+require 'task/attributes'
+require 'task/attributes/revision'
+require 'task/attributes/computed_revision'
+require 'task/attributes/computed_methods'
 
 describe 'Task with computed attributes' do
   subject(:task) { class_with_computed_attributes.new initial_attrs }
@@ -347,7 +350,7 @@ describe 'Task with computed attributes' do
   let(:class_with_computed_attributes) { Class.new(base_class) }
   before(:each) do
     class_with_computed_attributes.instance_eval do
-      include Task::Attributes::Computed::Methods
+      include Task::Attributes::ComputedMethods
       define_method(:inspect) { '<task>' }
     end
   end
@@ -450,7 +453,7 @@ describe 'Task with computed attributes' do
       end
 
       def create_computed_attr_rev(name, value, update_date)
-        Task::Attributes::Computed::Revision.new \
+        Task::Attributes::ComputedRevision.new \
           attribute_name: name,
           updated_value: value,
           update_date: update_date,

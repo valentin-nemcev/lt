@@ -17,6 +17,7 @@ module Task
     def == other
       self.updated_value == other.updated_value &&
         self.update_date == other.update_date &&
+        self.attribute_name == other.attribute_name &&
         self.owner == other.owner
     end
 
