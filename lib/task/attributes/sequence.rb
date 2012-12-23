@@ -4,6 +4,9 @@ module Task
       @creation_date = opts.fetch :creation_date
       @revision_class = opts[:revision_class]
       @owner = opts.fetch :owner
+
+      @revisions = []
+
       set_revisions opts[:revisions] || []
     end
     attr_reader :creation_date, :revision_class, :owner
@@ -13,14 +16,8 @@ module Task
       @revisions.each(*args, &block)
     end
 
-    def empty?
-      @revisions.empty?
-    end
+    delegate :count, :empty?, :last, :to => :@revisions
 
-
-    def last
-      @revisions.last
-    end
 
     def last_before(given_date)
       given_date or return nil
@@ -67,11 +64,11 @@ module Task
     end
 
     def clear_revisions
-      @revisions = []
+      @revisions.clear
       return self
     end
 
-    class Error < TaskError; end
+    class Error < Task::Error; end
 
     class DateSequenceError < Error
       def initialize(last, current)

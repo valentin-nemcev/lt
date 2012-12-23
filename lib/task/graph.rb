@@ -1,6 +1,5 @@
 module Task
   class Graph
-
     def add_tasks(args = {})
       given_relations = args.fetch(:relations, [])
 
@@ -70,6 +69,5 @@ module Task
       end
       [created_tasks, relations, attribute_revisions]
     end
-
   end
 end

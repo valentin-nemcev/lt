@@ -16,8 +16,8 @@ describe 'Forever and Never' do
     specify("#{t.class} <=> Never")   { (t <=> never  ).should be +1 }
   end
 
-  specify { forever.should == forever.class.new }
-  specify { never.should == never.class.new }
+  specify { forever.should == forever }
+  specify { never.should == never }
 
   example do
     (time_with_zone..forever).should cover(forever)

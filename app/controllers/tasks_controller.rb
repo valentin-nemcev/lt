@@ -26,7 +26,7 @@ class TasksController < ApplicationController
     storage.store task
 
     render :events, :status => :created
-  rescue Task::TaskError => e
+  rescue Task::Error => e
     logger.error e
     render :status => :bad_request, :json => {task_errors: [e]}
   end
@@ -43,7 +43,7 @@ class TasksController < ApplicationController
     storage.store task
 
     render :events
-  rescue Task::TaskError => e
+  rescue Task::Error => e
     logger.error e
     render :status => :bad_request, :json => {task_errors: [e]}
   end

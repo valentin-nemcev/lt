@@ -1,5 +1,5 @@
 module Task
-  class TaskError < StandardError;
+  class Error < StandardError;
     def name
       self.class.to_s.demodulize.gsub(/Error$/, '').underscore
     end

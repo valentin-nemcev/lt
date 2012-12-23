@@ -78,7 +78,7 @@ module Task
     end
 
 
-    class MissingAttributeError < TaskError
+    class MissingAttributeError < Task::Error
       def initialize(attr)
         @attr = attr
       end

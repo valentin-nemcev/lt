@@ -1,5 +1,9 @@
+require 'singleton'
+
 class Time
   class Infinity
+    include Singleton
+
     def == other
       self.class == other.class
     end
@@ -35,6 +39,6 @@ class Time
     end
   end
 
-  FOREVER = Forever.new
-  NEVER   = Never.new
+  FOREVER = Forever.instance
+  NEVER   = Never.instance
 end

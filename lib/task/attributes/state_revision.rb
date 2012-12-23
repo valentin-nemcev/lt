@@ -5,17 +5,8 @@ module Task
 
       VALID_STATES = [:considered, :underway, :canceled, :completed].freeze
 
-      def self.valid_next_states_for(what)
-        what = what.type if what != :new_task
-        VALID_STATES.fetch(what)
-      end
-
       def attribute_name
         :state
-      end
-
-      def initialize(attrs)
-        super
       end
 
       def normalize_value(state)
@@ -32,6 +23,6 @@ module Task
         end
       end
     end
-    class InvalidStateError < TaskError; end
+    class InvalidStateError < Task::Error; end
   end
 end

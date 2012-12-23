@@ -7,10 +7,6 @@ module Task
         :objective
       end
 
-      def initialize(attrs)
-        super
-      end
-
 
       def normalize_value(objective)
         objective.to_s.strip.gsub(/\s+/, ' ')
@@ -25,7 +21,7 @@ module Task
       end
     end
 
-    class EmptyObjectiveError < TaskError;
+    class EmptyObjectiveError < Task::Error;
       def message
         'Objective is empty'
       end

@@ -1,21 +1,8 @@
 module Task
   class Relations < ::Graph::NodeEdges
-    class DuplicateRelationError < TaskError
-      def initialize existing, duplicate
-        @existing, @duplicate = existing, duplicate
-      end
-      attr_reader :existing, :duplicate
-
-      def message
-        ["Duplicate relation:",
-          "existing:  #{existing.inspect}",
-          "duplicate: #{duplicate.inspect}"].join("\n")
-      end
-    end
-
     def edge_added(new_relation)
       check_for_duplication(new_relation)
-    rescue TaskError => e
+    rescue Task::Error => e
       new_relation.destroy
       raise e
     end
@@ -39,5 +26,17 @@ module Task
       filter{ |r| r.effective_in? given_period }
     end
 
+    class DuplicateRelationError < Task::Error
+      def initialize existing, duplicate
+        @existing, @duplicate = existing, duplicate
+      end
+      attr_reader :existing, :duplicate
+
+      def message
+        ["Duplicate relation:",
+          "existing:  #{existing.inspect}",
+          "duplicate: #{duplicate.inspect}"].join("\n")
+      end
+    end
   end
 end

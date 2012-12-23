@@ -32,7 +32,7 @@ module Task
       task.id
     end
 
-    class OwnerError < TaskError
+    class OwnerError < Task::Error
       def initialize(last, current)
         @last, @current = last, current
       end

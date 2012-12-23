@@ -61,7 +61,7 @@ describe Task::Relations do
       create_other_relation
       expect { create_first_relation_duplicate }.to raise_error { |error|
         error.should be_an_instance_of Task::Relations::DuplicateRelationError
-        error.should be_a Task::TaskError
+        error.should be_a Task::Error
         error.existing.should be first
         error.duplicate.should be
       }
