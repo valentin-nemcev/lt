@@ -2,9 +2,6 @@ class Lt.Models.Task extends Backbone.Model
   @comparator: (task) -> task.getSortRank()
 
   initialize: (attributes = {}, options = {}) ->
-    @on 'change:id', @onChangeId, @
-    @onChangeId(this, @id, silent: true)
-
     @on 'destroy', @onDestroy, @
 
     @on 'add', @onAdd, @
@@ -14,21 +11,7 @@ class Lt.Models.Task extends Backbone.Model
 
   parse: (eventsJSON) -> @collection.events.addEvents(eventsJSON, this); {}
 
-  getState: ->
-    @state
-
   onAdd: (model, collection, options = {}) ->
-
-  onDestroy: (model, collection, options = {}) ->
-    @setState 'deleted', options
-
-  onChangeId: (model, value, options = {})->
-    state = if @id then 'persisted' else 'new'
-    @setState state, options
-
-  setState: (state, options = {}) ->
-    @state = state
-    @trigger 'changeState', this, state, options
 
   isValidNextState: (state) -> yes
 

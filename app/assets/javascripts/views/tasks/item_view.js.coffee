@@ -17,7 +17,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   initialize: ->
     @model.bind 'change', @change, @
-    @model.bind 'changeState', @changeState, @
 
     @formView = new Views.FormView model: @model
     @formView.on 'close', => @toggleForm(off)
@@ -52,7 +51,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$task.toggleClass('selected', toggled)
     @$task.find('[control=select],[control=deselect]')
       .attr control: if toggled then 'deselect' else 'select'
-    showControls = toggled and @model.getState() isnt 'new'
+    showControls = toggled and !@model.isNew()
     @$task.find('.additional-controls').toggle(showControls)
 
     if toggled
@@ -62,11 +61,9 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @selectToggled = toggled
     return this
 
-  changeState: ->
-    @$el.attr 'record-id': @model.id, 'record-state': @model.getState()
-    @toggleSelect(@model.getState() is 'new')
-
   change: ->
+    @$el.attr 'record-id': @model.id
+
     objective = @model.get('objective') || ''
     $objective = @$fields.find('[field=objective]')
     if objective.match(/\S/)
@@ -81,6 +78,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       'task-state': @model.get('state')
 
     @subtasksView.$el.toggle @model.getType() is 'project'
+    @toggleSelect(@model.isNew())
 
   render: ->
     @$el.html @template()
@@ -95,7 +93,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$emptyObjective = @$fields.find('[field=objective] .empty')
 
     @toggleSelect off
-    @changeState()
     @change()
 
     @toggleSubtasks(@subtasksAreShown())

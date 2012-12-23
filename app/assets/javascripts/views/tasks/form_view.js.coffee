@@ -14,7 +14,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
   initialize: ->
     @model.bind 'change'     , @change     , @
-    @model.bind 'changeState', @changeState, @
     @projectControlView = new Views.FormProjectControlView model: @model
 
   cancel: ->
@@ -42,12 +41,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
     return this
 
-  changeState: ->
-    isNew = @model.getState() is 'new'
-    @$('form').attr form: if isNew then 'new-task' else 'update-task'
-
-    return this
-
   change: ->
     $f = _.bind($.fn.find, @$('form'))
     $f("[input=state] [value=#{@model.get('state')}]").prop(checked: true)
@@ -56,12 +49,14 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     $f('[input=state] input').each (i, el)=>
       $(el).closest('[item]').toggle @model.isValidNextState($(el).val())
 
+    form = if @model.isNew() then 'new-task' else 'update-task'
+    @$('form').attr form: form
+
     return this
 
   render : ->
     $(@el).html @template()
     @projectControlView.setElement(@$('[view=project-control]')).render()
     @change()
-    @changeState()
 
     return this
