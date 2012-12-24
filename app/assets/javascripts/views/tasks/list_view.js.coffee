@@ -9,8 +9,8 @@ class Views.ListView extends Backbone.View
     @collection.bind 'reset'   , @reset,   @
     @collection.bind 'add'     , @add,     @
     @collection.bind 'remove'  , @remove,  @
-    @collection.bind 'destroy' , @destroy,  @
 
+    @allItemViews = @options.allItemViews
     @itemViews = {}
 
   updateEmptyItem: ->
@@ -28,14 +28,16 @@ class Views.ListView extends Backbone.View
 
   add: (model, collection = null, options = {}) ->
     cid = model.cid
-    @itemViews[cid] ?= new Views.ItemView(
+    @allItemViews[cid] ?= new Views.ItemView(
       model: model
+      allItemViews: @allItemViews
       tagName: 'li'
       attributes:
         record: 'task'
       id: 'task' + '-' + model.cid
     ).render()
 
+    @itemViews[cid] = @allItemViews[cid]
     $el = @itemViews[cid].$el
     index = options.index
     if index == 0
@@ -59,6 +61,7 @@ class Views.ListView extends Backbone.View
     cid = model.cid ? model
     @itemViews[cid].$el.remove()
     delete @itemViews[cid]
+    @updateEmptyItem()
 
   render: (opts = {})->
     if $emptyItem = opts.$emptyItem

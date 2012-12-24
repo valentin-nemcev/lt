@@ -24,6 +24,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
     @subtasksView = new Views.ListView
       collection: @model.getSubtasks('composition')
+      allItemViews: @options.allItemViews
       attributes:
         records: 'subtasks'
 

@@ -5,12 +5,20 @@ class Views.MainView extends Backbone.View
   template: JST['templates/tasks/main']
 
   initialize: ->
+    @collection.bind 'destroy' , @destroy, @
+
     rootTasks = @collection.getRootTasksFor 'composition'
+    @allItemViews = {}
 
     @listView = new Views.ListView
       collection: rootTasks
+      allItemViews: @allItemViews
       attributes:
         records: 'root-tasks'
+
+  destroy: (model) ->
+    cid = model.cid ? model
+    delete @allItemViews[cid]
 
   events: ->
     'click [control=new]' : -> @newTask(); false
