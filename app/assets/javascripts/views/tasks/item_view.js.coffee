@@ -45,6 +45,8 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$fields.toggle(not toggled)
     @$task.toggleClass('updated', toggled)
     @formView.render() if toggled
+    # Clear selection after double click
+    window?.getSelection().removeAllRanges() unless toggled
     @formToggled = toggled
     @toggleSelect off
 
@@ -86,6 +88,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   render: ->
     @$el.html @template()
     @$task = @$el.children('.task')
+    @$task.on 'dblclick', => @toggleForm(on); false
     @$fields = @$task.children('.fields')
 
     @formView.$el.insertAfter(@$fields)
