@@ -105,5 +105,4 @@ class Lt.Collections.RelatedTasks extends Backbone.Collection
   comparator:  Lt.Models.Task.comparator
 
   initialize: ->
-    @on 'change:id'       , => @sort()
-    @on 'change:sort_rank', => @sort()
+    @on 'change:id change:sort_rank', => @sort()
