@@ -33,7 +33,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @toggleSubtasks on
 
   subtasksAreShown: ->
-    @model.get('type') is 'project' and @model.get('state') is 'underway'
+    @model.get('type') is 'project' and @model.get('computed_state') is 'underway'
 
   toggleSubtasks: (toggled) ->
     @subtasksView.$el.toggle(toggled)
@@ -80,7 +80,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
     @$el.attr
       'task-type':  @model.get('type')
-      'task-state': @model.get('state')
+      'task-computed-state': @model.get('computed_state')
 
     @subtasksView.$el.toggle @model.get('type') is 'project'
     @toggleSelect(@model.isNew())

@@ -13,17 +13,15 @@ module Task
 
     include Attributes::ComputedMethods
 
-    has_computed_attribute :state, computed_from:
-      {self: :state, subtasks: :state} \
+    has_computed_attribute :computed_state, computed_from:
+      {self: :state, subtasks: :computed_state} \
     do |self_state, subtasks_states|
       if subtasks_states.empty? || self_state != :underway
         self_state
-      elsif subtasks_states.any? { |s| s == :underway }
-        :underway
-      elsif subtasks_states.any? { |s| s == :considered }
-        :considered
-      else
+      elsif subtasks_states.all? { |s| s.in? [:completed, :canceled] }
         :completed
+      else
+        :underway
       end
     end
 
@@ -40,7 +38,7 @@ module Task
     STATES_ORDER = order_hash [:underway, :considered, :completed, :canceled]
     TYPES_ORDER = order_hash [:action, :project]
     has_computed_attribute :sort_rank, computed_from:
-      {self: [:state, :type]} \
+      {self: [:computed_state, :type]} \
     do |state, type|
       [STATES_ORDER[state], TYPES_ORDER[type]]
     end

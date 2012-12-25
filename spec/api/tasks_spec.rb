@@ -40,10 +40,10 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(project_id) }
     end
 
-    describe 'new project state update event' do
+    describe 'new project computed state update event' do
       subject { task_updates.find_struct(
         task_id:        project_id,
-        attribute_name: 'state',
+        attribute_name: 'computed_state',
         date:           project_creation_date
       )}
       its(:updated_value) { should eq('underway') }
@@ -81,19 +81,19 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(action_id) }
     end
 
-    describe 'new action state update event' do
+    describe 'new action computed state update event' do
       subject { task_updates.find_struct(
         task_id:        action_id,
-        attribute_name: 'state',
+        attribute_name: 'computed_state',
         date:           action_creation_date,
       )}
       its(:updated_value) { should eq('completed') }
     end
 
-    describe 'new action project computed state update' do
+    describe 'new action project computed computed state update' do
       subject { task_updates.find_struct(
         task_id:        project_id,
-        attribute_name: 'state',
+        attribute_name: 'computed_state',
         date:           action_creation_date,
       )}
       its(:updated_value) { should eq('completed') }
@@ -129,10 +129,10 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(action_id) }
     end
 
-    describe 'updated action project computed state update' do
+    describe 'updated action project computed computed state update' do
       subject { task_updates.find_struct(
         task_id:        project_id,
-        attribute_name: 'state',
+        attribute_name: 'computed_state',
         date:           update_date,
       )}
       its(:updated_value) { should eq('underway') }
@@ -222,7 +222,7 @@ describe 'tasks', :api do
 
         describe do
           subject(:task_updates) { response_body.task_updates }
-          it { should have(7).updates }
+          it { should have_at_least(7).updates }
           include_examples :new_project_updates
           include_examples :new_action_updates
           include_examples :updated_action_updates
@@ -255,7 +255,7 @@ describe 'tasks', :api do
 
     describe do
       subject(:task_updates) { project_response_body.task_updates }
-      it { should have(2).updates }
+      it { should have_at_least(2).updates }
       include_examples :new_project_updates
     end
 
@@ -270,7 +270,7 @@ describe 'tasks', :api do
 
     describe do
       subject(:task_updates) { action_response_body.task_updates }
-      it { should have(3).updates }
+      it { should have_at_least(3).updates }
       include_examples :new_action_updates
     end
 
@@ -299,7 +299,7 @@ describe 'tasks', :api do
 
     describe do
       subject(:task_updates) { response_body.task_updates }
-      it { should have(2).updates }
+      it { should have_at_least(2).updates }
 
       include_examples :updated_action_updates
     end

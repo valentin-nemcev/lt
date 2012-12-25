@@ -33,19 +33,19 @@ ul.tasks
     font-weight: bold
     color: #484848
 
-  [task-state=completed], [task-state=canceled]
+  [task-computed-state=completed], [task-computed-state=canceled]
     & > .task [field=objective]
       text-decoration: line-through
 
-  [task-state=completed]
+  [task-computed-state=completed]
     & > .task [field=objective]
       color: #307128
 
-  [task-state=canceled]
+  [task-computed-state=canceled]
     & > .task [field=objective]
       color: #999
 
-  [task-state=considered]
+  [task-computed-state=considered]
     & > .task [field=objective]
       color: #999
 
