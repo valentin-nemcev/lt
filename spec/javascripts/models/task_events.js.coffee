@@ -1,4 +1,4 @@
-#= require backbone/models/task_events
+#= require models/task_events
 
 describe 'TaskEvents', ->
 

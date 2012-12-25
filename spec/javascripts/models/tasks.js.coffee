@@ -1,4 +1,4 @@
-#= require backbone/models/tasks
+#= require models/tasks
 
 describe 'Task', ->
   describe 'related tasks', ->

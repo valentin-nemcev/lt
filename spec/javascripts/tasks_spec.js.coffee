@@ -1,5 +1,5 @@
-#= require backbone/models/task_events
-#= require backbone/models/tasks
+#= require models/task_events
+#= require models/tasks
 
 describe 'Tasks', ->
   parser = null
@@ -106,7 +106,9 @@ describe 'Tasks', ->
       server.respond()
 
       expect(taskEvents.length).toBe(8)
-      expect(tasks.toJSON().sort()).toEqualProperties(expectedTasks)
+      actualTasks   = _.sortBy(tasks.toJSON(), 'id')
+      expectedTasks = _.sortBy(expectedTasks,  'id')
+      expect(tasks.toJSON()).toEqualProperties(expectedTasks)
 
   describe 'Create', ->
     it 'posts a tasks and handles response', ->
