@@ -22,11 +22,11 @@ class Views.ListView extends Backbone.View
 
   reset: ->
     @remove cid for cid of @itemViews
-    @add model for model in @collection.models
+    @add model, @collection, {}, -1 for model in @collection.models
     @updateEmptyItem()
     return
 
-  add: (model, collection = null, options = {}) ->
+  add: (model, collection = null, options = {}, index) ->
     cid = model.cid
     @allItemViews[cid] ?= new Views.ItemView(
       model: model
@@ -39,7 +39,7 @@ class Views.ListView extends Backbone.View
 
     @itemViews[cid] = @allItemViews[cid]
     $el = @itemViews[cid].$el
-    index = options.index
+    index ?= collection.indexOf(model)
     if index == 0
       $el.prependTo @$el
     else if index > 0
