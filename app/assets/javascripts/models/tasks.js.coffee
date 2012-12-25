@@ -29,7 +29,7 @@ class Lt.Models.Task extends Backbone.Model
 
   setCurrentProject: (newProject) ->
     projects = @getSupertasks('composition')
-    newProject = @collection.getByCid(newProject)
+    newProject = @collection.get(newProject)
     currentProject = projects.at(0)
     return if newProject is currentProject
     @removeSupertask('composition', currentProject)

@@ -11,7 +11,7 @@ gem 'unicorn' , '~> 4.3.0'
 gem 'jbuilder', '~> 0.4.0'
 
 gem 'jquery-rails',    '~> 2.1.0'
-gem 'rails-backbone',  '~> 0.7.0'
+gem 'rails-backbone',  '~> 0.9.0'
 
 group :assets do
   gem 'sass-rails',    '~> 3.2.3'

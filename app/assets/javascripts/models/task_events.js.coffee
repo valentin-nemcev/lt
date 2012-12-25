@@ -15,7 +15,7 @@ class Lt.Models.TaskCreation extends Lt.Models.TaskEvent
 
   apply: (tasks) ->
     attrs = id: @get('task_id')
-    task = tasks.getByCid @updatedTask
+    task = tasks.get @updatedTask
     if task
       task.set(attrs)
     else

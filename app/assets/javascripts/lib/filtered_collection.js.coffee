@@ -10,7 +10,7 @@ class Backbone.FilteredCollection extends Backbone.Collection
   initialize: ->
 
   change: (model) ->
-    included = @getByCid model
+    included = @get model
     passes = @modelFilter model
     if not included and passes
       @add model
