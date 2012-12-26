@@ -4,6 +4,7 @@ require 'time_interval'
 require 'task'
 require 'task/attributes'
 require 'task/attributes/revision'
+require 'task/attributes/sequence'
 require 'task/attributes/computed_revision'
 require 'task/attributes/computed_methods'
 
@@ -26,65 +27,10 @@ describe 'Task with computed attributes' do
   let(:date4)     { Time.zone.parse '2012-01-06' }
   let(:ending)    { Time.zone.parse '2012-01-07' }
 
-  describe 'last computed attribute revision' do
-    let(:given_date) { beginning }
-
-    before do
-      task.stub_attr_rev_before given_date, [{
-        :for    => :attr1,
-        :value  => 'attr1 v'
-      }]
-      task.stub_editable_attr_rev_before given_date, [{
-        :for    => :attr,
-        :value  => 'attr v'
-      }]
-
-      related1_1, related1_2 =
-        task.stub_last_related_tasks_before given_date, :relation1, 2
-
-      task.stub_last_related_tasks_before given_date, :relation2, 0
-
-      related1_1.stub_attr_rev_before given_date, [{
-        :for    => :attr1_1,
-        :value  => 'attr1_1_1 v'
-      }, {
-        :for    => :attr1_2,
-        :value  => 'attr1_2_1 v'
-      }]
-      related1_2.stub_attr_rev_before given_date, [{
-        :for    => :attr1_1,
-        :value  => 'attr1_1_2 v'
-      }, {
-        :for    => :attr1_2,
-        :value  => 'attr1_2_2 v'
-      }]
-    end
-
-    before do
-      attr_proc = stub_proc [
-        ['attr1 v', 'attr v', ['attr1_1_1 v', 'attr1_1_2 v'],
-                              ['attr1_2_1 v', 'attr1_2_2 v'], []],
-        'computed v',
-      ]
-      class_with_computed_attributes.instance_eval do
-        has_computed_attribute :attr,
-          {computed_from: {
-            self:      [:attr1, :attr],
-            relation1: [:attr1_1, :attr1_2],
-            relation2: [:attr2_1]
-          }}, &attr_proc
-      end
-    end
-
-    specify do
-      task.should_have_last_computed_revision_before given_date, :attr, {
-        :value => 'computed v'
-      }
-    end
-  end
+  let(:given_interval) { TimeInterval.beginning_on beginning }
+  let(:given_date) { beginning }
 
   describe 'computed attribute revisions' do
-    let(:given_interval) { TimeInterval.new beginning, ending }
 
     context 'for attribute of newly created task' do
       # Timeline
@@ -127,16 +73,14 @@ describe 'Task with computed attributes' do
     context 'for attribute that does not change' do
       # Timeline
       #       date:   b   1   2   3   4   e
-      #      attr1: 0-----1---2---3--------
-      #       attr: 0-----0---0---1--------
+      #      attr1:   0---1---2---3--------
+      #       attr:   0---0---0---1--------
 
       before do
-        task.stub_attr_rev_before given_interval.beginning, [{
-          :for    => :attr1,
-          :value  => 'attr1 value0'
-        }]
-
         task.stub_attr_revs_in given_interval, :attr1, [{
+          :on    => beginning,
+          :value => 'attr1 value0'
+        }, {
           :on    => date1,
           :value => 'attr1 value1'
         }, {
@@ -164,6 +108,9 @@ describe 'Task with computed attributes' do
 
       specify do
         task.should_have_computed_revisions_in given_interval, :attr, [{
+          :on    => beginning,
+          :value => 'computed value0',
+        }, {
           :on    => date3,
           :value => 'computed value1',
         }]
@@ -284,18 +231,14 @@ describe 'Task with computed attributes' do
               removal_date: date4,
             }, {
               addition_date:   date3,
-              removal_date: 1.day.since(given_interval.ending),
+              removal_date: Time::FOREVER
             }]
 
         related2_1.stub_attr_rev_before given_interval.beginning, [{
           :for    => :attr2_1,
           :value  => 'attr2_1_1 v0'
         }]
-        # related2_2.stub_attr_rev_before date3, [{
-        #   :for    => :attr2_1,
-        #   :value  => 'attr2_1_2 v0'
-        # }]
-        related2_2.stub_attr_revs_in TimeInterval.new(date3, ending),
+        related2_2.stub_attr_revs_in TimeInterval.beginning_on(date3),
           :attr2_1, [{
             :on    => date3,
             :value => 'attr2_1_2 v1'
@@ -304,8 +247,6 @@ describe 'Task with computed attributes' do
 
       before do
         attr_proc = stub_proc [
-          [[], [], []],
-          'computed v0',
           [['attr1_1 v0'], ['attr1_2 v1'], ['attr2_1_1 v0']],
           'computed v1',
           [['attr1_1 v0'], ['attr1_2 v2'], ['attr2_1_1 v0']],
@@ -349,9 +290,14 @@ describe 'Task with computed attributes' do
 
   let(:class_with_computed_attributes) { Class.new(base_class) }
   before(:each) do
+    creation_date = beginning
     class_with_computed_attributes.instance_eval do
       include Task::Attributes::ComputedMethods
       define_method(:inspect) { '<task>' }
+      define_method(:creation_date) { creation_date }
+      define_method(:effective_interval) do
+        TimeInterval.beginning_on creation_date
+      end
     end
   end
 
@@ -374,7 +320,7 @@ describe 'Task with computed attributes' do
         self.stub(
           :last_attribute_revision => nil,
           :attribute_revisions => [],
-          :last_related_tasks => [],
+          :editable_attribute_revisions => [],
         )
       end
 
@@ -415,16 +361,6 @@ describe 'Task with computed attributes' do
         end
         self.stub(:related_tasks).
           with(:for => relation, :in => interval).and_return(task_stubs)
-        task_stubs.collect(&:first)
-      end
-
-      def stub_last_related_tasks_before(date, relation, rel_count)
-        task_stubs = rel_count.times.map do
-          task = self.class.new
-          [task, nil]
-        end
-        self.stub(:last_related_tasks).
-          with(:for => relation, before: date).and_return(task_stubs)
         task_stubs.collect(&:first)
       end
 

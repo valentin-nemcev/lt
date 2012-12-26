@@ -1,12 +1,13 @@
 module Task
   class Attributes::Revision
     def initialize(attrs = {})
-      @updated_value = attrs.fetch :updated_value
-      @update_date   = attrs.fetch :update_date
-      @owner         = attrs[:owner]
+      @owner           = attrs[:owner]
+      @update_date     = attrs.fetch :update_date
+      @updated_value   = attrs.fetch :updated_value
+      @sequence_number = attrs[:sequence_number]
     end
 
-    attr_reader :owner, :update_date, :updated_value
+    attr_reader :owner, :update_date, :updated_value, :sequence_number
     def attribute_name; end
 
     def owner=(new_owner)

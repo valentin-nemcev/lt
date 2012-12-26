@@ -109,18 +109,6 @@ module Task
       end
     end
 
-    def last_related_tasks(args = {})
-      e = filtered_relations(args)
-      args[:before].try do |date|
-        e.filter! do |r|
-          r.effective_interval.include_with_end? date
-        end
-      end
-      e.with_nodes.map do |relation, task|
-        [task, relation.effective_interval]
-      end
-    end
-
     def destroy
       super
       relations.each(&:destroy)

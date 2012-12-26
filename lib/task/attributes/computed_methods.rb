@@ -27,6 +27,38 @@ module Task
 
       def initialize(attrs = {})
         super
+        @computed_attribute_revisions = {}
+      end
+
+      def last_computed_attribute_revision(args = {})
+        attribute = args[:for]
+        date      = args.fetch :before
+        return nil if date == Time::NEVER
+        @computed_attribute_revisions[attribute] ||=
+          build_computed_revision_sequence(attribute)
+
+        @computed_attribute_revisions[attribute].last_before date
+      end
+
+      def build_computed_revision_sequence(attribute)
+        seq = Sequence.new(
+          owner: self,
+          creation_date: creation_date,
+          revision_class: ComputedRevision
+        )
+        compute_attribute_revisions(:for => attribute).each do |rev|
+          seq.new_revision(rev)
+        end
+        seq
+      end
+
+      def computed_attribute_revisions(args = {})
+        attribute = args[:for]
+        interval  = args[:in] || TimeInterval.for_all_time
+        @computed_attribute_revisions[attribute] ||=
+          build_computed_revision_sequence(attribute)
+
+        @computed_attribute_revisions[attribute].all_in_interval interval
       end
 
       # ↓ Worst code of the year
@@ -52,56 +84,9 @@ module Task
         end
       end
 
-      def last_computed_attribute_revision(args = {})
+      def compute_attribute_revisions(args = {})
         attribute = args[:for]
-        date      = args.fetch :before
-        opts = computed_attributes_opts.fetch attribute
-
-        attribute_proc = opts[:proc]
-        depended_on_attributes = opts[:computed_from]
-
-        current_values = Hash.new
-        depended_on_attributes.each_pair do |rel, attrs|
-          current_values[rel] = Hash.new
-          Array(attrs).each do |attr|
-            current_values[rel][attr] = Hash.new
-          end
-
-          tasks = rel == :self ? [[self, nil]]
-            : last_related_tasks(:for => rel, :before => date)
-          tasks.each do |(task, _)|
-            Array(attrs).each do |attr|
-              msg = attr == attribute && task == self ?
-                :last_editable_attribute_revision : :last_attribute_revision
-              revision =
-                task.public_send(msg, :for => attr, before: date)
-              value = revision.updated_value if revision
-              current_values[rel][attr][task] = value
-            end
-          end
-        end
-
-        proc_arguments = depended_on_attributes.flat_map do |rel, attrs|
-          Array(attrs).map do |attr|
-            if rel == :self
-              current_values[rel][attr].values.first
-            else
-              current_values[rel][attr].values
-            end
-          end
-        end
-        computed_value = attribute_proc.(*proc_arguments)
-
-        ComputedRevision.new \
-          owner: self,
-          attribute_name: attribute,
-          updated_value: computed_value,
-          update_date: date
-      end
-
-      def computed_attribute_revisions(args = {})
-        attribute = args[:for]
-        interval    = args[:in] || TimeInterval.for_all_time
+        interval  = effective_interval
         opts = computed_attributes_opts.fetch attribute
 
         attribute_proc = opts[:proc]
@@ -145,10 +130,6 @@ module Task
         end
         events = events.sort.chunk(&:date)
 
-        prev_revision = last_computed_attribute_revision \
-          :for => attribute, :before => interval.beginning
-        prev_value = prev_revision.try(:updated_value)
-
         events.map do |date, evs|
           task_evs = []
           next if date == Time::FOREVER
@@ -184,14 +165,11 @@ module Task
 
           computed_value = attribute_proc.(*proc_arguments)
 
-          next if computed_value == prev_value
-          prev_value = computed_value
-
-          ComputedRevision.new \
-            owner: self,
+          {
             attribute_name: attribute,
             updated_value: computed_value,
             update_date: date
+          }
         end.compact
       end
       # ↑ Worst code of the year
