@@ -13,7 +13,7 @@ module Task
           editable_attributes_opts.keys
         end
 
-        def new_attribute_revision(name, attrs)
+        def new_editable_attribute_revision(name, attrs)
           editable_attributes_opts.fetch(name).fetch(:revision_class).new(attrs)
         end
       end

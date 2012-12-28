@@ -1,5 +1,17 @@
 module Task
   module Attributes::Methods
+    extend ActiveSupport::Concern
+
+    module ClassMethods
+      def new_attribute_revision(is_computed, attribute_name, attrs)
+        if is_computed
+          new_computed_attribute_revision(attribute_name, attrs)
+        else
+          new_editable_attribute_revision(attribute_name, attrs)
+        end
+      end
+    end
+
     def attribute_revisions(args = {})
       interval = args[:in]
       computed = self.class.computed_attributes
@@ -20,6 +32,18 @@ module Task
       editable = self.class.editable_attributes
       return last_computed_attribute_revision(args) if computed.include? attr
       return last_editable_attribute_revision(args) if editable.include? attr
+    end
+
+    def all_attribute_revisions
+      all_editable_attribute_revisions + all_computed_attribute_revisions
+    end
+
+    def initialize(attrs = {})
+      revs = attrs.
+        delete(:all_attribute_revisions){ [] }.group_by(&:computed?)
+      attrs[:all_editable_attribute_revisions] = revs[false] || []
+      attrs[:all_computed_attribute_revisions] = revs[true]  || []
+      super
     end
   end
 end

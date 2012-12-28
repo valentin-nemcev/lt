@@ -9,6 +9,7 @@ module Task
 
     attr_reader :owner, :update_date, :updated_value, :sequence_number
     def attribute_name; end
+    def computed?; false; end
 
     def owner=(new_owner)
       owner.nil? or fail OwnerError.new owner, new_owner

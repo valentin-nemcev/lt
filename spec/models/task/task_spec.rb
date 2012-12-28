@@ -18,7 +18,7 @@ describe Task::Record do
   let(:task) do
     TaskDouble.new.tap do |task|
       task.stub creation_date: task_creation_date,
-        all_editable_attribute_revisions: []
+        all_attribute_revisions: []
     end
   end
   let(:not_persisted_task) { task.id = nil; task }
@@ -56,7 +56,7 @@ describe Task::Record do
 
     before(:each) do
       task.stub(
-        all_editable_attribute_revisions: task_editable_attribute_revisions)
+        all_attribute_revisions: task_editable_attribute_revisions)
       revision_records.should_receive(:save_revisions) do |rec, revs|
         @received_task_record = rec
         revs.should eq(task_editable_attribute_revisions)
@@ -93,7 +93,7 @@ describe Task::Record do
     end
 
     it 'delegates loading attribute revisions' do
-      task.all_editable_attribute_revisions.
+      task.all_attribute_revisions.
         should eq(task_editable_attribute_revisions)
       @received_task_record.should eq(task_record)
     end

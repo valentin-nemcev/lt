@@ -3,7 +3,11 @@ module Task
     self.table_name = 'task_attribute_revisions'
     self.record_timestamps  = false
     attr_accessible :attribute_name, :updated_value,
-      :update_date, :sequence_number
+      :update_date, :sequence_number, :computed
+
+    serialize :updated_value
+
+    scope :computed, where(:computed => true)
 
     belongs_to :task, :class_name => ::Task::Record,
       :foreign_key => :task_id,
@@ -26,6 +30,7 @@ module Task
     def self.load_revisions(task_record)
       task_record.attribute_revisions.map do |rec|
         ::Task::Base.new_attribute_revision(
+          rec.computed?,
           rec.attribute_name.to_sym,
           id:              rec.id,
           updated_value:   rec.updated_value,
@@ -40,6 +45,7 @@ module Task
       self.update_date     = revision.update_date
       self.attribute_name  = revision.attribute_name.to_s
       self.updated_value   = revision.updated_value
+      self.computed        = revision.computed?
       self
     end
   end

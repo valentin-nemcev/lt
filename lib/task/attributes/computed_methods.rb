@@ -18,6 +18,12 @@ module Task
           computed_attributes | editable_attributes
         end
 
+        def new_computed_attribute_revision(name, attrs)
+          computed_attributes_opts.has_key?(name) or
+            fail "Unknown computed attribute #{name}"
+          attrs[:attribute_name] = name
+          ComputedRevision.new(attrs)
+        end
       end
 
       included do |base|
@@ -25,40 +31,81 @@ module Task
         self.computed_attributes_opts ||= {}
       end
 
-      def initialize(attrs = {})
+      def initialize(given_attributes = {})
         super
+
         @computed_attribute_revisions = {}
+        @computed_attribute_revisions_update_dates = {}
+        @computed_attribute_revisions_update_date = Time::NEVER
+
+        given_attribute_revisions = given_attributes.
+          fetch(:all_computed_attribute_revisions, []).
+          group_by(&:attribute_name)
+
+        computed_attributes_opts.each_pair do |attr, attr_opts|
+          revision_sequence = initialize_computed_revision_sequence attr
+
+          given_attribute_revisions[attr].try do |revisions|
+            revision_sequence.set_revisions revisions
+          end
+        end
       end
 
-      def last_computed_attribute_revision(args = {})
-        attribute = args[:for]
-        date      = args.fetch :before
-        return nil if date == Time::NEVER
-        @computed_attribute_revisions[attribute] ||=
-          build_computed_revision_sequence(attribute)
-
-        @computed_attribute_revisions[attribute].last_before date
-      end
-
-      def build_computed_revision_sequence(attribute)
+      def initialize_computed_revision_sequence(attribute)
         seq = Sequence.new(
           owner: self,
           creation_date: creation_date,
           revision_class: ComputedRevision
         )
-        compute_attribute_revisions(:for => attribute).each do |rev|
-          seq.new_revision(rev)
-        end
-        seq
+        @computed_attribute_revisions_update_dates[attribute] = Time::NEVER
+        @computed_attribute_revisions[attribute] = seq
       end
+
+      def all_computed_attribute_revisions(*)
+        computed_attributes_opts.flat_map do |attr, attr_opts|
+          updated_computed_attribute_revisions(attr).to_a
+        end
+      end
+
+      def last_computed_attribute_revision(args = {})
+        attribute = args[:for]
+        date      = args.fetch :before
+        updated_computed_attribute_revisions(attribute).last_before date
+      end
+
 
       def computed_attribute_revisions(args = {})
         attribute = args[:for]
         interval  = args[:in] || TimeInterval.for_all_time
-        @computed_attribute_revisions[attribute] ||=
-          build_computed_revision_sequence(attribute)
+        updated_computed_attribute_revisions(attribute).all_in_interval interval
+      end
 
-        @computed_attribute_revisions[attribute].all_in_interval interval
+      def updated_computed_attribute_revisions(attribute)
+        if @computed_attribute_revisions_update_dates.fetch(attribute) <
+                                  @computed_attribute_revisions_update_date
+          update_computed_attributes \
+            :for => attribute,
+            :after => @computed_attribute_revisions_update_date
+          @computed_attribute_revisions_update_dates[attribute] =
+            @computed_attribute_revisions_update_date
+        end
+        @computed_attribute_revisions[attribute]
+      end
+
+      def computed_attributes_updated(args = {})
+        update_date = args.fetch(:after)
+        @computed_attribute_revisions_update_date = update_date
+      end
+
+      def update_computed_attributes(args = {})
+        update_date = args.fetch(:after)
+        attr = args.fetch(:for)
+        compute_attribute_revisions(
+          :for => attr,
+          :in => TimeInterval.beginning_on(update_date)
+        ).each do |rev|
+          @computed_attribute_revisions[attr].new_revision(rev)
+        end
       end
 
       # ↓ Worst code of the year
@@ -86,7 +133,7 @@ module Task
 
       def compute_attribute_revisions(args = {})
         attribute = args[:for]
-        interval  = effective_interval
+        interval  = args[:in] || effective_interval
         opts = computed_attributes_opts.fetch attribute
 
         attribute_proc = opts[:proc]

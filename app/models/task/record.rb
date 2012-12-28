@@ -31,6 +31,11 @@ module Task
         .where('supertask_id IN (:ids) AND subtask_id IN (:ids)', ids: ids)
     end
 
+    def self.destroy_computed_attribute_revisions
+      AttributeRevisionRecord.
+        where(:task_id => pluck(:id)).computed.delete_all
+    end
+
 
     def self.save_task(task)
       record = if task.persisted?
@@ -59,7 +64,7 @@ module Task
     def map_from_task(task)
       self.creation_date = task.creation_date
       AttributeRevisionRecord.save_revisions self,
-                                task.all_editable_attribute_revisions
+                                task.all_attribute_revisions
       self
     end
 
@@ -67,7 +72,7 @@ module Task
       ::Task::Base.new(
         id: self.id,
         creation_date: self.creation_date,
-        all_editable_attribute_revisions:
+        all_attribute_revisions:
           AttributeRevisionRecord.load_revisions(self),
       )
     end

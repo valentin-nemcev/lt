@@ -5,7 +5,7 @@ module Task
     attr_reader :user, :graph
     def initialize(opts = {})
       @user = opts.fetch :user
-      @graph = Task::Graph.new
+      clear_graph
     end
 
     def store(task)
@@ -23,6 +23,10 @@ module Task
         relation_base.save_relation(relation, task_records_map)
       end
       graph
+    end
+
+    def clear_graph
+      @graph = Task::Graph.new
     end
 
     def fetch(task_id)
@@ -43,6 +47,15 @@ module Task
       task.destroy{ |related_task| destroy_task related_task }
       task.freeze
       nil
+    end
+
+    def recompute_attributes!
+      task_base.destroy_computed_attribute_revisions
+      clear_graph
+      fetch_all
+      update_date = graph.tasks.collect(&:creation_date).min
+      graph.update_computed_attributes :after => update_date
+      store_graph
     end
 
     protected

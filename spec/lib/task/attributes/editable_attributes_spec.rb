@@ -24,9 +24,9 @@ describe 'Object with editable attributes' do
 
   its('class.editable_attributes') { should eq([:attr_name1, :attr_name2]) }
 
-  describe '.new_attribute_revision' do
+  describe '.new_editable_attribute_revision' do
     subject(:new_revision) do
-      task.class.new_attribute_revision :attr_name1, attrs
+      task.class.new_editable_attribute_revision :attr_name1, attrs
     end
     before(:each) do
       AttrNameRevision1.should_receive(:new).with(attrs)

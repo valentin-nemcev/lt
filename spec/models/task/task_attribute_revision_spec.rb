@@ -25,6 +25,7 @@ describe Task::AttributeRevisionRecord do
         AttributeRevisionDouble.new.tap do |rev|
           rev.stub(
             attribute_name: :attr_name,
+            computed?: false,
             updated_value: "Test value #{i}",
             update_date: test_update_date,
             sequence_number: i,
@@ -46,6 +47,7 @@ describe Task::AttributeRevisionRecord do
       AttributeRevisionDouble.new.tap do |rev|
         rev.stub(
           attribute_name: :attr_name,
+          computed?: true,
           updated_value: test_value,
           update_date: test_update_date,
           sequence_number: test_sn,
@@ -64,6 +66,7 @@ describe Task::AttributeRevisionRecord do
         revision_record.updated_value.should eq(test_value)
         revision_record.attribute_name.should eq('attr_name')
         revision_record.update_date.should eq_up_to_sec(test_update_date)
+        revision_record.computed?.should be_true
       end
     end
   end
@@ -74,6 +77,7 @@ describe Task::AttributeRevisionRecord do
         (1..3).to_a.reverse.map do |i|
           task_record.attribute_revisions.create!(
             attribute_name: :attr_name,
+            computed: true,
             updated_value: "Test value #{i}",
             update_date: test_update_date,
             sequence_number: i,
@@ -91,13 +95,15 @@ describe Task::AttributeRevisionRecord do
     it 'fetches revision fields' do
       revision_record = task_record.attribute_revisions.create! do |rec|
         rec.attribute_name = 'attr_name'
+        rec.computed = true
         rec.updated_value = test_value
         rec.update_date = test_update_date
         rec.sequence_number = test_sn
       end
 
-      Task::Base.should_receive(:new_attribute_revision) do |name, attrs|
+      Task::Base.should_receive(:new_attribute_revision) do |computed, name, attrs|
         name.should eq(:attr_name)
+        computed.should be_true
         attrs = OpenStruct.new attrs
         attrs.owner = task
         attrs.updated_value.should eq(test_value)

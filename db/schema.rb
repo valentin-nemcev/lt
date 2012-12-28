@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121216100635) do
+ActiveRecord::Schema.define(:version => 20121226120827) do
 
   create_table "task_attribute_revisions", :force => true do |t|
     t.integer  "task_id"
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(:version => 20121216100635) do
     t.datetime "update_date"
     t.string   "attribute_name",  :null => false
     t.string   "updated_value"
+    t.boolean  "computed",        :null => false
   end
 
   create_table "task_relations", :force => true do |t|

@@ -51,14 +51,18 @@ module Task
       tasks.find{ |task| task.id.to_s == id.to_s }
     end
 
+    def update_computed_attributes(args = {})
+      update_date = args.fetch :after
+      tasks.each{ |t| t.computed_attributes_updated :after => update_date }
+    end
 
-    def events(args = {})
-      interval = args.fetch :in
-      if task = args[:for]
-        tasks, relations = task.with_connected_tasks_and_relations
-      else
-        tasks, relations = self.tasks, self.relations
-      end
+
+    def new_events(args = {})
+      update_date = args.fetch :after
+      interval = TimeInterval.beginning_on update_date
+      task = args.fetch :for
+      tasks, relations = task.with_connected_tasks_and_relations
+      tasks.each{ |t| t.computed_attributes_updated :after => update_date }
       created_tasks = tasks.select{ |t| interval.include? t.creation_date }
       relations = relations.select do |r|
         interval.include?(r.addition_date) ||
@@ -68,6 +72,14 @@ module Task
         t.attribute_revisions in: interval
       end
       [created_tasks, relations, attribute_revisions]
+    end
+
+    def all_events
+      tasks, relations = self.tasks, self.relations
+      attribute_revisions = tasks.collect_concat do |t|
+        t.attribute_revisions in: TimeInterval.for_all_time
+      end
+      [tasks, relations, attribute_revisions]
     end
   end
 end

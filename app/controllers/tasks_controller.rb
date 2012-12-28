@@ -5,7 +5,7 @@ class TasksController < ApplicationController
 
   def index
     storage.fetch_all
-    @tasks, @relations, @revisions = graph.events in: TimeInterval.for_all_time
+    @tasks, @relations, @revisions = graph.all_events
 
     render :events
   end
@@ -18,7 +18,7 @@ class TasksController < ApplicationController
       on: effective_date
 
     @tasks, @relations, @revisions =
-      graph.events for: task, in: TimeInterval.beginning_on(effective_date - 1.second)
+      graph.new_events :for => task, :after => effective_date - 1.second
 
     storage.store task
 
@@ -33,7 +33,7 @@ class TasksController < ApplicationController
     task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
     @tasks, @relations, @revisions =
-      graph.events for: task, in: TimeInterval.beginning_on(effective_date - 1.second)
+      graph.new_events :for => task, :after => effective_date - 1.second
 
     storage.store task
 
