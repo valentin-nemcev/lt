@@ -31,6 +31,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @model.get('type') is 'project' and @model.get('computed_state') is 'underway'
 
   toggleSubtasks: (toggled = not @subtasksToggled) ->
+    toggled = no unless @hasSubtasks
     @subtasksToggled = toggled
 
     @subtasksView.$el.toggleClass('hidden', not toggled)

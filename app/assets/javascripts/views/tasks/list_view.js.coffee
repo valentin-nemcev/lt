@@ -6,9 +6,10 @@ class Views.ListView extends Backbone.View
   className: 'tasks'
 
   initialize: ->
-    @collection.bind 'reset sort', @reset,   @
-    @collection.bind 'add'       , @add,     @
-    @collection.bind 'remove'    , @remove,  @
+    @collection.bind 'reset'  , @reset  , @
+    @collection.bind 'sort'   , @sort   , @
+    @collection.bind 'add'    , @add    , @
+    @collection.bind 'remove' , @remove , @
 
     @allItemViews = @options.allItemViews
     @itemViews = {}
@@ -26,6 +27,10 @@ class Views.ListView extends Backbone.View
     @updateEmptyItem()
     return
 
+  sort: ->
+    @add model, @collection, {}, index for model, index in @collection.models
+    return
+
   add: (model, collection = null, options = {}, index) ->
     cid = model.cid
     @allItemViews[cid] ?= new Views.ItemView(
@@ -38,13 +43,11 @@ class Views.ListView extends Backbone.View
     ).render()
 
     @itemViews[cid] = @allItemViews[cid]
-    $el = @itemViews[cid].$el
+    $el = @itemViews[cid].$el.detach()
     index ?= collection.indexOf(model)
-    if index == 0
-      $el.prependTo @$el
-    else if index > 0
-      $beforeIndex = @$el.children().eq index - 1
-      $el.insertAfter $beforeIndex
+    if 0 <= index < collection.length - 1
+      $elAtIndex = @$el.children().eq index
+      $el.insertBefore $elAtIndex
     else
       $el.appendTo @$el
 
@@ -54,7 +57,8 @@ class Views.ListView extends Backbone.View
 
   remove: (model) ->
     cid = model.cid ? model
-    @itemViews[cid].$el.detach()
+    $el = @itemViews[cid].$el
+    $el.detach() if $el.parent() is @el
     @updateEmptyItem()
 
   destroy: (model) ->
