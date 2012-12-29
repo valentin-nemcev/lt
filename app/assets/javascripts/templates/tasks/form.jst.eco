@@ -30,8 +30,8 @@
   </div>
   <div class='field-group minor'>
     <input type="submit" control="save" value="Сохранить">
-    <button control="cancel">Отменить</button>
-  <button control="delete" class="right destructive"
+    <button control="cancel" class="link">Отменить</button>
+  <button control="delete" class="link right destructive"
     confirmation="Действительно уничтожить задачу со всеми вложенными подзадачами?">
     Уничтожить</button>
   </div>

@@ -1,15 +1,19 @@
 <div class="task">
   <div class="fields">
-    <div field="objective" control="select">
+    <div field="objective">
       <span class="empty">Нет цели</span>
     </div>
   </div>
 
-  <div class="additional-controls minor">
-    <button control="update">Обновить</button>
-    <button control="new-subtask">Добавить подзадачу</button>
-    <button control="show-subtasks">Показать подзадачи</button>
-    <button control="hide-subtasks">Скрыть подзадачи</button>
+  <div class="controls minor">
+    <button class="link" control="update">Обновить</button>
+    <button class="link" control="new-subtask">Добавить</button>
+    <button class="link" control="show-subtasks">
+      Показать <span field="subtask-count"></span>
+    </button>
+    <button class="link" control="hide-subtasks">
+      Скрыть <span field="subtask-count"></span>
+    </button>
   </div>
 </div>
 <span class="empty">Нет подзадач</span>

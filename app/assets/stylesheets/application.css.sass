@@ -14,8 +14,6 @@ input, select, textarea, button
   font: inherit
   line-height: inherit
 
-a
-  +link-colors(#333, #000, #666, #333, #000)
 
 h1
   font-size: 2em
@@ -23,4 +21,35 @@ h1
   font-weight: bold
 
 .minor
-  font-size: 90%
+  font-size: 85%
+  line-height: 117%
+
+.hidden
+  display: none !important
+
+
+a
+  +link-colors(#333, #000, #666, #333, #000)
+
+button.link
+  +link-colors(#333, #000, #666, #333, #000)
+  &, &:focus, &:active
+    /* Remove all decorations */
+    border: none
+    display: inline
+    margin: 0em
+    padding: 0em
+    // outline: none
+    // outline-offset: 0em
+    /* Look like a link */
+    background: none
+    cursor: pointer
+    font: inherit
+    text-decoration: underline
+    -moz-text-decoration-style: dashed
+
+  /* Remove extra space inside buttons in Firefox */
+  &::-moz-focus-inner
+    // border: none
+    padding: 0em
+

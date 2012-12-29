@@ -5,11 +5,6 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   template: JST['templates/tasks/item']
 
   events:
-    'click [control=select]'       : -> @toggleSelect(on)   ; false
-    'click [control=deselect]'     : -> @toggleSelect(off)  ; false
-    'deselect'                     : -> @toggleSelect(off)  ; false
-    'click [control=toggle-select]': -> @toggleSelect()     ; false
-
     'click [control=update]'       : -> @toggleForm(on)     ; false
     'click [control=show-subtasks]': -> @toggleSubtasks(on) ; false
     'click [control=hide-subtasks]': -> @toggleSubtasks(off); false
@@ -35,35 +30,31 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
   subtasksAreShown: ->
     @model.get('type') is 'project' and @model.get('computed_state') is 'underway'
 
-  toggleSubtasks: (toggled) ->
-    @subtasksView.$el.toggle(toggled)
-    @$task.find('[control=show-subtasks]').toggle(not toggled)
-    @$task.find('[control=hide-subtasks]').toggle(toggled)
+  toggleSubtasks: (toggled = not @subtasksToggled) ->
+    @subtasksToggled = toggled
+
+    @subtasksView.$el.toggleClass('hidden', not toggled)
+    @updateSubtaskControls()
 
   toggleForm: (toggled = not @formToggled) ->
-    @formView.$el.toggle(toggled)
-    @$fields.toggle(not toggled)
+    @formToggled = toggled
+
+    @formView.$el.toggleClass('hidden', not toggled)
+    @$fields.toggleClass('hidden', toggled)
+    @$controls.toggleClass('hidden', toggled)
     @$task.toggleClass('updated', toggled)
     @formView.render() if toggled
     # Clear selection after double click
     window?.getSelection().removeAllRanges() unless toggled
-    @formToggled = toggled
     @toggleSelect off
 
     return this
 
   toggleSelect: (toggled = not @selectToggled) ->
-    @$task.toggleClass('selected', toggled)
-    @$task.find('[control=select],[control=deselect]')
-      .attr control: if toggled then 'deselect' else 'select'
-    showControls = toggled and !@model.isNew()
-    @$task.find('.additional-controls').toggle(showControls)
-
-    if toggled
-      @$el.closest('[widget=tasks]')
-        .find('.task').not(@$task).trigger('deselect')
-
     @selectToggled = toggled
+
+    @$task.toggleClass('selected', toggled)
+    @$controls.toggleClass('hidden', @formToggled or not toggled)
     return this
 
   change: ->
@@ -82,16 +73,34 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       'task-type':  @model.get('type')
       'task-computed-state': @model.get('computed_state')
 
-    @subtasksView.$el.toggle @model.get('type') is 'project'
+    @$task.find('[field=subtask-count]').text(@model.get('subtask_count'))
+    @hasSubtasks = !!@model.get('subtask_count')
+    @updateSubtaskControls()
+
+    @subtasksView.$el.toggleClass('hidden', @model.get('type') isnt 'project')
     @toggleSelect(@model.isNew())
+
+  updateSubtaskControls: ->
+    @$showSubtasks ?= @$task.find('[control=show-subtasks]')
+    @$hideSubtasks ?= @$task.find('[control=hide-subtasks]')
+    @$showSubtasks.toggleClass('hidden', !(@hasSubtasks and not @subtasksToggled))
+    @$hideSubtasks.toggleClass('hidden', !(@hasSubtasks and @subtasksToggled))
 
   render: ->
     @$el.html @template()
     @$task = @$el.children('.task')
-    @$task.on 'dblclick', => @toggleForm(on); false
     @$fields = @$task.children('.fields')
+    @$controls = @$task.children('.controls')
+    @$fields.find('[field=objective]').on
+      'click'      : => @toggleSubtasks()  ; false
+      # 'dblclick'   : => @toggleForm(on)    ; false
+    @$task.on
+      'mouseenter' : => @toggleSelect(on)  ; false
+      'mouseleave' : => @toggleSelect(off) ; false
 
-    @formView.$el.insertAfter(@$fields)
+
+
+    @formView.$el.appendTo(@$task)
     @toggleForm @model.isNew()
 
     $emptyItem = @$el.children('.empty').detach()

@@ -20,11 +20,15 @@ ul.tasks
     +clearfix
 
     border: 1px solid white
-    &.selected, &.updated
+    &.selected
+    &.updated
       border: 1px dashed #999
 
-    .additional-controls
-      margin-top: 0.15em
+    .fields, .fields *
+      display: inline
+
+    .controls
+      display: inline
 
   .task [field=objective] .empty
     font-style: italic
@@ -50,6 +54,9 @@ ul.tasks
       color: #999
 
   [form]
+    [input=state] label
+      margin-right: 1em
+
     input[name=objective]
       +box-sizing(border-box)
       width: 100%

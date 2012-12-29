@@ -25,6 +25,12 @@ module Task
       end
     end
 
+    has_computed_attribute :subtask_count, computed_from:
+      {subtasks: :state} \
+    do |subtasks|
+      subtasks.count
+    end
+
     has_computed_attribute :type, computed_from:
       {subtasks: :state} \
     do |subtasks|
