@@ -25,6 +25,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   newSubtask: ->
     @model.newSubtask('composition')
+    @hasSubtasks = yes
     @toggleSubtasks on
 
   subtasksAreShown: ->

@@ -6,10 +6,11 @@ class Views.ListView extends Backbone.View
   className: 'tasks'
 
   initialize: ->
-    @collection.bind 'reset'  , @reset  , @
-    @collection.bind 'sort'   , @sort   , @
-    @collection.bind 'add'    , @add    , @
-    @collection.bind 'remove' , @remove , @
+    @collection.bind 'reset'   , @reset   , @
+    @collection.bind 'sort'    , @sort    , @
+    @collection.bind 'add'     , @add     , @
+    @collection.bind 'remove'  , @remove  , @
+    @collection.bind 'destroy' , @destroy , @
 
     @allItemViews = @options.allItemViews
     @itemViews = {}
