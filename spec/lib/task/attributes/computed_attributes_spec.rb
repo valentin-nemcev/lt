@@ -40,10 +40,7 @@ describe 'Task with computed attributes' do
       #       attr: ---1--------------------
 
       before do
-        attr_proc = stub_proc [
-          [nil], nil,
-          ['attr1 value1'], 'computed value1',
-        ]
+        attr_proc = stub_proc attr_params
         class_with_computed_attributes.instance_eval do
           has_computed_attribute :attr,
             {computed_from: {self: [:attr1]}},
@@ -63,6 +60,10 @@ describe 'Task with computed attributes' do
         }]
       end
 
+      let(:attr_params) { [
+        given_interval.beginning, ['attr1 value1'], 'computed value1',
+      ] }
+
       specify do
         task.should_have_computed_revisions_in given_interval, :attr, [{
           :on    => given_interval.beginning,
@@ -78,12 +79,7 @@ describe 'Task with computed attributes' do
       #       attr:   0---0---0---1--------
 
       before do
-        attr_proc = stub_proc [
-          ['attr1 value0'], 'computed value0',
-          ['attr1 value1'], 'computed value0',
-          ['attr1 value2'], 'computed value0',
-          ['attr1 value3'], 'computed value1',
-        ]
+        attr_proc = stub_proc attr_params
         class_with_computed_attributes.instance_eval do
           has_computed_attribute :attr,
             {computed_from: {self: [:attr1]}},
@@ -107,6 +103,13 @@ describe 'Task with computed attributes' do
         }]
       end
 
+      let(:attr_params) { [
+        beginning, ['attr1 value0'], 'computed value0',
+        date1,     ['attr1 value1'], 'computed value0',
+        date2,     ['attr1 value2'], 'computed value0',
+        date3,     ['attr1 value3'], 'computed value1',
+      ] }
+
       specify do
         task.should_have_computed_revisions_in given_interval, :attr, [{
           :on    => beginning,
@@ -127,13 +130,7 @@ describe 'Task with computed attributes' do
       #       attr: 0------1---2---3---4----
 
       before do
-        attr_proc = stub_proc [
-          ['attr1 value0', 'attr2 value0', 'attr value0'], 'computed value0',
-          ['attr1 value1', 'attr2 value0', 'attr value0'], 'computed value1',
-          ['attr1 value1', 'attr2 value1', 'attr value0'], 'computed value2',
-          ['attr1 value2', 'attr2 value1', 'attr value1'], 'computed value3',
-          ['attr1 value2', 'attr2 value1', 'attr value2'], 'computed value4',
-        ]
+        attr_proc = stub_proc attr_params
         class_with_computed_attributes.instance_eval do
           has_computed_attribute :attr,
             {computed_from: {self: [:attr1, :attr2, :attr]}},
@@ -174,6 +171,13 @@ describe 'Task with computed attributes' do
         }]
       end
 
+      let(:attr_params) { [
+        date1, ['attr1 value1', 'attr2 value0', 'attr value0'], 'computed value1',
+        date2, ['attr1 value1', 'attr2 value1', 'attr value0'], 'computed value2',
+        date3, ['attr1 value2', 'attr2 value1', 'attr value1'], 'computed value3',
+        date4, ['attr1 value2', 'attr2 value1', 'attr value2'], 'computed value4',
+      ] }
+
       specify do
         task.should_have_computed_revisions_in given_interval, :attr, [{
           :on    => date1,
@@ -204,18 +208,7 @@ describe 'Task with computed attributes' do
       #       attr: --1---2---3---4---5----
 
       before do
-        attr_proc = stub_proc [
-          [['attr1_1 v0'], ['attr1_2 v1'], ['attr2_1_1 v0']],
-          'computed v1',
-          [['attr1_1 v0'], ['attr1_2 v2'], ['attr2_1_1 v0']],
-          'computed v2',
-          [[            ], [            ], ['attr2_1_1 v0']],
-          'computed v3',
-          [[            ], [            ], ['attr2_1_1 v0', 'attr2_1_2 v1']],
-          'computed v4',
-          [[            ], [            ], [                'attr2_1_2 v1']],
-          'computed v5',
-        ]
+        attr_proc = stub_proc attr_params
         class_with_computed_attributes.instance_eval do
           has_computed_attribute :attr,
             {computed_from: {
@@ -267,6 +260,28 @@ describe 'Task with computed attributes' do
             :value => 'attr2_1_2 v1'
           }]
       end
+
+      let(:attr_params) { [
+        given_interval.beginning,
+        [['attr1_1 v0'], ['attr1_2 v1'], ['attr2_1_1 v0']],
+        'computed v1',
+
+        date1,
+        [['attr1_1 v0'], ['attr1_2 v2'], ['attr2_1_1 v0']],
+        'computed v2',
+
+        date2,
+        [[            ], [            ], ['attr2_1_1 v0']],
+        'computed v3',
+
+        date3,
+        [[            ], [            ], ['attr2_1_1 v0', 'attr2_1_2 v1']],
+        'computed v4',
+
+        date4,
+        [[            ], [            ], [                'attr2_1_2 v1']],
+        'computed v5',
+      ] }
 
       specify do
         task.should_have_computed_revisions_in given_interval, :attr, [{
@@ -402,10 +417,10 @@ describe 'Task with computed attributes' do
     end
   end
 
-  def stub_proc(func_map)
+  def stub_proc(params)
     func = stub
-    func_map.each_slice(2) do |input, output|
-      func.stub(:eval).with(*input).and_return(output)
+    params.each_slice(3) do |date, input, output|
+      func.stub(:eval).with(*input, date).and_return(output)
     end
     Proc.new { |*args| func.eval *args }
   end

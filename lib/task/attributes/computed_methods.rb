@@ -210,7 +210,7 @@ module Task
             end
           end
 
-          computed_value = attribute_proc.(*proc_arguments)
+          computed_value = attribute_proc.(*proc_arguments, date)
 
           {
             attribute_name: attribute,

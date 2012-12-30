@@ -37,16 +37,24 @@ module Task
       subtasks.empty? ? :action : :project
     end
 
-    def self.order_hash(els)
-      els.each.with_index.with_object({}) { |(e, i), h| h[e] = i }.freeze
+    has_computed_attribute :last_state_change_date, computed_from:
+      {self: :computed_state} \
+    do |_, date|
+      date
     end
 
-    STATES_ORDER = order_hash [:underway, :considered, :completed, :canceled]
+    def self.order_hash(els)
+      els.each_with_index.
+        flat_map { |els, i| Array(els).map { |e| [e, i] } }.
+        each_with_object({}) { |(e, i), h| h[e] = i }.freeze
+    end
+
+    STATES_ORDER = order_hash [[:completed, :canceled], :underway, :considered]
     TYPES_ORDER = order_hash [:action, :project]
     has_computed_attribute :sort_rank, computed_from:
-      {self: [:computed_state, :type]} \
-    do |state, type|
-      [STATES_ORDER[state], TYPES_ORDER[type]]
+      {self: [:computed_state, :last_state_change_date]} \
+    do |state, last_state_change_date|
+      [STATES_ORDER[state], last_state_change_date.to_i]
     end
 
     include Attributes::Methods
