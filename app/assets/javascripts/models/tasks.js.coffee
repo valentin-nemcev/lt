@@ -67,9 +67,8 @@ class Lt.Models.Task extends Backbone.Model
 
   _createRelated: (field, type) ->
     related = new Lt.Collections.RelatedTasks
-    related.on 'add'   , => @_updateRelatedIds(field, type, related)
-    related.on 'remove', => @_updateRelatedIds(field, type, related)
-    related.on 'reset' , => @_updateRelatedIds(field, type, related)
+    related.on 'add remove reset change:id',
+      => @_updateRelatedIds(field, type, related)
 
   _addRelated: (field, type, tasks) ->
     collection = @_getRelated(field, type)
