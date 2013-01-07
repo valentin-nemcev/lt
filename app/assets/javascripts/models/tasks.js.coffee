@@ -1,17 +1,26 @@
 class Lt.Models.Task extends Backbone.Model
   @comparator: (task) -> [!task.isNew(), task.get('sort_rank')]
 
+  @setupComparator: (collection) ->
+    collection.comparator = @comparator
+    collection.on 'change:id change:sort_rank', -> @sort()
+    # collection.sort()
+
   initialize: (attributes = {}, options = {}) ->
     @on 'destroy', @onDestroy, @
 
-    @on 'add', @onAdd, @
-    @onAdd(this, @collection)
+    @on 'change', => @_isRecent = null
 
     @_initializeRelatedTasks(attributes)
 
   parse: (eventsJSON) -> @collection.events.addEvents(eventsJSON, this); {}
 
-  onAdd: (model, collection, options = {}) ->
+  isRecent: ->
+    return @_isRecent if @_isRecent?
+    ms = new Date() - new Date(@get('last_state_change_date'))
+    days = ms / 1000 / 60 / 60 / 24
+    done = @get('computed_state') in ['canceled', 'completed']
+    @_isRecent = not (done and days > 3)
 
   isValidNextState: (state) -> yes
 
@@ -95,13 +104,26 @@ class Lt.Collections.Tasks extends Backbone.Collection
     (task) -> task.getSupertasks(relationType).length == 0
 
   getRootTasksFor: (relationType) ->
-    @rootTasks[relationType] ?= new Backbone.FilteredCollection this,
+    @rootTasks[relationType] ?= @buildRootTasksFor(relationType)
+
+  buildRootTasksFor: (relationType) ->
+    tasks = new Backbone.FilteredCollection this,
       modelFilter: @relationFilterFor(relationType)
-      comparator: Lt.Models.Task.comparator
+
+    Lt.Models.Task.setupComparator(tasks)
+    _.extend(tasks, Lt.Collections.TaskCollection)
+    tasks
 
 class Lt.Collections.RelatedTasks extends Backbone.Collection
   model: Lt.Models.Task
-  comparator:  Lt.Models.Task.comparator
 
   initialize: ->
-    @on 'change:id change:sort_rank', => @sort()
+    Lt.Models.Task.setupComparator(this)
+    _.extend(this, Lt.Collections.TaskCollection)
+
+Lt.Collections.TaskCollection =
+  getRecent: ->
+    if @length > 7
+      @filter (task) -> task.isRecent()
+    else
+      @models

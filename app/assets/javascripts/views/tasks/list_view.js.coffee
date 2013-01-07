@@ -6,58 +6,94 @@ class Views.ListView extends Backbone.View
   className: 'tasks'
 
   initialize: ->
+    @collection.bind 'add', (model) =>
+      @detachEmptyItem()
+      @add(model, @getModels())
+
     @collection.bind 'reset'   , @reset   , @
     @collection.bind 'sort'    , @sort    , @
-    @collection.bind 'add'     , @add     , @
     @collection.bind 'remove'  , @remove  , @
+
+    @collection.bind 'add remove reset', @updateArchivedItem, @
 
     @allItemViews = @options.allItemViews
     @itemViews = {}
 
-  updateEmptyItem: ->
-    return unless @$emptyItem?
-    if @collection.length == 0
-      @$emptyItem.appendTo(@$el)
+  getModels: ->
+    if @archivedToggled
+      @collection.models
     else
-      @$emptyItem.detach()
+      @collection.getRecent()
+
+  detachEmptyItem: -> @$emptyItem.detach()
+
+  attachEmptyItem: -> @$emptyItem.appendTo(@$el) if @collection.length == 0
+
+  updateArchivedItem: ->
+    archived = @collection.length - @getModels().length
+    if archived > 0
+      @$archivedItem.prependTo(@$el).find('.count').text(archived)
+    else
+      @$archivedItem.detach()
+
+  toggleArchived: (toggled = not @archivedToggled) ->
+    @archivedToggled = toggled
+
+    @$archivedItem.find('[control=show-archived]').toggle(not toggled)
+    @$archivedItem.find('[control=hide-archived]').toggle(toggled)
+    @reset()
 
   reset: ->
+    @detachEmptyItem()
     @remove cid for cid of @itemViews
-    @add model, @collection, {}, -1 for model in @collection.models
-    @updateEmptyItem()
+    recent = @getModels()
+    @add model, recent, -1 for model in recent
+    @attachEmptyItem()
     return
 
   sort: ->
-    @add model, @collection, {}, index for model, index in @collection.models
+    recent = @getModels()
+    @add model, recent, index for model, index in recent
     return
 
-  add: (model, collection = null, options = {}, index) ->
+  add: (model, models, index) ->
     cid = model.cid
     @itemViews[cid] = @allItemViews[cid]
 
     $el = @itemViews[cid].$el.detach()
-    index ?= collection.indexOf(model)
-    if 0 <= index < collection.length - 1
-      $elAtIndex = @$el.children().eq index
+    index ?= _(models).indexOf(model)
+    if 0 <= index < models.length - 1
+      $elAtIndex = @$el.children().not('.archived').eq index
       $el.insertBefore $elAtIndex
     else
       $el.appendTo @$el
-
-    @updateEmptyItem()
 
     return
 
   remove: (model) ->
     cid = model.cid ? model
     $el = @itemViews[cid].$el
-    $el.detach() if $el.parent() is @el
+    $el.detach() if $el.parent()[0] is @el
     delete @itemViews[cid]
-    @updateEmptyItem()
+    @attachEmptyItem()
     return
 
   render: (opts = {})->
     if $emptyItem = opts.$emptyItem
       @$emptyItem = $('<li/>', class: 'empty').append($emptyItem.contents())
-    @reset(@collection)
+    else
+      @$emptyItem = $()
+
+    if $archivedItem = opts.$archivedItem
+      @$archivedItem = $('<li/>', class: 'archived').append($archivedItem.contents())
+      @$archivedItem.on('click', '[control=show-archived]',
+        (ev) => ev.preventDefault(); @toggleArchived on )
+      @$archivedItem.on('click', '[control=hide-archived]',
+        (ev) => ev.preventDefault(); @toggleArchived off )
+    else
+      @$archivedItem = $()
+
+    @updateArchivedItem()
+    @toggleArchived(off)
 
     return this

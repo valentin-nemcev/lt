@@ -17,3 +17,11 @@
   </div>
 </div>
 <span class="empty">Нет подзадач</span>
+<span class="archived">
+  <button class="link minor" control="show-archived">
+    Показать <span class="count"></span>
+  </button>
+  <button class="link minor" control="hide-archived">
+    Скрыть <span class="count"></span>
+  </button>
+</span>

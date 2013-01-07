@@ -105,8 +105,11 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @formView.$el.appendTo(@$task)
     @toggleForm @model.isNew()
 
-    $emptyItem = @$el.children('.empty').detach()
-    @subtasksView.render($emptyItem: $emptyItem).$el.appendTo @$el
+    @subtasksView.render(
+      $emptyItem: @$el.children('.empty').detach()
+      $archivedItem: @$el.children('.archived').detach()
+    ).$el.appendTo @$el
+
     @$emptyObjective = @$fields.find('[field=objective] .empty')
 
     @toggleSelect off
