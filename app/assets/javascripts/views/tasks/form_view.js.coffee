@@ -13,7 +13,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     'click [control=delete]' : (ev) -> @delete($(ev.currentTarget)) ; false
 
   initialize: ->
-    @model.bind 'change'     , @change     , @
     @projectControlView = new Views.FormProjectControlView model: @model
 
   cancel: ->
@@ -21,7 +20,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
       @model.destroy()
     else
       @trigger 'close'
-      @change()
 
     return
 
@@ -46,7 +44,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     $f("[input=state] [value=#{@model.get('state')}]").prop(checked: true)
     $f('[input=objective]').val(@model.get('objective'))
 
-    $f('[input=state] input').each (i, el)=>
+    $f('[input=state] input').each (i, el) =>
       $(el).closest('[item]').toggle @model.isValidNextState($(el).val())
 
     form = if @model.isNew() then 'new-task' else 'update-task'

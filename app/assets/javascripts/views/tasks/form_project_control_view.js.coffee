@@ -5,12 +5,8 @@ class Lt.Views.Tasks.FormProjectControlView extends Backbone.View
   initialize: ->
     @allProjects = @model.collection
 
-    @currentProjects = @model.getSupertasks('composition')
-
-    @currentProjects.on 'add'   , @changeCurrentProject, @
-    @currentProjects.on 'remove', @changeCurrentProject, @
-
   changeCurrentProject: ->
+    @currentProjects = @model.getSupertasks('composition')
     @currentProject = @currentProjects.at(0)
     @$projectsControl?.val(@currentProject?.cid)
 

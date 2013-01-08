@@ -12,7 +12,20 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     'click [control=new-subtask]'  : -> @newSubtask()       ; false
 
   initialize: ->
-    @model.bind 'change', @change, @
+    @model.on {
+      'change:id'                   : @changeId
+      'change:type'                 : @changeType
+      'change:computed_state'       : @changeComputedState
+      'change:subtasks_composition' : @changeSubtasks
+      'change:objective'            : @changeObjective
+    }, this
+
+    @changeAll = ->
+      @changeId()
+      @changeType()
+      @changeComputedState()
+      @changeSubtasks()
+      @changeObjective()
 
     @formView = new Views.FormView model: @model
     @formView.on 'close', => @toggleForm(off)
@@ -42,12 +55,16 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @formToggled = toggled
 
     @formView.$el.toggleClass('hidden', not toggled)
+    @formView.render() if toggled
+
     @$fields.toggleClass('hidden', toggled)
     @$controls.toggleClass('hidden', toggled)
     @$task.toggleClass('updated', toggled)
-    @formView.render() if toggled
+
     # Clear selection after double click
-    window?.getSelection().removeAllRanges() unless toggled
+    if window.getSelection?
+      window.getSelection().removeAllRanges() unless toggled
+
     @toggleSelect off
 
     return this
@@ -59,28 +76,34 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$controls.toggleClass('hidden', @formToggled or not toggled)
     return this
 
-  change: ->
+  changeId: ->
     @$el.attr 'record-id': @model.id
+    @toggleSelect(@model.isNew())
 
+  changeObjective: ->
     objective = @model.get('objective') || ''
-    $objective = @$fields.find('[field=objective]')
+    @$objectiveField ?= @$fields.find('[field=objective]')
     if objective.match(/\S/)
       @$emptyObjective.detach()
-      $objective.text(objective)
+      @$objectiveField.text(objective)
     else
-      $objective.text('')
+      @$objectiveField.text('')
       @$emptyObjective.appendTo($objective)
 
-    @$el.attr
-      'task-type':  @model.get('type')
-      'task-computed-state': @model.get('computed_state')
+  changeType: ->
+    @$el.attr 'task-type': @model.get('type')
 
-    @$task.find('[field=subtask-count]').text(@model.get('subtask_count'))
-    @hasSubtasks = !!@model.get('subtask_count')
+  changeComputedState: ->
+    @$el.attr 'task-computed-state': @model.get('computed_state')
+
+
+  changeSubtasks: (model, subtasks) ->
+    count = @model.get('subtasks_composition')?.length
+    @$subtaskCountField ?= @$task.find('[field=subtask-count]')
+    @$subtaskCountField.text(count)
+    @hasSubtasks = !!count
+    @subtasksView.$el.toggleClass('hidden', not @hasSubtasks)
     @updateSubtaskControls()
-
-    @subtasksView.$el.toggleClass('hidden', @model.get('type') isnt 'project')
-    @toggleSelect(@model.isNew())
 
   updateSubtaskControls: ->
     @$showSubtasks ?= @$task.find('[control=show-subtasks]')
@@ -90,9 +113,11 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   render: ->
     @$el.html @template()
-    @$task = @$el.children('.task')
-    @$fields = @$task.children('.fields')
+
+    @$task     = @$el.children('.task')
+    @$fields   = @$task.children('.fields')
     @$controls = @$task.children('.controls')
+
     @$fields.find('[field=objective]').on
       'click'      : => @toggleSubtasks()  ; false
       # 'dblclick'   : => @toggleForm(on)    ; false
@@ -101,21 +126,19 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       'mouseleave' : => @toggleSelect(off) ; false
 
 
-
     @formView.$el.appendTo(@$task)
     @toggleForm @model.isNew()
 
     @subtasksView.render(
-      $emptyItem: @$el.children('.empty').detach()
+      $emptyItem:    @$el.children('.empty').detach()
       $archivedItem: @$el.children('.archived').detach()
     ).$el.appendTo @$el
 
     @$emptyObjective = @$fields.find('[field=objective] .empty')
 
     @toggleSelect off
-    @change()
+    @changeAll()
 
     @toggleSubtasks(@subtasksAreShown())
-
 
     return this
