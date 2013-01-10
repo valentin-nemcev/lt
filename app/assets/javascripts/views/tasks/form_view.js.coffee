@@ -13,9 +13,13 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     'click [control=delete]' : (ev) -> @delete($(ev.currentTarget)) ; false
 
   initialize: ->
-    @projectControlView = new Views.FormProjectControlView model: @model
+    @projectControlView = new Views.FormProjectControlView 
+      model: @model
+      mainView: @options.mainView
 
   cancel: ->
+    @projectControlView.cancelProjects()
+
     if @model.isNew()
       @model.destroy()
     else
@@ -33,19 +37,22 @@ class Lt.Views.Tasks.FormView extends Backbone.View
       state:     $f('[input=state] :checked').val(),
       objective: $f('[input=objective]').val(),
 
-    @model.setCurrentProject($f('[input=project]').val())
+    @model.setCurrentProject($f('[input=projects]').val())
     @model.save(attrs)
     @trigger('close')
 
     return this
 
-  change: ->
+  updateFields: ->
     $f = _.bind($.fn.find, @$('form'))
     $f("[input=state] [value=#{@model.get('state')}]").prop(checked: true)
     $f('[input=objective]').val(@model.get('objective'))
 
     $f('[input=state] input').each (i, el) =>
       $(el).closest('[item]').toggle @model.isValidNextState($(el).val())
+
+    projectIds = @model.getSupertasks('composition').pluck('id')
+    $f('[input=projects]').val(projectIds.join(','))
 
     form = if @model.isNew() then 'new-task' else 'update-task'
     @$('form').attr form: form
@@ -54,7 +61,7 @@ class Lt.Views.Tasks.FormView extends Backbone.View
 
   render : ->
     $(@el).html @template()
+    @updateFields()
     @projectControlView.setElement(@$('[view=project-control]')).render()
-    @change()
 
     return this

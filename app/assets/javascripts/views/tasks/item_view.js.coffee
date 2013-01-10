@@ -27,7 +27,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       @changeSubtasks()
       @changeObjective()
 
-    @formView = new Views.FormView model: @model
+    @formView = new Views.FormView model: @model, mainView: @options.mainView
     @formView.on 'close', => @toggleForm(off)
 
     @subtasksView = new Views.ListView
@@ -73,6 +73,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @selectToggled = toggled
 
     @$task.toggleClass('selected', toggled)
+    @$task.toggleClass('selection-mode', toggled and @selectionModeToggled)
     @$controls.toggleClass('hidden', @formToggled or not toggled)
     return this
 
@@ -88,7 +89,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       @$objectiveField.text(objective)
     else
       @$objectiveField.text('')
-      @$emptyObjective.appendTo($objective)
+      @$emptyObjective.appendTo(@$objectiveField)
 
   changeType: ->
     @$el.attr 'task-type': @model.get('type')
@@ -111,6 +112,10 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$showSubtasks.toggleClass('hidden', !(@hasSubtasks and not @subtasksToggled))
     @$hideSubtasks.toggleClass('hidden', !(@hasSubtasks and @subtasksToggled))
 
+  toggleSelectionMode: (toggled = not @selectionModeToggled, callback) ->
+    @selectionModeToggled = toggled
+    @selectionModeCallback = callback
+
   render: ->
     @$el.html @template()
 
@@ -118,13 +123,16 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$fields   = @$task.children('.fields')
     @$controls = @$task.children('.controls')
 
-    @$fields.find('[field=objective]').on
-      'click'      : => @toggleSubtasks()  ; false
-      # 'dblclick'   : => @toggleForm(on)    ; false
-    @$task.on
-      'mouseenter' : => @toggleSelect(on)  ; false
-      'mouseleave' : => @toggleSelect(off) ; false
+    @$fields.find('[field=objective]').click =>
+      if @selectionModeToggled
+        @selectionModeCallback()
+      else
+        @toggleSubtasks()
+      return false
 
+    @$task.on
+      'mouseenter': => @toggleSelect(on)  ; false
+      'mouseleave': => @toggleSelect(off) ; false
 
     @formView.$el.appendTo(@$task)
     @toggleForm @model.isNew()
@@ -137,6 +145,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
     @$emptyObjective = @$fields.find('[field=objective] .empty')
 
     @toggleSelect off
+    @toggleSelectionMode off
     @changeAll()
 
     @toggleSubtasks(@subtasksAreShown())

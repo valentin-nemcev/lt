@@ -22,11 +22,10 @@
   <div class='field-group'>
     <input name="objective" input="objective" type="text" autocomplete="off">
   </div>
-  <div class='field-group minor'>
-    <label view="project-control">
-      Проект
-      <select name="project" type="text" input="project"/></select>
-    </label>
+  <div class='field-group minor' view="project-control">
+    <label>Проект</label>
+    <input type='hidden' input="projects">
+    <ul class='task-projects'></ul>
   </div>
   <div class='field-group minor'>
     <input type="submit" control="save" value="Сохранить">

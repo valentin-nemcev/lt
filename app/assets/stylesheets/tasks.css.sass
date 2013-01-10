@@ -27,33 +27,36 @@ ul.tasks
     &.updated
       border: 1px dashed #999
 
+    &.selection-mode
+      border: 1px dashed #d96
+
     .fields, .fields *
       display: inline
 
     .controls
       display: inline
 
-  .task [field=objective] .empty
+  .task .fields [field=objective] .empty
     font-style: italic
 
-  [task-type=project] > .task [field=objective]
+  [task-type=project] > .task .fields [field=objective]
     font-weight: bold
     color: #484848
 
   [task-computed-state=completed], [task-computed-state=canceled]
-    & > .task [field=objective]
+    & > .task .fields [field=objective]
       text-decoration: line-through
 
   [task-computed-state=completed]
-    & > .task [field=objective]
+    & > .task .fields [field=objective]
       color: #307128
 
   [task-computed-state=canceled]
-    & > .task [field=objective]
+    & > .task .fields [field=objective]
       color: #999
 
   [task-computed-state=considered]
-    & > .task [field=objective]
+    & > .task .fields [field=objective]
       color: #999
 
   [form]
@@ -65,3 +68,11 @@ ul.tasks
       width: 100%
     input[name=deadline]
       width: 10ex
+
+    .task-projects
+      margin-left: 0.5em
+      [field=objective], [control]
+        margin-right: 0.5em
+      .changed, .added
+        &, & *
+          color: #d96

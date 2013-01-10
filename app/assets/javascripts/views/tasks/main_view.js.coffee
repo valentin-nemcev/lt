@@ -30,6 +30,7 @@ class Views.MainView extends Backbone.View
     @allItemViews[model.cid] ?= new Views.ItemView(
       model: model
       allItemViews: @allItemViews
+      mainView: this
       tagName: 'li'
       attributes:
         record: 'task'
@@ -55,5 +56,21 @@ class Views.MainView extends Backbone.View
 
     @reset()
     @listView.render($emptyItem: @$('.empty').detach()).$el.appendTo @$el
+
+    return this
+
+
+  selectTask: (selected) ->
+    for cid, view of @allItemViews
+      do (cid) =>
+        view.toggleSelectionMode on, =>
+          @cancelSelectTask()
+          selected(@collection.get(cid))
+
+    return this
+
+  cancelSelectTask: ->
+    for cid, view of @allItemViews
+      view.toggleSelectionMode off
 
     return this
