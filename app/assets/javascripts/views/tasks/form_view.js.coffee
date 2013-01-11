@@ -12,13 +12,23 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     'click [control=cancel]' : -> @cancel() ; false
     'click [control=delete]' : (ev) -> @delete($(ev.currentTarget)) ; false
 
+  relatedControls: [
+    ['supertasks', 'composition', yes],
+    ['supertasks', 'dependency'],
+    ['subtasks',   'dependency'],
+  ]
+
   initialize: ->
-    @projectControlView = new Views.FormProjectControlView 
-      model: @model
-      mainView: @options.mainView
+    @relatedControlViews = for [rel, type, singular] in @relatedControls
+      view = new Views.FormRelatedTasksView
+        model: @model
+        mainView: @options.mainView
+        singular: singular
+      [rel, type, view]
 
   cancel: ->
-    @projectControlView.cancelProjects()
+    for [rel, type, view] in @relatedControlViews
+      view.cancelTaskSelection()
 
     if @model.isNew()
       @model.destroy()
@@ -37,7 +47,9 @@ class Lt.Views.Tasks.FormView extends Backbone.View
       state:     $f('[input=state] :checked').val(),
       objective: $f('[input=objective]').val(),
 
-    @model.setCurrentProject($f('[input=projects]').val())
+    for [rel, type, view] in @relatedControlViews
+      @model.setRelated(rel, type, view.currentTasks)
+
     @model.save(attrs)
     @trigger('close')
 
@@ -51,9 +63,6 @@ class Lt.Views.Tasks.FormView extends Backbone.View
     $f('[input=state] input').each (i, el) =>
       $(el).closest('[item]').toggle @model.isValidNextState($(el).val())
 
-    projectIds = @model.getSupertasks('composition').pluck('id')
-    $f('[input=projects]').val(projectIds.join(','))
-
     form = if @model.isNew() then 'new-task' else 'update-task'
     @$('form').attr form: form
 
@@ -62,6 +71,8 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   render : ->
     $(@el).html @template()
     @updateFields()
-    @projectControlView.setElement(@$('[view=project-control]')).render()
+    for [rel, type, view] in @relatedControlViews
+      view.currentTasks = @model.getRelated(rel, type).models
+      view.setElement(@$("[view=related-#{rel}-#{type}]")).render()
 
     return this

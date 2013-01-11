@@ -61,31 +61,36 @@ class Lt.Models.Task extends Backbone.Model
     this.addSubtask type, subtask
     subtask
 
-  addSupertask: (type, tasks...) -> @_addRelated('supertasks', type, tasks)
-  addSubtask:   (type, tasks...) -> @_addRelated('subtasks'  , type, tasks)
+  addSupertask: (type, tasks...) -> @addRelated('supertasks', type, tasks)
+  addSubtask:   (type, tasks...) -> @addRelated('subtasks'  , type, tasks)
 
-  removeSupertask: (type, tasks...) -> @_removeRelated('supertasks', type, tasks)
-  removeSubtask:   (type, tasks...) -> @_removeRelated('subtasks'  , type, tasks)
+  removeSupertask: (type, tasks...) -> @removeRelated('supertasks', type, tasks)
+  removeSubtask:   (type, tasks...) -> @removeRelated('subtasks'  , type, tasks)
 
-  getSupertasks: (type) -> @_getRelated('supertasks', type)
-  getSubtasks:   (type) -> @_getRelated('subtasks'  , type)
+  getSupertasks: (type) -> @getRelated('supertasks', type)
+  getSubtasks:   (type) -> @getRelated('subtasks'  , type)
 
-  _getRelated: (field, type) ->
+  getRelated: (field, type) ->
     collections = @['_' + field]
-    collections[type] ?= @_createRelated(field, type)
+    collections[type] ?= @_createRelatedCollection(field, type)
 
-  _createRelated: (field, type) ->
+  _createRelatedCollection: (field, type) ->
     related = new Lt.Collections.RelatedTasks
     related.on 'add remove reset change:id',
       => @_updateRelatedIds(field, type, related)
 
-  _addRelated: (field, type, tasks) ->
-    collection = @_getRelated(field, type)
+  setRelated: (field, type, tasks) ->
+    collection = @getRelated(field, type)
+    collection.reset tasks
+    this
+
+  addRelated: (field, type, tasks) ->
+    collection = @getRelated(field, type)
     collection.add tasks
     this
 
-  _removeRelated: (field, type, tasks) ->
-    collection = @_getRelated(field, type)
+  removeRelated: (field, type, tasks) ->
+    collection = @getRelated(field, type)
     collection.remove tasks
     this
 

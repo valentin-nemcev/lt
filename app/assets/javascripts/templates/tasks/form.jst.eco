@@ -22,10 +22,17 @@
   <div class='field-group'>
     <input name="objective" input="objective" type="text" autocomplete="off">
   </div>
-  <div class='field-group minor' view="project-control">
+  <div class='field-group minor' view="related-supertasks-composition">
     <label>Проект</label>
-    <input type='hidden' input="projects">
-    <ul class='task-projects'></ul>
+    <ul class='related-tasks'></ul>
+  </div>
+  <div class='field-group minor' view="related-supertasks-dependency">
+    <label>Блокирующие</label>
+    <ul class='related-tasks'></ul>
+  </div>
+  <div class='field-group minor' view="related-subtasks-dependency">
+    <label>Зависящие</label>
+    <ul class='related-tasks'></ul>
   </div>
   <div class='field-group minor'>
     <input type="submit" control="save" value="Сохранить">
