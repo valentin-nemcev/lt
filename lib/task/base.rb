@@ -9,6 +9,7 @@ module Task
 
     include RelationMethods
     has_relation :composition, supers: :projects, subs: :subtasks
+    has_relation :dependency,  supers: :blocking, subs: :dependent
 
 
     include Attributes::ComputedMethods
@@ -24,6 +25,12 @@ module Task
         :underway
       end
     end
+
+    # has_computed_attribute :blocked, computed_from:
+    #   {blocking: :state} \
+    # do |blocking|
+    #   blocking.any? { |s| s.in? [:underway, :considered] }
+    # end
 
     has_computed_attribute :subtask_count, computed_from:
       {subtasks: :state} \
@@ -54,6 +61,7 @@ module Task
     has_computed_attribute :sort_rank, computed_from:
       {self: [:computed_state, :last_state_change_date]} \
     do |state, last_state_change_date|
+      # blocked = nil if state.in? [:completed, :canceled]
       [STATES_ORDER[state], last_state_change_date.to_i]
     end
 

@@ -16,6 +16,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       'change:id'                   : @changeId
       'change:type'                 : @changeType
       'change:computed_state'       : @changeComputedState
+      'change:blocked'              : @changeBlocked
       'change:subtasks_composition' : @changeSubtasks
       'change:objective'            : @changeObjective
     }, this
@@ -24,6 +25,7 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
       @changeId()
       @changeType()
       @changeComputedState()
+      @changeBlocked()
       @changeSubtasks()
       @changeObjective()
 
@@ -96,6 +98,12 @@ class Lt.Views.Tasks.ItemView extends Backbone.View
 
   changeComputedState: ->
     @$el.attr 'task-computed-state': @model.get('computed_state')
+
+  changeBlocked: ->
+    if @model.get('blocked')
+      @$el.attr blocked: 'blocked'
+    else
+      @$el.removeAttr 'blocked'
 
 
   changeSubtasks: (model, subtasks) ->
