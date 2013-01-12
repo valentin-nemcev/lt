@@ -1,6 +1,7 @@
 module Task
   class Relations < ::Graph::NodeEdges
     def edge_added(new_relation)
+      check_for_loop(new_relation)
       check_for_duplication(new_relation)
     rescue Task::Error => e
       new_relation.destroy
@@ -19,11 +20,36 @@ module Task
       end
     end
 
+    def check_for_loop(new_relation)
+      new_relation.supertask
+      connected = effective_in(new_relation.effective_interval)
+        .filter{ |r| r.type == new_relation.type }
+        .with_indirect
+        .outgoing
+        .nodes
+        .to_set
+
+      if connected.include? new_relation.supertask
+        raise RelationLoopError.new new_relation, connected
+      end
+    end
+
     alias_method :task, :node
     alias_method :tasks, :nodes
 
     def effective_in(given_period)
       filter{ |r| r.effective_in? given_period }
+    end
+
+    class RelationLoopError < Task::Error
+      def initialize relation, path
+        @relation, @path = relation, path
+      end
+      attr_reader :relation, :path
+
+      def message
+        (["Relation loop #{relation.inspect}:"] + path.map(&:inspect)).join("\n")
+      end
     end
 
     class DuplicateRelationError < Task::Error

@@ -51,7 +51,7 @@ describe Task::Relations do
     def create_second_relation attrs = {}
       Task::Relation.new({
         type: some_relation_type,
-        supertask: task2, subtask: task1,
+        supertask: task1, subtask: task2,
         addition_date: date2}.merge(attrs))
     end
     alias_method :create_first_relation_duplicate, :create_second_relation
@@ -80,6 +80,59 @@ describe Task::Relations do
     it "doesn't raise error for relations with different tasks" do
       create_first_relation supertask: task1, subtask: task2
       create_second_relation supertask: task1, subtask: task3
+    end
+  end
+
+  describe 'check for loops' do
+    it 'raises error for relation that creates loop with single task' do
+      expect do
+        Task::Relation.new(
+          type: some_relation_type,
+          supertask: task1, subtask: task1,
+          addition_date: date1, removal_date: date3)
+      end.to(raise_error do |error|
+        error.should be_a Task::Error
+        error.should be_an_instance_of Task::Relations::RelationLoopError
+      end)
+    end
+
+    it 'raises error for relation that creates loop' do
+      Task::Relation.new(
+        type: some_relation_type,
+        supertask: task1, subtask: task2,
+        addition_date: date1, removal_date: date3)
+
+      Task::Relation.new(
+        type: some_relation_type,
+        supertask: task2, subtask: task3,
+        addition_date: date1, removal_date: date3)
+
+      expect do
+        Task::Relation.new(
+          type: some_relation_type,
+          supertask: task3, subtask: task1,
+          addition_date: date1, removal_date: date3)
+      end.to(raise_error do |error|
+        error.should be_a Task::Error
+        error.should be_an_instance_of Task::Relations::RelationLoopError
+      end)
+    end
+
+    it "doesn't raise error for relation that do not create loop" do
+      Task::Relation.new(
+        type: some_relation_type,
+        supertask: task1, subtask: task2,
+        addition_date: date1, removal_date: date2)
+
+      Task::Relation.new(
+        type: some_relation_type,
+        supertask: task2, subtask: task3,
+        addition_date: date1, removal_date: date3)
+
+      Task::Relation.new(
+        type: some_relation_type,
+        supertask: task3, subtask: task1,
+        addition_date: date2, removal_date: date3)
     end
   end
 end
