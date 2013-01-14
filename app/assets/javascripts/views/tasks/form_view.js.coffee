@@ -71,6 +71,14 @@ class Lt.Views.Tasks.FormView extends Backbone.View
   render : ->
     $(@el).html @template()
     @updateFields()
+
+    @$('[input=state]').dblclick => @save()
+    # Save on enter
+    @$('[input=objective]').focus().keypress (ev) =>
+      if ev.which is 13
+        @save()
+        return false
+
     for [rel, type, view] in @relatedControlViews
       view.currentTasks = @model.getRelated(rel, type).models
       view.setElement(@$("[view=related-#{rel}-#{type}]")).render()
