@@ -83,11 +83,11 @@ module Task
       def updated_computed_attribute_revisions(attribute)
         if @computed_attribute_revisions_update_dates.fetch(attribute) <
                                   @computed_attribute_revisions_update_date
+          @computed_attribute_revisions_update_dates[attribute] =
+            @computed_attribute_revisions_update_date
           update_computed_attributes \
             :for => attribute,
             :after => @computed_attribute_revisions_update_date
-          @computed_attribute_revisions_update_dates[attribute] =
-            @computed_attribute_revisions_update_date
         end
         @computed_attribute_revisions[attribute]
       end
@@ -103,7 +103,7 @@ module Task
         compute_attribute_revisions(
           :for => attr,
           :in => TimeInterval.beginning_on(update_date)
-        ).each do |rev|
+        ) do |rev|
           @computed_attribute_revisions[attr].new_revision(rev)
         end
       end
@@ -177,7 +177,7 @@ module Task
         end
         events = events.sort.chunk(&:date)
 
-        events.map do |date, evs|
+        events.each do |date, evs|
           task_evs = []
           next if date == Time::FOREVER
           evs.each do |ev|
@@ -212,12 +212,12 @@ module Task
 
           computed_value = attribute_proc.(*proc_arguments, date)
 
-          {
+          yield({
             attribute_name: attribute,
             updated_value: computed_value,
             update_date: date
-          }
-        end.compact
+          })
+        end
       end
       # ↑ Worst code of the year
     end
