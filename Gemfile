@@ -40,5 +40,8 @@ group :development, :test do
   gem 'database_cleaner', '~> 0.8.0'
 
   gem 'awesome_print', '~> 1.1'
+
+  gem 'ruby-prof', '~> 0.11.3'
+  gem 'test-unit' # for rails benchmarker
 end
 

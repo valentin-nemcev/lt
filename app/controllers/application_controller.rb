@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
 
   def current_user
     users = User.scoped
-    user_id = session[:user_id]
+    user_id = params[:user_id] || session[:user_id]
     users = users.where :id => user_id unless user_id.nil?
     users.first!
   end
