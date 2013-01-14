@@ -26,11 +26,11 @@ module Task
       end
     end
 
-    # has_computed_attribute :blocked, computed_from:
-    #   {blocking: :state} \
-    # do |blocking|
-    #   blocking.any? { |s| s.in? [:underway, :considered] }
-    # end
+    has_computed_attribute :blocked, computed_from:
+      {blocking: :state} \
+    do |blocking|
+      blocking.any? { |s| s.in? [:underway, :considered] }
+    end
 
     has_computed_attribute :subtask_count, computed_from:
       {subtasks: :state} \
@@ -59,10 +59,10 @@ module Task
     STATES_ORDER = order_hash [[:completed, :canceled], :underway, :considered]
     TYPES_ORDER = order_hash [:action, :project]
     has_computed_attribute :sort_rank, computed_from:
-      {self: [:computed_state, :last_state_change_date]} \
-    do |state, last_state_change_date|
-      # blocked = nil if state.in? [:completed, :canceled]
-      [STATES_ORDER[state], last_state_change_date.to_i]
+      {self: [:computed_state, :blocked, :last_state_change_date]} \
+    do |state, blocked, last_state_change_date|
+      blocked = nil if state.in? [:completed, :canceled]
+      [STATES_ORDER[state], blocked, last_state_change_date.to_i]
     end
 
     include Attributes::Methods
