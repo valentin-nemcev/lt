@@ -9,6 +9,7 @@ gem 'mysql2', '~> 0.3.11'
 gem 'unicorn' , '~> 4.3.0'
 
 gem 'jbuilder', '~> 0.4.0'
+gem 'oj',       '~> 2.0.0' # Faster json
 
 gem 'jquery-rails',    '~> 2.1.0'
 gem 'rails-backbone',  '~> 0.9.0'

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121226120827) do
+ActiveRecord::Schema.define(:version => 20130114161847) do
 
   create_table "task_attribute_revisions", :force => true do |t|
     t.integer  "task_id"
@@ -21,6 +21,8 @@ ActiveRecord::Schema.define(:version => 20121226120827) do
     t.string   "updated_value"
     t.boolean  "computed",        :null => false
   end
+
+  add_index "task_attribute_revisions", ["task_id"], :name => "index_task_attribute_revisions_on_task_id"
 
   create_table "task_relations", :force => true do |t|
     t.integer  "subtask_id"
