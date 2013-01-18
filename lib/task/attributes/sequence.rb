@@ -31,14 +31,26 @@ module Task
 
     def set_revisions(revisions)
       clear_revisions
-      revisions.sort_by(&:sequence_number).each{ |r| add_revision r }
+      revisions = revisions.sort_by(&:sequence_number)
+      revisions.last.try do |r|
+        r.next_update_date == Time::FOREVER or
+          raise NextDateSequenceError.new r.next_update_date, Time::FOREVER
+      end
+      revisions.each{ |r| add_revision r }
       return self
     end
 
     def new_revision(revision_attrs)
-      attrs = revision_attrs.merge sequence_number: last_sequence_number + 1
+      attrs = revision_attrs.merge(
+        next_update_date: Time::FOREVER,
+        sequence_number: last_sequence_number + 1
+      )
       new_revision = revision_class.new(attrs)
-      add_revision new_revision if empty? || new_revision.different_from?(last)
+
+      if empty? || new_revision.different_from?(last)
+        last.next_update_date = new_revision.update_date unless empty?
+        add_revision new_revision
+      end
     end
 
     protected
@@ -51,12 +63,19 @@ module Task
       @revisions.last.try(:update_date) || creation_date
     end
 
+    def last_next_update_date
+      @revisions.last.try(:next_update_date) || creation_date
+    end
+
     def add_revision(revision)
       last_sequence_number < revision.sequence_number or
         raise SequenceNumberError.new last_sequence_number,
                                         revision.sequence_number
       last_update_date <= revision.update_date or
         raise DateSequenceError.new last_update_date, revision.update_date
+
+      empty? || last_next_update_date == revision.update_date or
+        raise NextDateSequenceError.new last_next_update_date, revision.update_date
 
       revision.owner = owner
       @revisions << revision
@@ -78,6 +97,18 @@ module Task
       def message
         'Revision updates should be in chronological order;'\
           " last: #{@last}, current: #{@current}"
+      end
+    end
+
+    class NextDateSequenceError < Error
+      def initialize(last, current)
+        @last, @current = last, current
+      end
+
+      def message
+        'Previous revision next update date and'\
+        ' current revision update date should match'\
+          " previous next update: #{@last}, current: #{@current}"
       end
     end
 

@@ -20,10 +20,16 @@ describe Task::Attributes::Sequence do
     end
   end
 
-  let(:first_revision)  { stub_revision(
-    'first revision',  update_date: creation_date, sequence_number: 1) }
-  let(:second_revision) { stub_revision(
-    'second revision', update_date: update_date,   sequence_number: 2) }
+  let(:first_revision)  { stub_revision('first revision',
+    update_date: creation_date,
+    next_update_date: update_date,
+    sequence_number: 1
+  ) }
+  let(:second_revision) { stub_revision('second revision',
+    update_date: update_date,
+    next_update_date: Time::FOREVER,
+    sequence_number: 2
+  ) }
 
   let(:initial_arguments) do
     { creation_date: creation_date, revision_class: RevisionClass, owner: owner }
@@ -64,28 +70,76 @@ describe Task::Attributes::Sequence do
         sequence.to_a.should eq([first_revision, second_revision])
       end
 
-      let(:revisions_with_incorrect_dates) { [
-        stub_revision(
-          'first revision',  update_date: update_date,   sequence_number: 1),
-        stub_revision(
-          'second revision', update_date: creation_date, sequence_number: 2),
+      let(:revisions_with_incorrect_update_dates) { [
+        stub_revision('first revision',
+          update_date: creation_date,
+          next_update_date: creation_date - 5.seconds,
+          sequence_number: 1
+        ),
+        stub_revision('second revision',
+          update_date: creation_date - 5.seconds,
+          next_update_date: Time::FOREVER,
+          sequence_number: 2
+        ),
       ] }
-      it 'should not allow revision list with incorrect dates' do
+      it 'should not allow revision list with incorrect update dates' do
         expect do
-          sequence.set_revisions revisions_with_incorrect_dates
+          sequence.set_revisions revisions_with_incorrect_update_dates
         end.to raise_error Sequence::DateSequenceError
       end
 
       let(:revisions_with_incorrect_sns) { [
-        stub_revision(
-          'first revision',  update_date: creation_date, sequence_number: 1),
-        stub_revision(
-          'second revision', update_date: update_date,   sequence_number: 1),
+        stub_revision('first revision',
+          update_date: creation_date,
+          next_update_date: update_date,
+          sequence_number: 1
+        ),
+        stub_revision('second revision',
+          update_date: update_date,
+          next_update_date: Time::FOREVER,
+          sequence_number: 1
+        ),
       ] }
       it 'should not allow revision list with incorrect sequence numbers' do
         expect do
           sequence.set_revisions revisions_with_incorrect_sns
         end.to raise_error Sequence::SequenceNumberError
+      end
+
+      let(:revisions_with_incorrect_next_dates) { [
+        stub_revision('first revision',
+          update_date: creation_date,
+          next_update_date: creation_date + 5.seconds,
+          sequence_number: 1
+        ),
+        stub_revision('second revision',
+          update_date: update_date,
+          next_update_date: Time::FOREVER,
+          sequence_number: 2
+        ),
+      ] }
+      it 'should not allow revision list with incorrect next dates' do
+        expect do
+          sequence.set_revisions revisions_with_incorrect_next_dates
+        end.to raise_error Sequence::NextDateSequenceError
+      end
+
+      let(:revisions_with_incorrect_last_next_date) { [
+        stub_revision('first revision',
+          update_date: creation_date,
+          next_update_date: update_date,
+          sequence_number: 1
+        ),
+        stub_revision('second revision',
+          update_date: update_date,
+          next_update_date: update_date + 5.seconds,
+          sequence_number: 2
+        ),
+      ] }
+      it 'should not allow revision list with incorrect last next date' do
+        expect do
+          sequence.set_revisions revisions_with_incorrect_last_next_date
+        end.to raise_error Sequence::NextDateSequenceError
       end
     end
 
@@ -95,6 +149,7 @@ describe Task::Attributes::Sequence do
       end
 
       it 'should replace existing revisions' do
+        first_revision.stub(:next_update_date => Time::FOREVER)
         sequence.set_revisions [first_revision]
         sequence.to_a.should eq([first_revision])
       end
@@ -108,14 +163,20 @@ describe Task::Attributes::Sequence do
   end
 
   describe '#new_revision' do
-    let(:revision_attrs) { {updated_value: :value, update_date: creation_date} }
+    let(:revision_attrs) { {
+      updated_value: :value,
+      update_date: creation_date,
+    } }
+    let(:actual_revision_attrs) { revision_attrs.merge(
+      next_update_date: Time::FOREVER,
+      sequence_number: new_sn
+    )}
     let(:new_sn) { 1 }
-    let(:new_revision) { stub_revision('new revision', revision_attrs) }
+    let(:new_revision) { stub_revision('new revision', actual_revision_attrs) }
 
     before(:each) do
-      revision_attrs.update sequence_number: new_sn
       RevisionClass.should_receive(:new)
-        .with(revision_attrs)
+        .with(actual_revision_attrs)
         .and_return(new_revision)
     end
 
@@ -142,35 +203,50 @@ describe Task::Attributes::Sequence do
         new_revision.stub(:different_from?).with(second_revision)
           .and_return(true)
         sequence.set_revisions [first_revision, second_revision]
+        new_revision.stub update_date: new_date
+        second_revision.stub next_update_date: new_date
       end
       let(:new_sn) { 3 }
+      let(:new_date) { update_date + 1.hour }
 
-      it 'should create new revision and add it to sequence' do
-        new_revision.stub update_date: 1.second.since(update_date)
-        sequence.new_revision revision_attrs
-        sequence.to_a.should eq([first_revision, second_revision, new_revision])
-      end
+      let(:revisions_with_new) {
+        [first_revision, second_revision, new_revision] }
 
-      it 'should not allow adding revisions with incorrect date order' do
-        new_revision.stub update_date: 1.second.until(update_date)
-        expect do
+      context 'with correct new date' do
+        it 'should create new revision and add it to sequence' do
+          second_revision.should_receive(:"next_update_date=").with(new_date)
           sequence.new_revision revision_attrs
-        end.to raise_error Sequence::DateSequenceError
+          sequence.to_a.should eq(revisions_with_new)
+        end
+
+        it 'should not create revision that is not different from previous' do
+          second_revision.should_not_receive(:"next_update_date=")
+          new_revision.stub(:different_from?).with(second_revision)
+            .and_return(false)
+          sequence.new_revision(revision_attrs).should be_nil
+          sequence.to_a.should_not include(new_revision)
+        end
       end
 
-      it 'should preserve order of revisions with same date' do
-        new_revision.stub update_date: update_date
-        sequence.new_revision revision_attrs
-        sequence.to_a.should eq([first_revision, second_revision, new_revision])
+      context 'with incorrect date' do
+        let(:new_date) { update_date - 1.second }
+        it 'should not allow adding revisions' do
+          second_revision.should_receive(:"next_update_date=").with(new_date)
+          expect do
+            sequence.new_revision revision_attrs
+          end.to raise_error Sequence::DateSequenceError
+        end
       end
 
-      it 'should not create revision that is not different from previous' do
-        new_revision.stub update_date: update_date
-        new_revision.stub(:different_from?).with(second_revision)
-          .and_return(false)
-        sequence.new_revision(revision_attrs).should be_nil
-        sequence.to_a.should_not include(new_revision)
+      context 'with same date' do
+        let(:new_date) { update_date }
+        it 'should preserve order of revisions' do
+          second_revision.should_receive(:"next_update_date=").with(new_date)
+          sequence.new_revision revision_attrs
+          sequence.to_a.should eq(revisions_with_new)
+        end
       end
+
     end
 
     it 'should set revisions owner' do

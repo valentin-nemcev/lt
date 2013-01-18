@@ -25,6 +25,10 @@ class Time
     def inspect
       "#<#{self.class.name}>"
     end
+
+    def to_s
+      inspect
+    end
   end
 
   class Forever < Time::Infinity

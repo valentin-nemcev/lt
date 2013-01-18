@@ -3,7 +3,7 @@ module Task
     self.table_name = 'task_attribute_revisions'
     self.record_timestamps  = false
     attr_accessible :attribute_name, :updated_value,
-      :update_date, :sequence_number, :computed
+      :update_date, :next_update_date, :sequence_number, :computed
 
     serialize :updated_value
 
@@ -19,33 +19,42 @@ module Task
 
     def self.save_revision(task_record, revision)
       scope = task_record.attribute_revisions
-      return if revision.persisted?
-      scope.build.tap do |record|
-        record.map_from_revision(revision)
-        record.save! if record.changed?
-        revision.id = record.id
+      record = if revision.persisted?
+        scope.detect { |rec| rec.id == revision.id }
+      else
+        scope.build
       end
+      record.map_from_revision(revision)
+      record.save! if record.changed?
+      revision.id = record.id
     end
 
     def self.load_revisions(task_record)
       task_record.attribute_revisions.map do |rec|
-        ::Task::Base.new_attribute_revision(
-          rec.computed?,
-          rec.attribute_name.to_sym,
+        attrs = {
           id:              rec.id,
           updated_value:   rec.updated_value,
           update_date:     rec.update_date,
           sequence_number: rec.sequence_number,
+        }
+        if rec.next_update_date?
+          attrs[:next_update_date] = rec.next_update_date
+        end
+        ::Task::Base.new_attribute_revision(
+          rec.computed?,
+          rec.attribute_name.to_sym,
+          attrs
         )
       end
     end
 
-    def map_from_revision(revision)
-      self.sequence_number = revision.sequence_number
-      self.update_date     = revision.update_date
-      self.attribute_name  = revision.attribute_name.to_s
-      self.updated_value   = revision.updated_value
-      self.computed        = revision.computed?
+    def map_from_revision(rev)
+      self.sequence_number  = rev.sequence_number
+      self.update_date      = rev.update_date
+      self.next_update_date = rev.has_next? ? rev.next_update_date : nil
+      self.attribute_name   = rev.attribute_name.to_s
+      self.updated_value    = rev.updated_value
+      self.computed         = rev.computed?
       self
     end
   end

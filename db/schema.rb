@@ -11,15 +11,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130114161847) do
+ActiveRecord::Schema.define(:version => 20130118091800) do
 
   create_table "task_attribute_revisions", :force => true do |t|
     t.integer  "task_id"
-    t.integer  "sequence_number", :null => false
+    t.integer  "sequence_number",  :null => false
     t.datetime "update_date"
-    t.string   "attribute_name",  :null => false
+    t.string   "attribute_name",   :null => false
     t.string   "updated_value"
-    t.boolean  "computed",        :null => false
+    t.boolean  "computed",         :null => false
+    t.datetime "next_update_date"
   end
 
   add_index "task_attribute_revisions", ["task_id"], :name => "index_task_attribute_revisions_on_task_id"
