@@ -43,7 +43,7 @@ module Task
             update_attributes({attr => val}, on: creation_date)
           end
 
-          raise MissingAttributeError, attr if revision_sequence.empty?
+          # raise MissingAttributeError, attr if revision_sequence.empty?
         end
       end
 

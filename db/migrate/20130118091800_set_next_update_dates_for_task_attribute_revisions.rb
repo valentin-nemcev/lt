@@ -16,6 +16,10 @@ class SetNextUpdateDatesForTaskAttributeRevisions < ActiveRecord::Migration
         prev_r.next_update_date = next_r.update_date
         prev_r.save!
       end
+      revs.last.try do |last_r|
+        last_r.next_update_date = nil
+        last_r.save!
+      end
     end
   end
 

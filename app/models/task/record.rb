@@ -25,10 +25,18 @@ module Task
     scope :all_graph_scope
     scope :graph_scope
 
-    def self.relations
-      ids = all.map(&:id)
+    def self.relations(ids = nil)
+      ids ||= all.map(&:id)
       RelationRecord
         .where('supertask_id IN (:ids) AND subtask_id IN (:ids)', ids: ids)
+    end
+
+    def self.effective_on(effective_date)
+      includes(:attribute_revisions).where(
+        'task_attribute_revisions.update_date <= :effective_date AND' \
+        ' (:effective_date < task_attribute_revisions.next_update_date' \
+        ' OR task_attribute_revisions.next_update_date IS NULL)',
+        :effective_date => effective_date)
     end
 
     def self.destroy_computed_attribute_revisions

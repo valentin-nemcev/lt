@@ -8,6 +8,12 @@ module Task
     belongs_to :supertask, class_name: ::Task::Record
     attr_accessible :type, :addition_date, :removal_date, :subtask, :supertask
 
+    def self.effective_on(effective_date)
+      where('addition_date <= :effective_date AND' \
+              ' (:effective_date < removal_date OR removal_date IS NULL)',
+              :effective_date => effective_date)
+    end
+
 
     def self.task_relation_records_cache
       @task_rrelation_ecords_cache ||= {}

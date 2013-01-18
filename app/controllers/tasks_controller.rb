@@ -76,7 +76,8 @@ class TasksController < ApplicationController
   end
 
   def storage
-    @storage ||= Task::Storage.new user: current_user
+    @storage ||= Task::Storage.new :user => current_user,
+      :effective_on => effective_date
   end
 
   def graph
