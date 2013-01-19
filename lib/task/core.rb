@@ -3,14 +3,25 @@ module Task
     attr_reader :effective_date
 
     def initialize(attrs={})
-      now = attrs.fetch(:clock, Time).current
-      @creation_date = attrs[:on] || attrs[:creation_date] || now
+      @creation_date = attrs[:on] || attrs[:creation_date] || Time.current
+      @completion_date = attrs[:completion_date] || Time::FOREVER
     end
 
-    attr_reader :creation_date
+    attr_reader :creation_date, :completion_date
+
+    def completed?
+      completion_date < Time::FOREVER
+    end
+
+    def completion_date=(new_date)
+      !completed? or raise Error, "Couldn't redefine task completion date"
+      new_date >= creation_date or raise Error,
+        "Task couldn't be completed before it was created"
+      @completion_date = new_date
+    end
 
     def effective_interval
-      TimeInterval.beginning_on creation_date
+      TimeInterval.new creation_date, completion_date
     end
 
     def effective_in?(given_time_interval)

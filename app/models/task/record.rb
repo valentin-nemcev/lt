@@ -71,6 +71,7 @@ module Task
 
     def map_from_task(task)
       self.creation_date = task.creation_date
+      self.completion_date = task.completed? ? task.completion_date : nil
       AttributeRevisionRecord.save_revisions self,
                                 task.all_attribute_revisions
       self
@@ -80,6 +81,7 @@ module Task
       ::Task::Base.new(
         id: self.id,
         creation_date: self.creation_date,
+        completion_date: self.completion_date,
         all_attribute_revisions:
           AttributeRevisionRecord.load_revisions(self),
       )
