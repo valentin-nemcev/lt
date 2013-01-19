@@ -10,7 +10,7 @@
         В работе
       </label>
       <label item>
-        <input name="state" type="radio" value="completed">
+        <input name="state" type="radio" value="done">
         Выполнена
       </label>
       <label item>

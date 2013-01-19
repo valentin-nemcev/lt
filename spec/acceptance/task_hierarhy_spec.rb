@@ -12,8 +12,8 @@ describe 'Task hierarhy', :acceptance do
   let!(:action1)      { project.new_sub_action }
   let!(:action2)      { project.new_sub_action }
 
-  describe 'Half-completed project' do
-    before(:each) { action1.update_state 'completed' }
+  describe 'Half-done project' do
+    before(:each) { action1.update_state 'done' }
 
     %w{underway considered}.each do |state|
       example "with second action #{state}" do
@@ -26,14 +26,14 @@ describe 'Task hierarhy', :acceptance do
   end
 
   describe 'Completed project' do
-    before(:each) { action1.update_state 'completed' }
+    before(:each) { action1.update_state 'done' }
 
-    %w{completed canceled}.each do |state|
+    %w{done canceled}.each do |state|
       example "with second action #{state}" do
         action2.update_state 'underway'
 
-        project.should have_state('completed')
-        super_project.should have_state('completed')
+        project.should have_state('done')
+        super_project.should have_state('done')
       end
     end
   end

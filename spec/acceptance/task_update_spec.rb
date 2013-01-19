@@ -33,7 +33,7 @@ feature 'Task update', :acceptance do
     task.find("[form=update-task]").tap do |form|
       form.find('[input=state]').tap do |state|
         state.option_set.should eq('underway')
-        available_options = %w{considered underway completed canceled}
+        available_options = %w{considered underway done canceled}
         # TODO:
         # state.options.should match_array(available_options)
         state.set_option('considered')

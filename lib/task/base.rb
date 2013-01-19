@@ -19,8 +19,8 @@ module Task
     do |self_state, subtasks_states|
       if subtasks_states.empty? || self_state != :underway
         self_state
-      elsif subtasks_states.all? { |s| s.in? [:completed, :canceled] }
-        :completed
+      elsif subtasks_states.all? { |s| s.in? [:done, :canceled] }
+        :done
       else
         :underway
       end
@@ -56,12 +56,12 @@ module Task
         each_with_object({}) { |(e, i), h| h[e] = i }.freeze
     end
 
-    STATES_ORDER = order_hash [[:completed, :canceled], :underway, :considered]
+    STATES_ORDER = order_hash [[:done, :canceled], :underway, :considered]
     TYPES_ORDER = order_hash [:action, :project]
     has_computed_attribute :sort_rank, computed_from:
       {self: [:computed_state, :blocked, :last_state_change_date]} \
     do |state, blocked, last_state_change_date|
-      blocked = nil if state.in? [:completed, :canceled]
+      blocked = nil if state.in? [:done, :canceled]
       [STATES_ORDER[state], blocked, last_state_change_date.to_i]
     end
 

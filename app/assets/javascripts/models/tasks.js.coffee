@@ -19,7 +19,7 @@ class Lt.Models.Task extends Backbone.Model
     return @_isRecent if @_isRecent?
     ms = new Date() - new Date(@get('last_state_change_date'))
     days = ms / 1000 / 60 / 60 / 24
-    done = @get('computed_state') in ['canceled', 'completed']
+    done = @get('computed_state') in ['canceled', 'done']
     @_isRecent = not (done and days > 3)
 
   isValidNextState: (state) -> yes

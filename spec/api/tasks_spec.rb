@@ -55,7 +55,7 @@ describe 'tasks', :api do
   let(:new_action_fields) {{
     supertask_ids: {composition: [project_id]},
     objective:     'New action objective',
-    state:         'completed',
+    state:         'done',
   }}
 
   let(:action_creation_date) { Time.zone.parse('2012-01-02 12:00').httpdate }
@@ -87,7 +87,7 @@ describe 'tasks', :api do
         attribute_name: 'computed_state',
         date:           action_creation_date,
       )}
-      its(:updated_value) { should eq('completed') }
+      its(:updated_value) { should eq('done') }
     end
 
     describe 'new action project computed computed state update' do
@@ -96,7 +96,7 @@ describe 'tasks', :api do
         attribute_name: 'computed_state',
         date:           action_creation_date,
       )}
-      its(:updated_value) { should eq('completed') }
+      its(:updated_value) { should eq('done') }
     end
   end
 
@@ -114,7 +114,7 @@ describe 'tasks', :api do
   let(:updated_action_fields) { new_action_fields.merge(
     supertask_ids: {composition: []},
     objective: 'Updated action objective',
-    state:     'completed'
+    state:     'done'
   ) }
 
   let(:update_date)   { Time.zone.parse('2012-01-03 12:00').httpdate }

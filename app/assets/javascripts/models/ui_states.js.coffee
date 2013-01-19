@@ -7,4 +7,4 @@ class Lt.Models.TaskViewState extends Backbone.Model
 
 
   defaults:
-    show_completed: no
+    show_done: no

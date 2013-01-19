@@ -3,7 +3,7 @@ module Task
     class StateRevision < EditableRevision
       include Persistable
 
-      VALID_STATES = [:considered, :underway, :canceled, :completed].freeze
+      VALID_STATES = [:considered, :underway, :canceled, :done].freeze
 
       def attribute_name
         :state
