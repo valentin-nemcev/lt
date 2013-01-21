@@ -28,9 +28,14 @@ class TimeInterval
     @beginning, @ending = beginning, ending
   end
 
+  def endpoints
+    [beginning, ending]
+  end
+
   def inspect
     "#<#{self.class} from #{beginning} to #{ending}>"
   end
+
 
   def == other
     self.beginning == other.beginning && self.ending == other.ending

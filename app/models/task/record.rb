@@ -27,16 +27,19 @@ module Task
 
     def self.relations(ids = nil)
       ids ||= all.map(&:id)
-      RelationRecord
-        .where('supertask_id IN (:ids) AND subtask_id IN (:ids)', ids: ids)
+      RelationRecord.where(:supertask_id => ids, :subtask_id => ids)
     end
 
-    def self.effective_on(effective_date)
-      includes(:attribute_revisions).where(
-        'task_attribute_revisions.update_date <= :effective_date AND' \
-        ' (:effective_date < task_attribute_revisions.next_update_date' \
-        ' OR task_attribute_revisions.next_update_date IS NULL)',
-        :effective_date => effective_date)
+    extend RecordScopes
+    def self.effective_in(interval)
+      includes(:attribute_revisions)
+        .generic_effective_in(
+          'tasks.creation_date', 'tasks.completion_date', interval
+        ).generic_effective_in(
+          'task_attribute_revisions.update_date',
+          'task_attribute_revisions.next_update_date',
+          interval
+        )
     end
 
     def self.destroy_computed_attribute_revisions

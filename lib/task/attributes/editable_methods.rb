@@ -60,8 +60,9 @@ module Task
       end
 
       def editable_attribute_revisions(args = {})
+        interval = args[:in] || TimeInterval.for_all_time
         @attribute_revisions[args.fetch :for].
-          all_in_interval(args.fetch :in).to_a
+          all_in_interval(interval).to_a
       end
 
       def last_editable_attribute_revision(args = {})
@@ -69,11 +70,19 @@ module Task
       end
 
       def update_attributes(attrs = {}, opts = {})
-        attrs.map do |name, val|
+        update_date = opts.fetch(:on)
+        update_date <= self.completion_date or raise Error,
+          "Couldn't update attributes for completed task"
+        attributes = attrs.map do |name, val|
           @attribute_revisions[name].new_revision(
             updated_value: val,
-            update_date: opts.fetch(:on))
-        end
+            update_date: update_date)
+        end.compact
+        editable_attributes_updated(attributes)
+        attributes
+      end
+
+      def editable_attributes_updated(attributes)
       end
     end
 

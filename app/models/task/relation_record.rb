@@ -8,10 +8,9 @@ module Task
     belongs_to :supertask, class_name: ::Task::Record
     attr_accessible :type, :addition_date, :removal_date, :subtask, :supertask
 
-    def self.effective_on(effective_date)
-      where('addition_date <= :effective_date AND' \
-              ' (:effective_date < removal_date OR removal_date IS NULL)',
-              :effective_date => effective_date)
+    extend RecordScopes
+    def self.effective_in(interval)
+      generic_effective_in('addition_date', 'removal_date', interval)
     end
 
 

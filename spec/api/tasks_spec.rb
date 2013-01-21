@@ -16,6 +16,7 @@ describe 'tasks', :api do
     state:     'underway',
   }}
 
+  let(:beginning_date)        { Time.zone.parse('2012-01-01 00:00').httpdate }
   let(:project_creation_date) { Time.zone.parse('2012-01-01 12:00').httpdate }
 
   shared_examples :project_creation do
@@ -40,13 +41,13 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(project_id) }
     end
 
-    describe 'new project computed state update event' do
+    describe 'new project subtask count update event' do
       subject { task_updates.find_struct(
         task_id:        project_id,
-        attribute_name: 'computed_state',
+        attribute_name: 'subtask_count',
         date:           project_creation_date
       )}
-      its(:updated_value) { should eq('underway') }
+      its(:updated_value) { should eq(0) }
       its(:task_id)       { should eq(project_id) }
     end
   end
@@ -55,7 +56,7 @@ describe 'tasks', :api do
   let(:new_action_fields) {{
     supertask_ids: {composition: [project_id]},
     objective:     'New action objective',
-    state:         'done',
+    state:         'underway',
   }}
 
   let(:action_creation_date) { Time.zone.parse('2012-01-02 12:00').httpdate }
@@ -87,16 +88,16 @@ describe 'tasks', :api do
         attribute_name: 'computed_state',
         date:           action_creation_date,
       )}
-      its(:updated_value) { should eq('done') }
+      its(:updated_value) { should eq('underway') }
     end
 
-    describe 'new action project computed computed state update' do
+    describe 'new action project subtask count update' do
       subject { task_updates.find_struct(
         task_id:        project_id,
-        attribute_name: 'computed_state',
+        attribute_name: 'subtask_count',
         date:           action_creation_date,
       )}
-      its(:updated_value) { should eq('done') }
+      its(:updated_value) { should eq(1) }
     end
   end
 
@@ -129,13 +130,13 @@ describe 'tasks', :api do
       its(:task_id)       { should eq(action_id) }
     end
 
-    describe 'updated action project computed computed state update' do
+    describe 'updated action project subtask count state update' do
       subject { task_updates.find_struct(
         task_id:        project_id,
-        attribute_name: 'computed_state',
+        attribute_name: 'subtask_count',
         date:           update_date,
       )}
-      its(:updated_value) { should eq('underway') }
+      its(:updated_value) { should eq(0) }
     end
   end
 
@@ -152,7 +153,8 @@ describe 'tasks', :api do
 
   let(:project_create_response) do
     request :post, '/tasks/', :task => new_project_fields,
-      :effective_date => project_creation_date
+      :effective_date => project_creation_date,
+      :beginning_date => beginning_date
   end
 
   let(:project_id) do
@@ -165,12 +167,14 @@ describe 'tasks', :api do
 
   let(:action_create_response) do
     request :post, '/tasks/', :task => new_action_fields,
-      :effective_date => action_creation_date
+      :effective_date => action_creation_date,
+      :beginning_date => beginning_date
   end
 
   let(:action_update_response) do
     request :put, action_url, :task => updated_action_fields,
-      :effective_date => update_date
+      :effective_date => update_date,
+      :beginning_date => beginning_date
   end
 
   let(:action_id) do
@@ -181,7 +185,9 @@ describe 'tasks', :api do
   let(:action_url) { "/tasks/#{action_id}" }
 
   describe 'get persisted tasks' do
-    subject(:get_response) { request :get, '/tasks/' }
+    subject(:get_response) { request :get, '/tasks/',
+      :beginning_date => beginning_date
+    }
 
     context 'no tasks' do
       it { should be_successful }
@@ -312,7 +318,9 @@ describe 'tasks', :api do
   end
 
   describe 'delete a project with subtasks' do
-    subject(:get_response) { request :get, '/tasks/' }
+    subject(:get_response) { request :get, '/tasks/',
+      :beginning_date => beginning_date
+    }
     let!(:delete_response) do
       project_id
       action_id

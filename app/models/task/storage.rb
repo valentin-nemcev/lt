@@ -2,10 +2,11 @@ module Task
   class Storage
     class TaskNotFoundError < StandardError; end
 
-    attr_reader :user, :graph, :effective_date
+    attr_reader :user, :graph, :effective_interval
     def initialize(opts = {})
       @user = opts.fetch :user
-      @effective_date = opts.fetch :effective_date, Time.current
+      @effective_interval = opts.fetch(:effective_in,
+                                       TimeInterval.for_all_time)
       clear_graph
     end
 
@@ -62,10 +63,10 @@ module Task
     protected
 
     def fetch_scope(task_scope)
-      effective_tasks = task_scope.effective_on(effective_date)
+      effective_tasks = task_scope.effective_in(effective_interval)
       tasks = effective_tasks.load_tasks
       relations = effective_tasks.relations(tasks.map(&:id))
-        .effective_on(effective_date)
+        .effective_in(effective_interval)
         .load_relations(tasks.index_by(&:id))
       graph.add_tasks tasks: tasks, relations: relations
     end

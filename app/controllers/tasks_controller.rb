@@ -1,7 +1,6 @@
 class TasksController < ApplicationController
   include TasksHelper
 
-  before_filter :get_effective_date, only: [:create, :update]
 
   def index
     storage.fetch_all
@@ -25,10 +24,8 @@ class TasksController < ApplicationController
     render :events, :status => :created
   end
 
-  before_filter :fetch_task, only: [:update, :destroy]
-  attr_reader :task
-
   def update
+    task = fetch_task
     task.update_attributes task_attrs, on: effective_date
     task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
@@ -41,6 +38,7 @@ class TasksController < ApplicationController
   end
 
   def destroy
+    task = fetch_task
     storage.destroy_task task
     head :status => :ok
   end
@@ -49,9 +47,9 @@ class TasksController < ApplicationController
   protected
 
   def fetch_task
-    @task = storage.fetch params[:id]
-  rescue Task::Storage::TaskNotFoundError
-    head :status => :not_found
+    storage.fetch params[:id]
+  # rescue Task::Storage::TaskNotFoundError
+  #   head :status => :not_found
   end
 
 
@@ -67,6 +65,25 @@ class TasksController < ApplicationController
     @effective_date ||= Time.current
   end
 
+  def beginning_date
+    @beginning_date ||= effective_date - 1.day
+  end
+
+  def effective_interval
+    @effective_interval ||= TimeInterval.beginning_on beginning_date
+  end
+
+
+  before_filter :get_beginning_date
+  def get_beginning_date
+    params[:beginning_date].try do |date|
+      @beginning_date = Time.httpdate(date).in_time_zone
+    end
+  rescue ArgumentError => e
+    render :status => :bad_request, :text => e.message
+  end
+
+  before_filter :get_effective_date, only: [:create, :update]
   def get_effective_date
     params[:effective_date].try do |date|
       @effective_date = Time.httpdate(date).in_time_zone
@@ -77,7 +94,7 @@ class TasksController < ApplicationController
 
   def storage
     @storage ||= Task::Storage.new :user => current_user,
-      :effective_on => effective_date
+      :effective_in => effective_interval
   end
 
   def graph

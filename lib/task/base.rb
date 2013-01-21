@@ -6,6 +6,15 @@ module Task
     has_editable_attribute :state,     revision_class: Attributes::StateRevision
     has_editable_attribute :objective, revision_class: Attributes::ObjectiveRevision
 
+    def editable_attributes_updated(revisions)
+      completed_rev = revisions.detect do |rev|
+        rev.attribute_name == :state &&
+          rev.updated_value.in?([:done, :canceled])
+      end
+      return if completed_rev.nil?
+
+      self.completion_date = completed_rev.update_date
+    end
 
     include RelationMethods
     has_relation :composition, supers: :projects, subs: :subtasks

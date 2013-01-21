@@ -14,6 +14,7 @@ module Task
     end
 
     def completion_date=(new_date)
+      # raise 'Task completed'
       !completed? or raise Error, "Couldn't redefine task completion date"
       new_date >= creation_date or raise Error,
         "Task couldn't be completed before it was created"
