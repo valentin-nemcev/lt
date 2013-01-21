@@ -21,12 +21,15 @@ module Task
       @addition_date = attrs[:on] || attrs[:addition_date] || now
       @removal_date = Time::FOREVER
       remove on: attrs[:removal_date] if attrs.has_key? :removal_date
-      self.nodes.connect(attrs.fetch(:subtask), attrs.fetch(:supertask))
+      subtask, supertask = attrs.fetch(:subtask), attrs.fetch(:supertask)
+      validate_addition_to_completed_task(addition_date, supertask)
+      self.nodes.connect(subtask, supertask)
     end
 
     def remove(opts={})
       removal_date = opts.fetch :on, Time.current
       assert_removal_date_valid removal_date
+      validate_removal_from_completed_task(removal_date, supertask)
       @removal_date = removal_date
       return self
     end
@@ -38,6 +41,19 @@ module Task
                     "Relation couldn't be removed earlier than it was created"
     end
     protected :assert_removal_date_valid
+
+    def validate_addition_to_completed_task(addition_date, supertask)
+      if (type == :composition && addition_date > supertask.completion_date)
+        raise InvalidRelationError, "Couldn't add subtask to completed task"
+      end
+    end
+
+    def validate_removal_from_completed_task(removal_date, supertask)
+      if (type == :composition && removal_date > supertask.completion_date)
+        raise InvalidRelationError, "Couldn't remove subtask from completed task"
+      end
+    end
+
 
     def supertask
       nodes.parent
@@ -59,14 +75,6 @@ module Task
       effective_interval.include? given_date
     end
 
-
-    def dependency?
-      type == :dependency
-    end
-
-    def composition?
-      type == :composition
-    end
 
     def removed?
       removal_date != Time::FOREVER

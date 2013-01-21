@@ -15,7 +15,9 @@ describe Task::Relation do
   end
 
   def create_task
-    TaskStub.new
+    TaskStub.new.tap do |task|
+      task.stub(:completion_date => Time::FOREVER)
+    end
   end
 
   def create_relation(attrs={})
@@ -85,6 +87,56 @@ describe Task::Relation do
       expect do
         relation.remove on: test_date3
       end.to raise_error Task::InvalidRelationError
+    end
+  end
+
+  context 'when adding subtasks to completed task' do
+    let(:supertask) do
+      create_task.tap{ |task| task.stub(:completion_date => test_date2) }
+    end
+    let(:subtask) { create_task }
+
+    it 'raises error if added after completion' do
+      expect do
+        create_relation \
+          :supertask => supertask, :subtask => subtask,
+          :addition_date => test_date3,
+          :type => :composition
+      end.to raise_error Task::InvalidRelationError
+    end
+
+    it 'does not raise error if added before completion' do
+      expect do
+        create_relation \
+          :supertask => supertask, :subtask => subtask,
+          :addition_date => test_date1,
+          :type => :composition
+      end.not_to raise_error Task::InvalidRelationError
+    end
+  end
+
+  context 'when removing subtasks from completed task' do
+    let(:supertask) do
+      create_task.tap{ |task| task.stub(:completion_date => test_date2) }
+    end
+    let(:subtask) { create_task }
+    let(:relation) do
+      create_relation \
+        :supertask => supertask, :subtask => subtask,
+        :addition_date => test_date0,
+        :type => :composition
+    end
+
+    it 'raises error if removed after completion' do
+      expect do
+        relation.remove :on => test_date3
+      end.to raise_error Task::InvalidRelationError
+    end
+
+    it 'does not raise error if removed before completion' do
+      expect do
+        relation.remove :on => test_date1
+      end.not_to raise_error Task::InvalidRelationError
     end
   end
 
