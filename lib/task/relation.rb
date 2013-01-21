@@ -19,17 +19,22 @@ module Task
       @type = attrs.fetch(:type).to_sym
       now = attrs.fetch(:clock, Time).current
       @addition_date = attrs[:on] || attrs[:addition_date] || now
-      @removal_date = Time::FOREVER
-      remove on: attrs[:removal_date] if attrs.has_key? :removal_date
       subtask, supertask = attrs.fetch(:subtask), attrs.fetch(:supertask)
+      subtask or raise InvalidRelationError, 'Subtask missing'
+      supertask or raise InvalidRelationError, 'Supertask missing'
       validate_addition_to_completed_task(addition_date, supertask)
+      @removal_date = Time::FOREVER
+      if attrs.has_key? :removal_date
+        validate_removal_from_completed_task(attrs[:removal_date], supertask)
+        remove on: attrs[:removal_date]
+      end
       self.nodes.connect(subtask, supertask)
     end
 
     def remove(opts={})
       removal_date = opts.fetch :on, Time.current
       assert_removal_date_valid removal_date
-      validate_removal_from_completed_task(removal_date, supertask)
+      supertask and validate_removal_from_completed_task(removal_date, supertask)
       @removal_date = removal_date
       return self
     end

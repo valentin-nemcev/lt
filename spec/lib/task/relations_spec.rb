@@ -20,6 +20,7 @@ describe Task::Relations do
   def create_task(name)
     TaskWithRelations.new.tap do |task|
       task.define_singleton_method(:inspect) { "<task #{name}>" }
+      task.stub(:completion_date => Time::FOREVER)
     end
   end
   let(:task0) { create_task(:task0) }

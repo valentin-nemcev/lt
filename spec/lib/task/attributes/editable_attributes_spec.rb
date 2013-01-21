@@ -16,6 +16,7 @@ describe 'Object with editable attributes' do
       has_editable_attribute :attr_name1, :revision_class => AttrNameRevision1
       has_editable_attribute :attr_name2, :revision_class => AttrNameRevision2
       define_method(:inspect) { '<task>' }
+      define_method(:completion_date) { Time::FOREVER }
     end
   end
 
@@ -80,7 +81,7 @@ describe 'Object with editable attributes' do
     context 'without attribute or revisions passed' do
       specify do
         attr_revisions2.stub empty?: true
-        expect{ task }.to raise_error Task::Attributes::MissingAttributeError
+        expect{ task }.to_not raise_error Task::Attributes::MissingAttributeError
       end
     end
   end
@@ -139,8 +140,8 @@ describe 'Object with editable attributes' do
     end
   end
 
-  let(:creation_date)     { 'creation date' }
-  let(:update_date)    { 'update date' }
+  let(:creation_date) { Time.zone.parse('2000.01.01') }
+  let(:update_date)   { Time.zone.parse('2000.01.02') }
   let(:attr_revisions1) { stub(:attr_revision_sequence1, empty?: false) }
   let(:attr_revisions2) { stub(:attr_revision_sequence2, empty?: false) }
   let(:attr_revision)  { stub(:attr_revision, attr_name: :attr_value) }
