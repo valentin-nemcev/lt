@@ -72,6 +72,12 @@ module Task
       when :super then e.incoming!
       when :sub   then e.outgoing!
       end
+      args[:on].try do |date|
+        e.filter!{ |r| r.effective_on? date }
+      end
+      args[:in].try do |interval|
+        e.filter!{ |r| r.effective_in? interval }
+      end
       opts.fetch(:type).tap do |type|
         e.filter!{ |r| r.type == type }
       end
@@ -101,9 +107,6 @@ module Task
 
     def related_tasks(args = {})
       e = filtered_relations(args)
-      args[:in].try do |interval|
-        e.filter!{ |r| r.effective_in? interval }
-      end
       e.with_nodes.map do |relation, task|
         [task, relation.effective_interval]
       end

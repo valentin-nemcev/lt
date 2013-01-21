@@ -2,6 +2,10 @@ module Task
   class Base < Core
     include Persistable
 
+    include RelationMethods
+    has_relation :composition, supers: :projects, subs: :subtasks
+    has_relation :dependency,  supers: :blocking, subs: :dependent
+
     include Attributes::EditableMethods
     has_editable_attribute :state,     revision_class: Attributes::StateRevision
     has_editable_attribute :objective, revision_class: Attributes::ObjectiveRevision
@@ -13,12 +17,13 @@ module Task
       end
       return if completed_rev.nil?
 
-      self.completion_date = completed_rev.update_date
-    end
+      update_date = completed_rev.update_date
+      subtasks = filtered_relations(:for => :subtasks, :on => update_date).nodes
+      subtasks.all?(&:completed?) or raise Error,
+        "Can't complete task with incomplete subtasks"
 
-    include RelationMethods
-    has_relation :composition, supers: :projects, subs: :subtasks
-    has_relation :dependency,  supers: :blocking, subs: :dependent
+      self.completion_date = update_date
+    end
 
 
     include Attributes::ComputedMethods
