@@ -114,7 +114,10 @@ module Task
 
         def <=> other
           if self.date == other.date
-            if    task_ev && value.in?([:beginning, :added])
+            if    task_ev && value == :creation
+              -1
+            elsif task_ev && value.in?([:beginning, :added]) &&
+                    !(other.task_ev && other.value == :creation)
               -1
             elsif task_ev && value.in?([:ending, :removed])
               +1
@@ -147,7 +150,9 @@ module Task
           end
         end
 
+        add_creation_event = false
         events = depended_on_attributes.flat_map do |rel, attrs|
+          add_creation_event = rel != :self
           tasks = rel == :self ? [[self, interval]]
             : related_tasks(:for => rel, :in => interval)
           tasks.flat_map do |(task, orig_task_int)|
@@ -175,6 +180,9 @@ module Task
             end
           end
         end
+        if self.creation_date.in?(interval) && add_creation_event
+          events << Event.new(:self, nil, self, self.creation_date, true, :creation)
+        end
         events = events.sort.chunk(&:date)
 
         events.each do |date, evs|
@@ -184,7 +192,7 @@ module Task
             if ev.task_ev
               if ev.value.in? [:removed, :ending]
                 current_values[ev.rel][ev.attr].delete(ev.task)
-              else ev.value.in? [:added, :beginning]
+              elsif ev.value.in? [:added, :beginning]
                 msg = ev.attr == attribute && ev.task == self ?
                   :last_editable_attribute_revision : :last_attribute_revision
                 revision =

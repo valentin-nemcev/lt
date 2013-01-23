@@ -302,6 +302,37 @@ describe 'Task with computed attributes' do
         }]
       end
     end
+
+    context 'for attribute of newly created task with no relations' do
+      # Timeline
+      #       date:    b   1   2   3   4   e
+      #       attr: ---0--------------------
+
+      before do
+        attr_proc = stub_proc attr_params
+        class_with_computed_attributes.instance_eval do
+          has_computed_attribute :attr,
+            {computed_from: {relation1: [:attr1]}},
+            &attr_proc
+        end
+      end
+
+      before do
+        task.stub_related_tasks_in given_interval, :relation1, []
+      end
+
+      let(:attr_params) { [
+        given_interval.beginning, [[]], 'computed value1',
+      ] }
+
+      specify do
+        task.should_have_computed_revisions_in given_interval, :attr, [{
+          :on    => given_interval.beginning,
+          :value => 'computed value1',
+        }]
+      end
+    end
+
   end
 
 
@@ -422,6 +453,9 @@ describe 'Task with computed attributes' do
     params.each_slice(3) do |date, input, output|
       func.stub(:eval).with(*input, date).and_return(output)
     end
-    Proc.new { |*args| func.eval *args }
+    Proc.new do |*args|
+      # ap args
+      func.eval *args
+    end
   end
 end
