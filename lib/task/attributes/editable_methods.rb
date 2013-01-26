@@ -23,6 +23,10 @@ module Task
         self.editable_attributes_opts ||= {}
       end
 
+      %w[
+        MissingAttributeError
+        UpdatingCompletedTaskError
+      ].each { |error_name| const_set(error_name, Class.new(Error)) }
 
       def initialize(given_attributes = {})
         super
@@ -43,7 +47,9 @@ module Task
             update_attributes({attr => val}, on: creation_date)
           end
 
-          # raise MissingAttributeError, attr if revision_sequence.empty?
+          if revision_sequence.empty?
+            raise MissingAttributeError.new task: self, attribute: attr
+          end
         end
       end
 
@@ -71,8 +77,11 @@ module Task
 
       def update_attributes(attrs = {}, opts = {})
         update_date = opts.fetch(:on)
-        update_date <= self.completion_date or raise Error,
-          "Couldn't update attributes for completed task"
+        if update_date > self.completion_date
+          raise UpdatingCompletedTaskError.new \
+            task: self,
+            update_date: update_date
+        end
         attributes = attrs.map do |name, val|
           @attribute_revisions[name].new_revision(
             updated_value: val,
@@ -83,17 +92,6 @@ module Task
       end
 
       def editable_attributes_updated(attributes)
-      end
-    end
-
-
-    class MissingAttributeError < Task::Error
-      def initialize(attr)
-        @attr = attr
-      end
-
-      def message
-        "Missing #{@attr} value or missing or empty attribute revisions"
       end
     end
   end

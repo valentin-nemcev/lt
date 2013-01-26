@@ -1,6 +1,13 @@
 module Task
-  class InvalidRelationError < Task::Error; end;
   class Relation
+    %w[
+      SubtaskMissingError
+      SupertaskMissingError
+      AlreadyRemovedError
+      RemovalDateEarlierThanAdditionDateError
+      AddingToCompleteSupertaskError
+      RemovingFromCompleteSupertaskError
+    ].each { |error_name| const_set(error_name, Class.new(Error)) }
 
     def nodes
       @nodes ||= ::Graph::EdgeNodes.new self
@@ -16,46 +23,58 @@ module Task
     attr_reader :type, :addition_date, :removal_date
     def initialize(attrs={})
       self.id = attrs[:id]
+
       @type = attrs.fetch(:type).to_sym
-      now = attrs.fetch(:clock, Time).current
-      @addition_date = attrs[:on] || attrs[:addition_date] || now
-      subtask, supertask = attrs.fetch(:subtask), attrs.fetch(:supertask)
-      subtask or raise InvalidRelationError, 'Subtask missing'
-      supertask or raise InvalidRelationError, 'Supertask missing'
-      validate_addition_to_completed_task(addition_date, supertask)
+
+      @addition_date = attrs[:on] || attrs[:addition_date] || Time.current
+
+      @connected = false
+      @subtask, @supertask = *attrs.values_at(:subtask, :supertask)
+      @subtask or
+        raise SubtaskMissingError.new   relation: self, attributes: attrs
+      @supertask or
+        raise SupertaskMissingError.new relation: self, attributes: attrs
+
+      validate_addition_to_completed_task
       @removal_date = Time::FOREVER
       if attrs.has_key? :removal_date
-        validate_removal_from_completed_task(attrs[:removal_date], supertask)
         remove on: attrs[:removal_date]
       end
-      self.nodes.connect(subtask, supertask)
+      self.nodes.connect(@subtask, @supertask)
+      @connected = true
     end
 
     def remove(opts={})
-      removal_date = opts.fetch :on, Time.current
-      assert_removal_date_valid removal_date
-      supertask and validate_removal_from_completed_task(removal_date, supertask)
-      @removal_date = removal_date
+      new_removal_date = opts.fetch :on, Time.current
+      validate_removal_date new_removal_date
+      @removal_date = new_removal_date
+      validate_removal_from_completed_task
       return self
     end
 
-    def assert_removal_date_valid(removal_date)
-      !removed? or raise InvalidRelationError,
-        "Couldn't redefine relation removal date"
-      removal_date >= addition_date or raise InvalidRelationError,
-                    "Relation couldn't be removed earlier than it was created"
-    end
-    protected :assert_removal_date_valid
+    def validate_removal_date(new_removal_date)
+      unless !removed?
+        raise AlreadyRemovedError.new \
+          relation: self,
+          new_removal_date: new_removal_date
+      end
 
-    def validate_addition_to_completed_task(addition_date, supertask)
-      if (type == :composition && addition_date > supertask.completion_date)
-        raise InvalidRelationError, "Couldn't add subtask to completed task"
+      unless new_removal_date >= addition_date
+        raise RemovalDateEarlierThanAdditionDateError.new \
+          relation: self,
+          new_removal_date: new_removal_date
       end
     end
 
-    def validate_removal_from_completed_task(removal_date, supertask)
-      if (type == :composition && removal_date > supertask.completion_date)
-        raise InvalidRelationError, "Couldn't remove subtask from completed task"
+    def validate_addition_to_completed_task
+      if type == :composition && @addition_date > @supertask.completion_date
+        raise AddingToCompleteSupertaskError.new relation: self
+      end
+    end
+
+    def validate_removal_from_completed_task
+      if type == :composition && @removal_date > @supertask.completion_date
+        raise RemovingFromCompleteSupertaskError.new relation: self
       end
     end
 
@@ -87,22 +106,20 @@ module Task
 
 
     def destroy
-      @old_supertask = self.nodes.parent
-      @old_subtask   = self.nodes.child
       self.nodes.disconnect
+      @connected = false
+      self
     end
 
 
     def inspect
       id_str = id.nil? ? '' : ":#{id}"
-      subtask = self.subtask.inspect +
-        (self.subtask.nil? ? " (was #{@old_subtask.inspect})" : '')
-      supertask = self.supertask.inspect +
-        (self.supertask.nil? ? " (was #{@old_supertask.inspect})" : '')
+      connection_state = @connected ? '   connected' : 'disconnected'
 
       "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str} #{type}" \
-      " of #{supertask} - #{subtask}>" \
-      " effective in #{effective_interval.inspect}"
+      " of #{@supertask.inspect} - #{@subtask.inspect}" \
+      " (#{connection_state})" \
+      " effective in #{effective_interval.inspect}>"
     end
 
   end

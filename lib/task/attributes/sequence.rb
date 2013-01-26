@@ -1,5 +1,11 @@
 module Task
   class Attributes::Sequence
+    %w[
+      InvalidUpdateDateError
+      InvalidNextUpdateDateError
+      InvalidSequenceNumberError
+    ].each { |error_name| const_set(error_name, Class.new(Error)) }
+
     def initialize(opts = {})
       @creation_date = opts.fetch :creation_date
       @revision_class = opts[:revision_class]
@@ -34,7 +40,9 @@ module Task
       revisions = revisions.sort_by(&:sequence_number)
       revisions.last.try do |r|
         r.next_update_date == Time::FOREVER or
-          raise NextDateSequenceError.new r.next_update_date, Time::FOREVER
+          raise InvalidNextUpdateDateError.new \
+            previous_revision: r,
+            expected_next_update_date: Time::FOREVER
       end
       revisions.each{ |r| add_revision r }
       return self
@@ -63,19 +71,22 @@ module Task
       @revisions.last.try(:update_date) || creation_date
     end
 
-    def last_next_update_date
-      @revisions.last.try(:next_update_date) || creation_date
-    end
-
     def add_revision(revision)
       last_sequence_number < revision.sequence_number or
-        raise SequenceNumberError.new last_sequence_number,
-                                        revision.sequence_number
+        raise InvalidSequenceNumberError.new \
+          previous_sequence_number: last_sequence_number,
+          previous_revision: last,
+          next_revision: revision
       last_update_date <= revision.update_date or
-        raise DateSequenceError.new last_update_date, revision.update_date
+        raise InvalidUpdateDateError.new \
+          previous_update_date: last_update_date,
+          previous_revision: last,
+          next_revision: revision
 
-      empty? || last_next_update_date == revision.update_date or
-        raise NextDateSequenceError.new last_next_update_date, revision.update_date
+      empty? || last.next_update_date == revision.update_date or
+        raise InvalidNextUpdateDateError.new \
+          previous_revision: last,
+          next_revision: revision
 
       revision.owner = owner
       @revisions << revision
@@ -85,42 +96,6 @@ module Task
     def clear_revisions
       @revisions.clear
       return self
-    end
-
-    class Error < Task::Error; end
-
-    class DateSequenceError < Error
-      def initialize(last, current)
-        @last, @current = last, current
-      end
-
-      def message
-        'Revision updates should be in chronological order;'\
-          " last: #{@last}, current: #{@current}"
-      end
-    end
-
-    class NextDateSequenceError < Error
-      def initialize(last, current)
-        @last, @current = last, current
-      end
-
-      def message
-        'Previous revision next update date and'\
-        ' current revision update date should match'\
-          " previous next update: #{@last}, current: #{@current}"
-      end
-    end
-
-    class SequenceNumberError < Error
-      def initialize(last, current)
-        @last, @current = last, current
-      end
-
-      def message
-        'Revision sequence numbers should be in ascending order;'\
-          " last: #{@last}, current: #{@current}"
-      end
     end
   end
 end

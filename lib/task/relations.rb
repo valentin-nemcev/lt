@@ -1,5 +1,10 @@
 module Task
   class Relations < ::Graph::NodeEdges
+    %w[
+      DuplicateError
+      LoopError
+    ].each { |error_name| const_set(error_name, Class.new(Error)) }
+
     def edge_added(new_relation)
       check_for_loop(new_relation)
       check_for_duplication(new_relation)
@@ -16,7 +21,9 @@ module Task
           r.other_task(self.task) == new_relation.other_task(self.task)
         }
       if duplicated_relation
-        raise DuplicateRelationError.new duplicated_relation, new_relation
+        raise DuplicateError.new \
+          existing: duplicated_relation,
+          new: new_relation
       end
     end
 
@@ -30,7 +37,7 @@ module Task
         .to_set
 
       if connected.include? new_relation.supertask
-        raise RelationLoopError.new new_relation, connected
+        raise LoopError.new relation: new_relation, tasks_in_loop: connected
       end
     end
 
@@ -39,30 +46,6 @@ module Task
 
     def effective_in(given_period)
       filter{ |r| r.effective_in? given_period }
-    end
-
-    class RelationLoopError < Task::Error
-      def initialize relation, path
-        @relation, @path = relation, path
-      end
-      attr_reader :relation, :path
-
-      def message
-        (["Relation loop #{relation.inspect}:"] + path.map(&:inspect)).join("\n")
-      end
-    end
-
-    class DuplicateRelationError < Task::Error
-      def initialize existing, duplicate
-        @existing, @duplicate = existing, duplicate
-      end
-      attr_reader :existing, :duplicate
-
-      def message
-        ["Duplicate relation:",
-          "existing:  #{existing.inspect}",
-          "duplicate: #{duplicate.inspect}"].join("\n")
-      end
     end
   end
 end

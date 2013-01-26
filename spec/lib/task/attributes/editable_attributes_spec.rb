@@ -81,7 +81,8 @@ describe 'Object with editable attributes' do
     context 'without attribute or revisions passed' do
       specify do
         attr_revisions2.stub empty?: true
-        expect{ task }.to_not raise_error Task::Attributes::MissingAttributeError
+        expect{ task }.to raise_error \
+          Task::Attributes::EditableMethods::MissingAttributeError
       end
     end
   end

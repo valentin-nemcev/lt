@@ -1,6 +1,10 @@
 module Task
   module Attributes
     class ObjectiveRevision < EditableRevision
+      %w[
+        EmptyObjectiveError
+      ].each { |error_name| const_set(error_name, Class.new(Error)) }
+
       include Persistable
 
       def attribute_name
@@ -14,16 +18,10 @@ module Task
 
       def validate_value(objective)
         if objective.blank?
-          raise EmptyObjectiveError
+          raise EmptyObjectiveError.new revision: self, objective: objective
         else
           return objective
         end
-      end
-    end
-
-    class EmptyObjectiveError < Task::Error;
-      def message
-        'Objective is empty'
       end
     end
   end

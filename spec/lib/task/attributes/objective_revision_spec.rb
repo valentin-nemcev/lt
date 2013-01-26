@@ -21,7 +21,8 @@ describe Task::Attributes::ObjectiveRevision do
     [nil, '', '    '].each do |empty_objective|
       expect do
         create_objective_revision(empty_objective)
-      end.to raise_error(Task::Attributes::EmptyObjectiveError)
+      end.to raise_error \
+        Task::Attributes::ObjectiveRevision::EmptyObjectiveError
     end
   end
 

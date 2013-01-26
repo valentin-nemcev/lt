@@ -12,6 +12,10 @@ describe Task::Relation do
     def edges
       @edges ||= Graph::NodeEdges.new self
     end
+
+    def inspect
+      '<TaskStub>'
+    end
   end
 
   def create_task
@@ -42,15 +46,6 @@ describe Task::Relation do
       relation.subtask.should   be(subtask)
     end
   end
-  context 'created without addition date' do
-    let(:current_time) { Time.current }
-    let(:clock) { stub('Clock', current: current_time) }
-    let(:relation) { create_relation clock: clock }
-
-    it 'should have default addition date' do
-      relation.addition_date.should eq(current_time)
-    end
-  end
 
   context 'created with addition date' do
     let(:addition_date)     { test_date1 }
@@ -68,7 +63,7 @@ describe Task::Relation do
     it "couldn't be removed earlier than it was created" do
       expect do
         relation.remove on: test_date0
-      end.to raise_error Task::InvalidRelationError
+      end.to raise_error Task::Relation::RemovalDateEarlierThanAdditionDateError
     end
   end
 
@@ -86,7 +81,7 @@ describe Task::Relation do
     it 'should not allow changing changing removal date' do
       expect do
         relation.remove on: test_date3
-      end.to raise_error Task::InvalidRelationError
+      end.to raise_error Task::Relation::AlreadyRemovedError
     end
   end
 
@@ -102,7 +97,7 @@ describe Task::Relation do
           :supertask => supertask, :subtask => subtask,
           :addition_date => test_date3,
           :type => :composition
-      end.to raise_error Task::InvalidRelationError
+      end.to raise_error Task::Relation::AddingToCompleteSupertaskError
     end
 
     it 'does not raise error if added before completion' do
@@ -111,7 +106,7 @@ describe Task::Relation do
           :supertask => supertask, :subtask => subtask,
           :addition_date => test_date1,
           :type => :composition
-      end.not_to raise_error Task::InvalidRelationError
+      end.not_to raise_error Task::Relation::AddingToCompleteSupertaskError
     end
   end
 
@@ -130,13 +125,13 @@ describe Task::Relation do
     it 'raises error if removed after completion' do
       expect do
         relation.remove :on => test_date3
-      end.to raise_error Task::InvalidRelationError
+      end.to raise_error Task::Relation::RemovingFromCompleteSupertaskError
     end
 
     it 'does not raise error if removed before completion' do
       expect do
         relation.remove :on => test_date1
-      end.not_to raise_error Task::InvalidRelationError
+      end.not_to raise_error Task::Relation::RemovingFromCompleteSupertaskError
     end
   end
 

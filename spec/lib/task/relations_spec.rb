@@ -60,12 +60,9 @@ describe Task::Relations do
     it 'raises error for relation with same type and tasks' do
       first = create_first_relation
       create_other_relation
-      expect { create_first_relation_duplicate }.to raise_error { |error|
-        error.should be_an_instance_of Task::Relations::DuplicateRelationError
-        error.should be_a Task::Error
-        error.existing.should be first
-        error.duplicate.should be
-      }
+      expect do
+        create_first_relation_duplicate
+      end.to raise_error Task::Relations::DuplicateError
     end
 
     it "doesn't raise error for non-ovelapping relations" do
@@ -91,10 +88,7 @@ describe Task::Relations do
           type: some_relation_type,
           supertask: task1, subtask: task1,
           addition_date: date1, removal_date: date3)
-      end.to(raise_error do |error|
-        error.should be_a Task::Error
-        error.should be_an_instance_of Task::Relations::RelationLoopError
-      end)
+      end.to raise_error Task::Relations::LoopError
     end
 
     it 'raises error for relation that creates loop' do
@@ -113,10 +107,7 @@ describe Task::Relations do
           type: some_relation_type,
           supertask: task3, subtask: task1,
           addition_date: date1, removal_date: date3)
-      end.to(raise_error do |error|
-        error.should be_a Task::Error
-        error.should be_an_instance_of Task::Relations::RelationLoopError
-      end)
+      end.to raise_error Task::Relations::LoopError
     end
 
     it "doesn't raise error for relation that do not create loop" do

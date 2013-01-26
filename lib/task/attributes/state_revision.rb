@@ -1,6 +1,11 @@
 module Task
   module Attributes
     class StateRevision < EditableRevision
+      %w[
+        EmptyStateError
+        UnknownStateError
+      ].each { |error_name| const_set(error_name, Class.new(Error)) }
+
       include Persistable
 
       VALID_STATES = [:considered, :underway, :canceled, :done].freeze
@@ -15,14 +20,13 @@ module Task
 
       def validate_value(state)
         if state.blank?
-          raise InvalidStateError, "State is empty"
+          raise EmptyStateError.new revision: self, state: state
         elsif !state.in? VALID_STATES
-          raise InvalidStateError, "Invalid state: #{state}"
+          raise UnknownStateError.new revision: self, state: state
         else
           return state
         end
       end
     end
-    class InvalidStateError < Task::Error; end
   end
 end

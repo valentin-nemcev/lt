@@ -85,7 +85,7 @@ describe Task::Attributes::Sequence do
       it 'should not allow revision list with incorrect update dates' do
         expect do
           sequence.set_revisions revisions_with_incorrect_update_dates
-        end.to raise_error Sequence::DateSequenceError
+        end.to raise_error Sequence::InvalidUpdateDateError
       end
 
       let(:revisions_with_incorrect_sns) { [
@@ -103,7 +103,7 @@ describe Task::Attributes::Sequence do
       it 'should not allow revision list with incorrect sequence numbers' do
         expect do
           sequence.set_revisions revisions_with_incorrect_sns
-        end.to raise_error Sequence::SequenceNumberError
+        end.to raise_error Sequence::InvalidSequenceNumberError
       end
 
       let(:revisions_with_incorrect_next_dates) { [
@@ -121,7 +121,7 @@ describe Task::Attributes::Sequence do
       it 'should not allow revision list with incorrect next dates' do
         expect do
           sequence.set_revisions revisions_with_incorrect_next_dates
-        end.to raise_error Sequence::NextDateSequenceError
+        end.to raise_error Sequence::InvalidNextUpdateDateError
       end
 
       let(:revisions_with_incorrect_last_next_date) { [
@@ -139,7 +139,7 @@ describe Task::Attributes::Sequence do
       it 'should not allow revision list with incorrect last next date' do
         expect do
           sequence.set_revisions revisions_with_incorrect_last_next_date
-        end.to raise_error Sequence::NextDateSequenceError
+        end.to raise_error Sequence::InvalidNextUpdateDateError
       end
     end
 
@@ -194,7 +194,7 @@ describe Task::Attributes::Sequence do
         new_revision.stub update_date: 1.second.until(creation_date)
         expect do
           sequence.new_revision revision_attrs
-        end.to raise_error Sequence::DateSequenceError
+        end.to raise_error Sequence::InvalidUpdateDateError
       end
     end
 
@@ -234,7 +234,7 @@ describe Task::Attributes::Sequence do
           second_revision.should_receive(:"next_update_date=").with(new_date)
           expect do
             sequence.new_revision revision_attrs
-          end.to raise_error Sequence::DateSequenceError
+          end.to raise_error Sequence::InvalidUpdateDateError
         end
       end
 
