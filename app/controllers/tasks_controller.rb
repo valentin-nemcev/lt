@@ -4,9 +4,9 @@ class TasksController < ApplicationController
 
   def index
     storage.fetch_all
-    @tasks, @relations, @revisions = graph.all_events
+    @events = graph.all_events
 
-    render :events
+    render :json => {:events => @events}
   end
 
   # TODO: Remove effective_date - 1.second hack
@@ -16,12 +16,14 @@ class TasksController < ApplicationController
     task.update_related_tasks fetch_related_tasks(task_params),
       on: effective_date
 
-    @tasks, @relations, @revisions =
-      graph.new_events :for => task, :after => effective_date - 1.second
+    graph.new_events :for => task, :after => effective_date - 1.second
 
     storage.store task
 
-    render :events, :status => :created
+    @events =
+      graph.new_events :for => task, :after => effective_date - 1.second
+
+    render :json => {:events => @events}, :status => :created
   end
 
   def update
@@ -29,12 +31,15 @@ class TasksController < ApplicationController
     task.update_attributes task_attrs, on: effective_date
     task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
-    @tasks, @relations, @revisions =
-      graph.new_events :for => task, :after => effective_date - 1.second
+
+    graph.new_events :for => task, :after => effective_date - 1.second
 
     storage.store task
 
-    render :events
+    @events =
+      graph.new_events :for => task, :after => effective_date - 1.second
+
+    render :json => {:events => @events}
   end
 
   def destroy

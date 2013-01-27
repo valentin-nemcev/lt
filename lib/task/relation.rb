@@ -111,6 +111,36 @@ module Task
       self
     end
 
+    def events
+      events = [{
+        :type => 'relation_addition',
+        :id => [
+          self.id,
+          self.subtask.id,
+          self.supertask.id,
+          'a'
+        ].join('-'),
+        :date          => self.addition_date.httpdate,
+        :relation_type => self.type,
+        :supertask_id  => self.supertask.id,
+        :subtask_id    => self.subtask.id,
+      }]
+      return events unless removed?
+      events += [{
+        :type => 'relation_removal',
+        :id => [
+          self.id,
+          self.subtask.id,
+          self.supertask.id,
+          'r'
+        ].join('-'),
+        :date          => self.removal_date.httpdate,
+        :relation_type => self.type,
+        :supertask_id  => self.supertask.id,
+        :subtask_id    => self.subtask.id,
+      }]
+    end
+
 
     def inspect
       id_str = id.nil? ? '' : ":#{id}"

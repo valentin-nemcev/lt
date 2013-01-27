@@ -22,7 +22,7 @@ describe 'tasks', :api do
   shared_examples :project_creation do
     describe 'new project creation event' do
       subject {
-        task_creations.find_struct(date: project_creation_date)
+        events.find_struct(date: project_creation_date, type: 'task_creation')
       }
       its(:id)        { should_not be_nil }
       its(:task_id)   { should eq(project_id) }
@@ -32,7 +32,8 @@ describe 'tasks', :api do
 
   shared_examples :new_project_updates do
     describe 'new project objective update event' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         task_id:        project_id,
         attribute_name: 'objective',
         date:           project_creation_date
@@ -42,7 +43,8 @@ describe 'tasks', :api do
     end
 
     describe 'new project subtask count update event' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         task_id:        project_id,
         attribute_name: 'subtask_count',
         date:           project_creation_date
@@ -64,7 +66,7 @@ describe 'tasks', :api do
   shared_examples :action_creation do
     describe 'new action creation event' do
       subject {
-        task_creations.find_struct(date: action_creation_date)
+        events.find_struct(date: action_creation_date, type: 'task_creation')
       }
       its(:id)        { should_not be_nil }
       its(:task_id)   { should_not be_nil }
@@ -74,7 +76,8 @@ describe 'tasks', :api do
 
   shared_examples :new_action_updates do
     describe 'new action objective update event' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         attribute_name: 'objective',
         date:           action_creation_date
       )}
@@ -83,7 +86,8 @@ describe 'tasks', :api do
     end
 
     describe 'new action computed state update event' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         task_id:        action_id,
         attribute_name: 'computed_state',
         date:           action_creation_date,
@@ -92,7 +96,8 @@ describe 'tasks', :api do
     end
 
     describe 'new action project subtask count update' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         task_id:        project_id,
         attribute_name: 'subtask_count',
         date:           action_creation_date,
@@ -103,8 +108,9 @@ describe 'tasks', :api do
 
   shared_examples :new_action_relations do
     describe 'new action to project relation addition' do
-      subject { relation_additions.find_struct(
-        subtask_id: action_id,
+      subject { events.find_struct(
+        type:         'relation_addition',
+        subtask_id:   action_id,
         supertask_id: project_id
       )}
       its(:relation_type) { should eq('composition') }
@@ -122,7 +128,8 @@ describe 'tasks', :api do
 
   shared_examples :updated_action_updates do
     describe 'updated action objective update' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         attribute_name: 'objective',
         date:           update_date
       )}
@@ -131,7 +138,8 @@ describe 'tasks', :api do
     end
 
     describe 'updated action project subtask count state update' do
-      subject { task_updates.find_struct(
+      subject { events.find_struct(
+        type:           'task_update',
         task_id:        project_id,
         attribute_name: 'subtask_count',
         date:           update_date,
@@ -142,8 +150,9 @@ describe 'tasks', :api do
 
   shared_examples :updated_action_relations do
     describe 'updated action to project relation removal' do
-      subject { relation_removals.find_struct(
-        subtask_id: action_id,
+      subject { events.find_struct(
+        type:         'relation_removal',
+        subtask_id:   action_id,
         supertask_id: project_id
       )}
       its(:relation_type) { should eq('composition') }
@@ -158,8 +167,8 @@ describe 'tasks', :api do
   end
 
   let(:project_id) do
-    project_create_response.json_body.task_creations
-      .find_struct(date: project_creation_date).id
+    project_create_response.json_body.events
+      .find_struct(date: project_creation_date, type: 'task_creation').id
   end
 
   let(:project_url) { "/tasks/#{project_id}" }
@@ -178,8 +187,8 @@ describe 'tasks', :api do
   end
 
   let(:action_id) do
-    action_create_response.json_body.task_creations
-      .find_struct(date: action_creation_date).id
+    action_create_response.json_body.events
+      .find_struct(date: action_creation_date, type: 'task_creation').id
   end
 
   let(:action_url) { "/tasks/#{action_id}" }
@@ -193,10 +202,7 @@ describe 'tasks', :api do
       it { should be_successful }
       describe do
         subject { get_response.json_body }
-        its(:task_creations)     { should be_empty }
-        its(:task_updates)       { should be_empty }
-        its(:relation_additions) { should be_empty }
-        its(:relation_removals)  { should be_empty }
+        its(:events) { should be_empty }
       end
       # its(:valid_new_task_states) { should_not be_empty }
     end
@@ -209,42 +215,21 @@ describe 'tasks', :api do
       end
 
       describe do
-        subject(:response_body) { get_response.json_body }
+        subject(:events) { get_response.json_body.events }
         let(:event_ids) do
-          [response_body.task_creations,
-           response_body.task_updates,
-           response_body.relation_additions,
-           response_body.relation_removals,
-          ].flatten.collect{ |u| u['id'] }
+          events.collect{ |u| u['id'] }
         end
         specify { event_ids.should be_unique }
 
-        describe do
-          subject(:task_creations) { response_body.task_creations }
-          it { should have(2).creations }
-          include_examples :project_creation
-          include_examples :action_creation
-        end
+        include_examples :project_creation
+        include_examples :action_creation
 
-        describe do
-          subject(:task_updates) { response_body.task_updates }
-          it { should have_at_least(7).updates }
-          include_examples :new_project_updates
-          include_examples :new_action_updates
-          include_examples :updated_action_updates
-        end
+        include_examples :new_project_updates
+        include_examples :new_action_updates
+        include_examples :updated_action_updates
 
-        describe do
-          subject(:relation_additions) { response_body.relation_additions }
-          it { should have(1).addition }
-          include_examples :new_action_relations
-        end
-
-        describe do
-          subject(:relation_removals) { response_body.relation_removals }
-          it { should have(1).removal }
-          include_examples :updated_action_relations
-        end
+        include_examples :new_action_relations
+        include_examples :updated_action_relations
       end
     end
   end
@@ -254,14 +239,9 @@ describe 'tasks', :api do
     let(:project_response_body) { project_create_response.json_body }
 
     describe do
-      subject(:task_creations) { project_response_body.task_creations }
-      it { should have(1).creation }
-      include_examples :project_creation
-    end
+      subject(:events) { project_response_body.events }
 
-    describe do
-      subject(:task_updates) { project_response_body.task_updates }
-      it { should have_at_least(2).updates }
+      include_examples :project_creation
       include_examples :new_project_updates
     end
 
@@ -269,20 +249,10 @@ describe 'tasks', :api do
     let(:action_response_body) { action_create_response.json_body }
 
     describe do
-      subject(:task_creations) { action_response_body.task_creations }
-      it { should have(1).creation }
+      subject(:events) { action_response_body.events }
+
       include_examples :action_creation
-    end
-
-    describe do
-      subject(:task_updates) { action_response_body.task_updates }
-      it { should have_at_least(3).updates }
       include_examples :new_action_updates
-    end
-
-    describe do
-      subject(:relation_additions) { action_response_body.relation_additions }
-      it { should have(1).addition }
       include_examples :new_action_relations
     end
 
@@ -303,18 +273,10 @@ describe 'tasks', :api do
     specify { action_update_response.should be_successful }
     let(:response_body) { action_update_response.json_body }
 
-    describe do
-      subject(:task_updates) { response_body.task_updates }
-      it { should have_at_least(2).updates }
+    subject(:events) { response_body.events }
 
-      include_examples :updated_action_updates
-    end
-
-    describe do
-      subject(:relation_removals) { response_body.relation_removals }
-      it { should have(1).removal }
-      include_examples :updated_action_relations
-    end
+    include_examples :updated_action_updates
+    include_examples :updated_action_relations
   end
 
   describe 'delete a project with subtasks' do
@@ -326,15 +288,9 @@ describe 'tasks', :api do
       action_id
       request :delete, project_url
     end
-    let(:task_creations)     { get_response.json_body.task_creations }
-    let(:task_updates)       { get_response.json_body.task_updates }
-    let(:relation_additions) { get_response.json_body.relation_additions }
-    let(:relation_removals)  { get_response.json_body.relation_removals }
+    let(:events)     { get_response.json_body.events }
 
     specify { delete_response.should be_successful }
-    specify { task_creations.should have(0).creations }
-    specify { task_updates.should have(0).updates }
-    specify { relation_additions.should have(0).additions }
-    specify { relation_removals.should have(0).removals }
+    specify { events.should have(0).events }
   end
 end

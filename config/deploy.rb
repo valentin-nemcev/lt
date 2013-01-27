@@ -14,6 +14,7 @@ set :repository,  'git@vds:lt.git'
 set :deploy_via, :remote_cache
 
 server 'vds', :app, :web, :db, :primary => true
+
 set :use_sudo, false
 set :deploy_to, "/home/valentin/webapps/#{application}"
 set :shared_symlinks, {

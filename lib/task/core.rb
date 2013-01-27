@@ -37,6 +37,15 @@ module Task
     def destroy
     end
 
+    def events
+      [{
+        :type    => 'task_creation',
+        :id      => self.id,
+        :task_id => self.id,
+        :date    => self.creation_date.httpdate,
+      }]
+    end
+
     def inspect
       id_str = id.nil? || id == object_id ? '' : ":#{id}"
       "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str}>"

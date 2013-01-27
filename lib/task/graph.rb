@@ -71,7 +71,7 @@ module Task
       attribute_revisions = tasks.collect_concat do |t|
         t.attribute_revisions in: interval
       end
-      [created_tasks, relations, attribute_revisions]
+      (tasks + relations + attribute_revisions).collect_concat(&:events)
     end
 
     def all_events
@@ -79,7 +79,7 @@ module Task
       attribute_revisions = tasks.collect_concat do |t|
         t.attribute_revisions in: TimeInterval.for_all_time
       end
-      [tasks, relations, attribute_revisions]
+      (tasks + relations + attribute_revisions).collect_concat(&:events)
     end
   end
 end

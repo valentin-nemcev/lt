@@ -66,21 +66,16 @@ class Lt.TaskEvents extends Backbone.Collection
 
   applyEvent: (event) -> event.apply @tasks
 
+  classes = _.chain(Lt.Models).pick(
+    'TaskCreation', 'TaskUpdate', 'RelationAddition', 'RelationRemoval'
+  ).values().value()
+  eventClasses = {}
+  eventClasses[cls.prototype.type] = cls for cls in classes
+
   parse: (eventsJSON, updatedTask = null) ->
     updatedTask = null unless updatedTask?.cid?
-    creations = for creation in eventsJSON.task_creations ? []
-      new Lt.Models.TaskCreation(creation, updatedTask: updatedTask)
-
-    updates = for update in eventsJSON.task_updates ? []
-      new Lt.Models.TaskUpdate(update)
-
-    additions = for addition in eventsJSON.relation_additions ? []
-      new Lt.Models.RelationAddition(addition)
-
-    removals = for removal in eventsJSON.relation_removals ? []
-      new Lt.Models.RelationRemoval(removal)
-
-    return creations.concat(updates).concat(additions).concat(removals)
+    for event in eventsJSON.events ? []
+      new eventClasses[event.type](event, updatedTask: updatedTask)
 
   resetTasks: ->
     @applyEvent(event) for event in @models

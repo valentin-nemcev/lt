@@ -65,6 +65,17 @@ module Task
 
     alias_method :task, :owner
 
+    def events
+      [{
+        :type           => 'task_update',
+        :id             => "#{self.id}-#{self.task_id}",
+        :task_id        => self.task_id,
+        :attribute_name => self.attribute_name,
+        :updated_value  => self.updated_value,
+        :date           => self.update_date.httpdate,
+      }]
+    end
+
     def task_id
       task.id
     end

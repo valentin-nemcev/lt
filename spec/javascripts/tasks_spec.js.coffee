@@ -36,54 +36,59 @@ describe 'Tasks', ->
 
     it 'with unordered events for multiple tasks with updates', ->
       # TODO: Add sequence numbers
-      taskEventsJSON =
-        task_creations: [
-          id         : '1'
-          task_id    : 'action1'
-          date       : 'Tue, 18 Sep 2012 16:00:00 GMT'
-        ,
-          id         : '2'
-          task_id    : 'project1'
-          date       : 'Thu, 20 Sep 2012 17:00:00 GMT'
-        ]
-        task_updates: [
-          id             : 'update1'
-          task_id        : 'action1'
-          date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
-          attribute_name : 'state'
-          updated_value  : 'considered'
-        ,
-          id             : 'update2'
-          task_id        : 'action1'
-          date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
-          attribute_name : 'objective'
-          updated_value  : 'New objective'
-        ,
-          id             : 'update3'
-          task_id        : 'project1'
-          date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
-          attribute_name : 'state'
-          updated_value  : 'underway'
-        ,
-          id             : 'update4'
-          task_id        : 'project1'
-          date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
-          attribute_name : 'objective'
-          updated_value  : 'Project objective'
-        ,
-          id             : 'update5'
-          task_id        : 'project1'
-          date           : 'Thu, 20 Sep 2012 18:00:00 GMT'
-          attribute_name : 'objective'
-          updated_value  : 'Updated project objective'
-        ].reverse()
-        relation_additions: [
-          id            : 'relation_addition1'
-          date          : 'Thu, 20 Sep 2012 17 : 00 : 00 GMT'
-          relation_type : 'composition'
-          supertask_id  : 'project1'
-          subtask_id    : 'action1'
-        ]
+      taskEventsJSON = [
+        type       : 'task_creation'
+        id         : '1'
+        task_id    : 'action1'
+        date       : 'Tue, 18 Sep 2012 16:00:00 GMT'
+      ,
+        type       : 'task_creation'
+        id         : '2'
+        task_id    : 'project1'
+        date       : 'Thu, 20 Sep 2012 17:00:00 GMT'
+      ,
+        type           : 'task_update'
+        id             : 'update1'
+        task_id        : 'action1'
+        date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
+        attribute_name : 'state'
+        updated_value  : 'considered'
+      ,
+        type           : 'task_update'
+        id             : 'update2'
+        task_id        : 'action1'
+        date           : 'Tue, 18 Sep 2012 16:00:00 GMT'
+        attribute_name : 'objective'
+        updated_value  : 'New objective'
+      ,
+        type           : 'task_update'
+        id             : 'update3'
+        task_id        : 'project1'
+        date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
+        attribute_name : 'state'
+        updated_value  : 'underway'
+      ,
+        type           : 'task_update'
+        id             : 'update4'
+        task_id        : 'project1'
+        date           : 'Thu, 20 Sep 2012 17:00:00 GMT'
+        attribute_name : 'objective'
+        updated_value  : 'Project objective'
+      ,
+        type           : 'task_update'
+        id             : 'update5'
+        task_id        : 'project1'
+        date           : 'Thu, 20 Sep 2012 18:00:00 GMT'
+        attribute_name : 'objective'
+        updated_value  : 'Updated project objective'
+      ,
+        type          : 'relation_addition'
+        id            : 'relation_addition1'
+        date          : 'Thu, 20 Sep 2012 17 : 00 : 00 GMT'
+        relation_type : 'composition'
+        supertask_id  : 'project1'
+        subtask_id    : 'action1'
+      ]
 
       expectedTasks = [
         id            : 'project1'
@@ -100,7 +105,7 @@ describe 'Tasks', ->
       ]
 
       server.respondWith 'GET', '/tasks', (request) ->
-        request.respond jsonResponse(taskEventsJSON)...
+        request.respond jsonResponse(events: taskEventsJSON)...
 
       taskEvents.fetch()
       server.respond()
@@ -112,25 +117,26 @@ describe 'Tasks', ->
 
   describe 'Create', ->
     it 'posts a tasks and handles response', ->
-      taskEventsResponseJSON =
-        task_creations: [
-          id             : 'creation1'
-          task_id        : 'action1'
-          date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
-        ]
-        task_updates: [
-          id             : 'update1'
-          task_id        : 'action1'
-          attribute_name : 'state'
-          updated_value  : 'considered'
-          date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
-        ,
-          id             : 'update2'
-          task_id        : 'action1'
-          attribute_name : 'objective'
-          updated_value  : 'Test objective'
-          date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
-        ]
+      taskEventsResponseJSON = [
+        type           : 'task_creation'
+        id             : 'creation1'
+        task_id        : 'action1'
+        date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
+      ,
+        type           : 'task_update'
+        id             : 'update1'
+        task_id        : 'action1'
+        attribute_name : 'state'
+        updated_value  : 'considered'
+        date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
+      ,
+        type           : 'task_update'
+        id             : 'update2'
+        task_id        : 'action1'
+        attribute_name : 'objective'
+        updated_value  : 'Test objective'
+        date           : 'Sat, 27 Oct 2012 09 : 17 : 35 GMT'
+      ]
 
       expectedTasks = [
         id            : 'action1'
@@ -149,7 +155,7 @@ describe 'Tasks', ->
       actualTaskRequestJSON = null
       server.respondWith 'POST', '/tasks', (request) ->
         actualTaskRequestJSON = jsonRequest request.requestBody
-        request.respond jsonResponse(taskEventsResponseJSON)...
+        request.respond jsonResponse(events: taskEventsResponseJSON)...
 
       tasks.create
         objective : 'Test objective'
