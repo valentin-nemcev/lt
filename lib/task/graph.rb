@@ -23,7 +23,7 @@ module Task
     def new_task(*args)
       task = Task::Base.new *args
       add_tasks_with_connected [task]
-      task
+      [[task.creation_event, *task.editable_attribute_events], task]
     end
 
 
@@ -56,6 +56,9 @@ module Task
       tasks.each{ |t| t.computed_attributes_updated :after => update_date }
     end
 
+    def compute_events_from(events)
+      []
+    end
 
     def new_events(args = {})
       update_date = args.fetch :after

@@ -37,18 +37,33 @@ module Task
     def destroy
     end
 
+    def creation_event
+      @creation_event ||= CreationEvent.new(self)
+    end
+
     def events
-      [{
-        :type    => 'task_creation',
-        :id      => self.id,
-        :task_id => self.id,
-        :date    => self.creation_date.httpdate,
-      }]
+      [creation_event]
     end
 
     def inspect
       id_str = id.nil? || id == object_id ? '' : ":#{id}"
       "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str}>"
+    end
+  end
+
+  class CreationEvent
+    def initialize(task)
+      @task = task
+    end
+    attr_reader :task
+
+    def as_json(*)
+      {
+        :type    => 'task_creation',
+        :id      => task.id,
+        :task_id => task.id,
+        :date    => task.creation_date.httpdate,
+      }
     end
   end
 end

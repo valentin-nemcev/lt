@@ -50,7 +50,7 @@ module Task
 
     def self.save_task(task)
       record = if task.persisted?
-        task_records_cache.fetch(task.id) { self.find_by_id! task.id }
+        self.find_by_id! task.id
       else
         self.new
       end
@@ -75,8 +75,8 @@ module Task
     def map_from_task(task)
       self.creation_date = task.creation_date
       self.completion_date = task.completed? ? task.completion_date : nil
-      AttributeRevisionRecord.save_revisions self,
-                                task.all_attribute_revisions
+      # AttributeRevisionRecord.save_revisions self,
+      #                           task.all_attribute_revisions
       self
     end
 

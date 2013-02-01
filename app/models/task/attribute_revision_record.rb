@@ -17,12 +17,11 @@ module Task
       revisions.map{ |rev| save_revision(task_record, rev) }.compact
     end
 
-    def self.save_revision(task_record, revision)
-      scope = task_record.attribute_revisions
+    def self.save_revision(revision)
       record = if revision.persisted?
-        scope.detect { |rec| rec.id == revision.id }
+        self.find_by_id! revision.id
       else
-        scope.build
+        self.new
       end
       record.map_from_revision(revision)
       record.save! if record.changed?
@@ -49,6 +48,7 @@ module Task
     end
 
     def map_from_revision(rev)
+      self.task_id          = rev.task_id
       self.sequence_number  = rev.sequence_number
       self.update_date      = rev.update_date
       self.next_update_date = rev.has_next? ? rev.next_update_date : nil

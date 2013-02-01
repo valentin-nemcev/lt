@@ -30,7 +30,7 @@ module Task
 
     def update_related_tasks(new_related_tasks = {}, opts = {})
       effective_date = opts.fetch :on, Time.current
-      changed_relations = []
+      events = []
       effective_related_tasks(:on => effective_date).
         each do |relation_type, related|
         related.flat_map do |relation_dir, tasks_with_relations|
@@ -38,17 +38,18 @@ module Task
             fetch(relation_dir, [])
           existing_tasks = tasks_with_relations.collect(&:second)
           (new_tasks - existing_tasks).map do |task|
-            changed_relations <<
-              add_relation(relation_type, relation_dir, task, opts)
+            events <<
+              add_relation(relation_type, relation_dir, task, opts).
+                addition_event
           end
           tasks_with_relations.each do |(relation, task)|
             unless new_tasks.include? task
-              changed_relations << relation.remove(:on => effective_date)
+              events << relation.remove(:on => effective_date).removal_event
             end
           end
         end
       end
-      changed_relations
+      events
     end
 
     def add_relation(type, relation, task, additional_opts)

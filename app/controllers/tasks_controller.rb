@@ -9,35 +9,28 @@ class TasksController < ApplicationController
     render :json => {:events => @events}
   end
 
-  # TODO: Remove effective_date - 1.second hack
   def create
-    task = graph.new_task task_attrs.merge(on: effective_date)
+    @events, task = graph.new_task task_attrs.merge(on: effective_date)
 
-    task.update_related_tasks fetch_related_tasks(task_params),
+    @events += task.update_related_tasks fetch_related_tasks(task_params),
       on: effective_date
 
-    graph.new_events :for => task, :after => effective_date - 1.second
+    @events += graph.compute_events_from @events
 
-    storage.store task
-
-    @events =
-      graph.new_events :for => task, :after => effective_date - 1.second
+    storage.store_events @events
 
     render :json => {:events => @events}, :status => :created
   end
 
   def update
     task = fetch_task
-    task.update_attributes task_attrs, on: effective_date
-    task.update_related_tasks fetch_related_tasks(task_params),
+    @events = task.update_attributes task_attrs, on: effective_date
+    @events += task.update_related_tasks fetch_related_tasks(task_params),
         on: effective_date
 
-    graph.new_events :for => task, :after => effective_date - 1.second
+    @events += graph.compute_events_from @events
 
-    storage.store task
-
-    @events =
-      graph.new_events :for => task, :after => effective_date - 1.second
+    storage.store_events @events
 
     render :json => {:events => @events}
   end

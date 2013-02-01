@@ -111,36 +111,18 @@ module Task
       self
     end
 
-    def events
-      events = [{
-        :type => 'relation_addition',
-        :id => [
-          self.id,
-          self.subtask.id,
-          self.supertask.id,
-          'a'
-        ].join('-'),
-        :date          => self.addition_date.httpdate,
-        :relation_type => self.type,
-        :supertask_id  => self.supertask.id,
-        :subtask_id    => self.subtask.id,
-      }]
-      return events unless removed?
-      events += [{
-        :type => 'relation_removal',
-        :id => [
-          self.id,
-          self.subtask.id,
-          self.supertask.id,
-          'r'
-        ].join('-'),
-        :date          => self.removal_date.httpdate,
-        :relation_type => self.type,
-        :supertask_id  => self.supertask.id,
-        :subtask_id    => self.subtask.id,
-      }]
+    def addition_event
+      @addition_event ||= AdditionEvent.new self
     end
 
+    def removal_event
+      return nil unless removed?
+      @removal_event ||= RemovalEvent.new self
+    end
+
+    def events
+      [addition_event, removal_event].compact
+    end
 
     def inspect
       id_str = id.nil? ? '' : ":#{id}"
@@ -151,6 +133,51 @@ module Task
       " (#{connection_state})" \
       " effective in #{effective_interval.inspect}>"
     end
+  end
 
+  class AdditionEvent
+    def initialize(relation)
+      @relation = relation
+    end
+    attr_reader :relation
+
+    def as_json(*)
+      {
+        :type => 'relation_addition',
+        :id => [
+          relation.id,
+          relation.subtask.id,
+          relation.supertask.id,
+          'a'
+        ].join('-'),
+        :date          => relation.addition_date.httpdate,
+        :relation_type => relation.type,
+        :supertask_id  => relation.supertask.id,
+        :subtask_id    => relation.subtask.id,
+      }
+    end
+  end
+
+  class RemovalEvent
+    def initialize(relation)
+      @relation = relation
+    end
+    attr_reader :relation
+
+    def as_json(*)
+      {
+        :type => 'relation_removal',
+        :id => [
+          relation.id,
+          relation.subtask.id,
+          relation.supertask.id,
+          'r'
+        ].join('-'),
+        :date          => relation.removal_date.httpdate,
+        :relation_type => relation.type,
+        :supertask_id  => relation.supertask.id,
+        :subtask_id    => relation.subtask.id,
+      }
+    end
   end
 end

@@ -109,17 +109,25 @@ describe Task::Graph do
 
     describe '#new_task' do
       let(:new_task_args) { :new_task_args }
-      let(:new_task) { stub('New task') }
+      let(:new_task) do
+        stub('New task',
+             :creation_event => :creation_event,
+             :editable_attribute_events => [:editable_attribute_event]
+            )
+      end
       before do
         new_task.stub(:with_connected_tasks_and_relations => [[new_task], []])
         stub_const('Task::Base', Class.new)
         Task::Base.should_receive(:new).
           with(new_task_args).and_return(new_task)
       end
-      it 'creates task, includes it in graph and returns it' do
-        graph.new_task(new_task_args).should be new_task
+      it 'creates task, includes it in graph and returns it and its events' do
+        events, task = graph.new_task(new_task_args)
 
-        graph.tasks.should include(new_task)
+        events.should eq [:creation_event, :editable_attribute_event]
+        task.should be new_task
+
+        graph.tasks.should include new_task
       end
     end
 

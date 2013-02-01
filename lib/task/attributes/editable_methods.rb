@@ -88,10 +88,14 @@ module Task
             update_date: update_date)
         end.compact
         editable_attributes_updated(attributes)
-        attributes
+        attributes.collect(&:update_event)
       end
 
       def editable_attributes_updated(attributes)
+      end
+
+      def editable_attribute_events
+        @attribute_revisions.values.flat_map(&:to_a).map(&:update_event)
       end
     end
   end

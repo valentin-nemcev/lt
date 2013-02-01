@@ -4,6 +4,7 @@ module Task
       NextDateAlreadySetError
       NextDateEarlierThanUpdateDateError
       OwnerAlreadySetError
+      PreviousRevisionAlreadySetError
     ].each { |error_name| const_set(error_name, Class.new(Error)) }
 
     def initialize(attrs = {})
@@ -51,6 +52,16 @@ module Task
       @owner = new_owner
     end
 
+    attr_reader :previous_revision
+    def previous_revision=(new_previous_revision)
+      if previous_revision.present?
+        raise PreviousRevisionAlreadySetError.new \
+          revision: self,
+          new_previous_revision: new_previous_revision
+      end
+      @previous_revision = new_previous_revision
+    end
+
     def == other
       self.updated_value == other.updated_value &&
         self.update_date == other.update_date &&
@@ -65,19 +76,42 @@ module Task
 
     alias_method :task, :owner
 
+    def update_event
+      @update_event ||= UpdateEvent.new(self)
+    end
+
     def events
-      [{
-        :type           => 'task_update',
-        :id             => "#{self.id}-#{self.task_id}",
-        :task_id        => self.task_id,
-        :attribute_name => self.attribute_name,
-        :updated_value  => self.updated_value,
-        :date           => self.update_date.httpdate,
-      }]
+      [update_event]
     end
 
     def task_id
       task.id
+    end
+  end
+
+  class UpdateEvent
+    def initialize(revision)
+      @revision = revision
+    end
+    attr_reader :revision
+
+    def previous_revision
+      revision.previous_revision
+    end
+
+    def changed_revisions
+      [previous_revision, revision].compact
+    end
+
+    def as_json(*)
+      {
+        :type           => 'task_update',
+        :id             => "#{revision.id}-#{revision.task_id}",
+        :task_id        => revision.task_id,
+        :attribute_name => revision.attribute_name,
+        :updated_value  => revision.updated_value,
+        :date           => revision.update_date.httpdate,
+      }
     end
   end
 end

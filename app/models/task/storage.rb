@@ -1,6 +1,9 @@
 module Task
   class Storage
-    class TaskNotFoundError < StandardError; end
+    %w[
+      TaskNotFoundError
+      UnknownEventType
+    ].each { |error_name| const_set(error_name, Class.new(Error)) }
 
     attr_reader :user, :graph, :effective_interval
     def initialize(opts = {})
@@ -8,6 +11,27 @@ module Task
       @effective_interval = opts.fetch(:effective_in,
                                        TimeInterval.for_all_time)
       clear_graph
+    end
+
+    def store_events(events)
+      events.each do |event|
+        case event
+        when CreationEvent
+          task_record = task_base.save_task(event.task)
+        when UpdateEvent
+          event.changed_revisions.map do |revision|
+            task_attribute_base.save_revision(revision)
+          end
+        when AdditionEvent
+          relation = event.relation
+          relation_base.save_relation(relation)
+        when RemovalEvent
+          relation = event.relation
+          relation_base.save_relation(relation)
+        else
+          raise UnknownEventType.new event: event
+        end
+      end
     end
 
     def store(task)
@@ -73,6 +97,10 @@ module Task
 
     def task_base
       Task::Record.for_user user
+    end
+
+    def task_attribute_base
+      Task::AttributeRevisionRecord
     end
 
     def relation_base

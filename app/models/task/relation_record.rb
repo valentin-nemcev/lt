@@ -26,27 +26,25 @@ module Task
       end
     end
 
-    def self.save_relation(relation, task_records_map)
+    def self.save_relation(relation)
       record = if relation.persisted?
-        task_relation_records_cache.fetch(relation.id) do
-          self.find_by_id! relation.id
-        end
+        self.find_by_id! relation.id
       else
         self.new
       end
-      record.map_from_relation(relation, task_records_map)
+      record.map_from_relation(relation)
       record.save! if record.changed?
       relation.id = record.id
       record
     end
 
-    def map_from_relation(relation, task_records_map)
+    def map_from_relation(relation)
       self.type       = relation.type.to_s
       self.addition_date   = relation.addition_date
       self.removal_date = relation.removed? ? relation.removal_date : nil
 
-      self.supertask  = task_records_map[relation.supertask.id]
-      self.subtask    = task_records_map[relation.subtask.id]
+      self.supertask_id  = relation.supertask.id
+      self.subtask_id    = relation.subtask.id
       self
     end
 

@@ -57,6 +57,7 @@ module Task
 
       if empty? || new_revision.different_from?(last)
         last.next_update_date = new_revision.update_date unless empty?
+        new_revision.previous_revision = last
         add_revision new_revision
       end
     end

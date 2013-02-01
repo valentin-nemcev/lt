@@ -145,5 +145,7 @@ describe 'Object with editable attributes' do
   let(:update_date)   { Time.zone.parse('2000.01.02') }
   let(:attr_revisions1) { stub(:attr_revision_sequence1, empty?: false) }
   let(:attr_revisions2) { stub(:attr_revision_sequence2, empty?: false) }
-  let(:attr_revision)  { stub(:attr_revision, attr_name: :attr_value) }
+  let(:attr_revision)  do
+    stub(:attr_revision, attr_name: :attr_value, update_event: nil)
+  end
 end

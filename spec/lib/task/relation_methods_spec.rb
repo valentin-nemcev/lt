@@ -65,7 +65,8 @@ describe 'Task with relations' do
           subtasks:   [related_task2]}} }
 
         let(:updated_relations) do
-          task.update_related_tasks updates, on: addition_date
+          task.update_related_tasks(updates, on: addition_date).
+            collect(&:relation)
         end
         specify { updated_relations.should have(2).relations }
 
@@ -104,7 +105,8 @@ describe 'Task with relations' do
           subtasks:   [related_task2, new_related_task]}} }
 
         let!(:updated_relations) do
-          task.update_related_tasks updates, on: new_addition_date
+          task.update_related_tasks(updates, on: new_addition_date).
+            collect(&:relation)
         end
         specify { task.relations.should have(3).relations }
         specify { updated_relations.should have(1).relation }
@@ -128,7 +130,8 @@ describe 'Task with relations' do
         } } }
 
         let!(:updated_relations) do
-          task.update_related_tasks updates, on: removal_date
+          task.update_related_tasks(updates, on: removal_date).
+            collect(&:relation)
         end
         specify { task.relations.should have(2).relations }
         specify { updated_relations.should have(1).relation }

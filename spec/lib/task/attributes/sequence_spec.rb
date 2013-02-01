@@ -17,6 +17,8 @@ describe Task::Attributes::Sequence do
   def stub_revision(*args)
     stub(*args).tap do |revision_stub|
       revision_stub.stub(:'owner=')
+      revision_stub.stub(:'previous_revision=')
+      revision_stub.stub(:'next_update_date=')
     end
   end
 
@@ -215,12 +217,12 @@ describe Task::Attributes::Sequence do
       context 'with correct new date' do
         it 'should create new revision and add it to sequence' do
           second_revision.should_receive(:"next_update_date=").with(new_date)
+          new_revision.should_receive(:"previous_revision=").with(second_revision)
           sequence.new_revision revision_attrs
           sequence.to_a.should eq(revisions_with_new)
         end
 
         it 'should not create revision that is not different from previous' do
-          second_revision.should_not_receive(:"next_update_date=")
           new_revision.stub(:different_from?).with(second_revision)
             .and_return(false)
           sequence.new_revision(revision_attrs).should be_nil
@@ -231,7 +233,6 @@ describe Task::Attributes::Sequence do
       context 'with incorrect date' do
         let(:new_date) { update_date - 1.second }
         it 'should not allow adding revisions' do
-          second_revision.should_receive(:"next_update_date=").with(new_date)
           expect do
             sequence.new_revision revision_attrs
           end.to raise_error Sequence::InvalidUpdateDateError
@@ -241,7 +242,6 @@ describe Task::Attributes::Sequence do
       context 'with same date' do
         let(:new_date) { update_date }
         it 'should preserve order of revisions' do
-          second_revision.should_receive(:"next_update_date=").with(new_date)
           sequence.new_revision revision_attrs
           sequence.to_a.should eq(revisions_with_new)
         end
