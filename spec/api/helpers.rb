@@ -53,7 +53,7 @@ class Array
     structs = map(&:to_struct)
     matches = structs.find_all{ |s| s.matches? fields }
     l = matches.size
-    l >= 1 or fail "Found #{l == 0 ? 'no' : l} #{'struct'.pluralize(l)}" \
+    l == 1 or fail "Found #{l == 0 ? 'no' : l} #{'struct'.pluralize(l)}" \
                    " matching #{fields}" \
                    " Existing #{'struct'.pluralize(structs.size)} were: \n" +
                    structs.map(&:inspect).join("\n")

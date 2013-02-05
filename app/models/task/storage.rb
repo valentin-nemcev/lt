@@ -78,9 +78,11 @@ module Task
       task_base.destroy_computed_attribute_revisions
       clear_graph
       fetch_all
-      update_date = graph.tasks.collect(&:creation_date).min
-      graph.update_computed_attributes :after => update_date
-      store_graph
+      new_events = graph.all_events.sort_by(&:date).chunk(&:date).
+        flat_map do |date, events|
+        graph.compute_events_from(events)
+      end
+      store_events(new_events)
     end
 
     protected

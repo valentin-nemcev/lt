@@ -6,8 +6,9 @@ namespace :tasks do
       user = user.where :login => ENV['user']
     end
     user.all.each do |user|
-      puts "Recomputing tasks for #{user.login}"
       storage = Task::Storage.new(user: user)
+      revs = storage.fetch_all.tasks.collect_concat(&:all_computed_attribute_revisions)
+      puts "Recomputing #{revs.size} task revisions for #{user.login}"
       storage.recompute_attributes!
       revs = storage.graph.tasks.collect_concat(&:all_computed_attribute_revisions)
       puts "Recomputed #{revs.size} revisions"
