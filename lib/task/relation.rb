@@ -87,6 +87,10 @@ module Task
       nodes.child
     end
 
+    def tasks
+      [supertask, subtask]
+    end
+
     def effective_interval
       TimeInterval.new addition_date, removal_date
     end
@@ -141,6 +145,10 @@ module Task
     end
     attr_reader :relation
 
+    def date
+      relation.addition_date
+    end
+
     def as_json(*)
       {
         :type => 'relation_addition',
@@ -163,6 +171,10 @@ module Task
       @relation = relation
     end
     attr_reader :relation
+
+    def date
+      relation.removal_date
+    end
 
     def as_json(*)
       {

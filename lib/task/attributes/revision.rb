@@ -103,6 +103,11 @@ module Task
       [previous_revision, revision].compact
     end
 
+    def date
+      revision.update_date
+    end
+
+
     def as_json(*)
       {
         :type           => 'task_update',

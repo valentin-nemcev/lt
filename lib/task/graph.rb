@@ -57,7 +57,25 @@ module Task
     end
 
     def compute_events_from(events)
-      []
+      computed_events = events.flat_map do |event|
+        case event
+        when CreationEvent
+          event.task.compute_attributes_after_creation
+        when UpdateEvent
+          rev = event.revision
+          rev.task.compute_attributes_after_attribute_update(rev)
+        when AdditionEvent, RemovalEvent
+          rel = event.relation
+          date = event.date
+          super_revs = rel.supertask.
+            compute_attributes_after_relation_update(rel, :sub, date)
+          sub_revs = rel.subtask.
+            compute_attributes_after_relation_update(rel, :super, date)
+          super_revs + sub_revs
+        else
+          raise UnknownEventType.new event: event
+        end
+      end.compact.collect_concat(&:events)
     end
 
     def new_events(args = {})

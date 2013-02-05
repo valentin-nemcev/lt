@@ -57,6 +57,10 @@ module Task
     end
     attr_reader :task
 
+    def date
+      task.creation_date
+    end
+
     def as_json(*)
       {
         :type    => 'task_creation',

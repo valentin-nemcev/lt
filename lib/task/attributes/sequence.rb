@@ -25,6 +25,11 @@ module Task
     delegate :count, :empty?, :last, :to => :@revisions
 
 
+    def last_on(given_date)
+      last_index = @revisions.rindex{ |rev| rev.update_date <= given_date }
+      last_index and @revisions[last_index]
+    end
+
     def last_before(given_date)
       given_date or return nil
       last_index = @revisions.rindex{ |rev| rev.update_date < given_date }

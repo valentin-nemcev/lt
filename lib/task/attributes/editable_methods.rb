@@ -72,7 +72,7 @@ module Task
       end
 
       def last_editable_attribute_revision(args = {})
-        @attribute_revisions[args.fetch :for].last_before args.fetch :before
+        @attribute_revisions[args.fetch :for].last_on args.fetch :on
       end
 
       def update_attributes(attrs = {}, opts = {})

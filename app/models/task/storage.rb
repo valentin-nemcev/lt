@@ -14,22 +14,21 @@ module Task
     end
 
     def store_events(events)
-      events.each do |event|
-        case event
-        when CreationEvent
-          task_record = task_base.save_task(event.task)
-        when UpdateEvent
-          event.changed_revisions.map do |revision|
-            task_attribute_base.save_revision(revision)
+      task_base.transaction do
+        events.each do |event|
+          case event
+          when CreationEvent
+            task_record = task_base.save_task(event.task)
+          when UpdateEvent
+            event.changed_revisions.map do |revision|
+              task_attribute_base.save_revision(revision)
+            end
+          when AdditionEvent, RemovalEvent
+            relation = event.relation
+            relation_base.save_relation(relation)
+          else
+            raise UnknownEventType.new event: event
           end
-        when AdditionEvent
-          relation = event.relation
-          relation_base.save_relation(relation)
-        when RemovalEvent
-          relation = event.relation
-          relation_base.save_relation(relation)
-        else
-          raise UnknownEventType.new event: event
         end
       end
     end

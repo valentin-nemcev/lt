@@ -14,6 +14,19 @@ module Task
       def related_tasks
         relation_opts.keys
       end
+
+      def reversed_relation(given_rel)
+        opts = relation_opts.fetch(given_rel)
+        given_dir, given_type = opts.values_at(:relation, :type)
+        rev_dir = case given_dir
+                  when :sub   then :super
+                  when :super then :sub
+                  end
+        rev_rel = relation_opts.find do |rel, opts|
+          opts[:type] == given_type && opts[:relation] == rev_dir
+        end.first
+        rev_rel
+      end
     end
 
     included do |base|
@@ -91,9 +104,9 @@ module Task
       self.class.related_tasks.each do |relation_name|
         opts = relation_opts_for(relation_name)
         relation = case opts[:relation]
-        when :super then :supertasks
-        when :sub   then :subtasks
-        end
+          when :super then :supertasks
+          when :sub   then :subtasks
+          end
         tasks[opts[:type]][relation] =
           filtered_relations(:for => relation_name).filter do |r|
             r.effective_on? effective_date
