@@ -108,23 +108,26 @@ module Task
         end
       end
 
-      def compute_attributes_after_creation
+      def computed_attributes_after_creation
         date = self.creation_date
         computed_attributes_opts.flat_map do |attr, attr_opts|
-          self.compute_attribute_with_deps(attr, date)
+          self.computed_attribute_with_deps(attr, date)
         end
       end
 
-      def compute_attributes_after_attribute_update(revision)
+      def computed_attributes_after_attribute_update(revision)
         attribute, date = revision.attribute_name, revision.update_date
         deps_for_attribute(attribute, date).flat_map do |task, attr|
-          task.compute_attribute_with_deps(attr, date)
+          task.computed_attribute_with_deps(attr, date)
         end
       end
 
-      def compute_attributes_after_relation_update(relation, relation_dir, date)
-        deps_for_relation(relation.type, relation_dir).flat_map do |task, attr|
-          task.compute_attribute_with_deps(attr, date)
+      def computed_attributes_after_relation_update(
+        given_rel_type, given_rel_dir, given_date
+      )
+        deps_for_relation(given_rel_type, given_rel_dir, given_date).
+          flat_map do |task, attr|
+          task.computed_attribute_with_deps(attr, given_date)
         end
       end
 
@@ -140,12 +143,12 @@ module Task
                 :on => given_date,
                 :for => self.class.reversed_relation(rel)).nodes
             end
-            rel_tasks.map{ |rel_task| [rel_task, attr] }
+            rel_tasks.map{ |rel_task| [rel_task, attr, given_date] }
           end.compact
         end
       end
 
-      def deps_for_relation(given_rel_type, given_rel_dir)
+      def deps_for_relation(given_rel_type, given_rel_dir, given_date)
         computed_attributes_opts.flat_map do |attr, attr_opts|
           depended_on_attributes = attr_opts[:computed_from]
           depended_on_attributes.map do |rel, attrs|
@@ -155,12 +158,19 @@ module Task
                 opts[:relation] == given_rel_dir
               next
             end
-            [self, attr]
+            [self, attr, given_date]
           end.compact
         end
       end
 
-      def compute_attribute_with_deps(attribute, date)
+      def computed_attribute_with_deps(attribute, date)
+        [[self, attribute, date]] +
+          deps_for_attribute(attribute, date).flat_map do |task, attr|
+            task.computed_attribute_with_deps(attr, date)
+          end
+      end
+
+      def compute_attribute(attribute, date)
         attr_opts = computed_attributes_opts.fetch attribute
         attribute_proc = attr_opts[:proc]
         depended_on_attributes = attr_opts[:computed_from]
@@ -199,9 +209,6 @@ module Task
           attribute_name: attribute,
           updated_value: computed_value,
           update_date: date
-        [rev] + deps_for_attribute(attribute, date).flat_map do |task, attr|
-          task.compute_attribute_with_deps(attr, date)
-        end
       end
 
       # ↓ Worst code of the year

@@ -1,3 +1,4 @@
+Task::Relation # TODO: Remove
 module Task
   class Storage
     %w[
