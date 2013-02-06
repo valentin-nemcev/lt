@@ -3,7 +3,7 @@ module Task
   class Storage
     %w[
       TaskNotFoundError
-      UnknownEventType
+      UnknownEventTypeError
     ].each { |error_name| const_set(error_name, Class.new(Error)) }
 
     attr_reader :user, :graph, :effective_interval
@@ -18,7 +18,7 @@ module Task
       task_base.transaction do
         events.each do |event|
           case event
-          when CreationEvent
+          when CreationEvent, CompletionEvent
             task_record = task_base.save_task(event.task)
           when UpdateEvent
             event.changed_revisions.map do |revision|
@@ -28,7 +28,7 @@ module Task
             relation = event.relation
             relation_base.save_relation(relation)
           else
-            raise UnknownEventType.new event: event
+            raise UnknownEventTypeError.new event: event
           end
         end
       end

@@ -1,5 +1,8 @@
 module Task
   class Graph
+    %w[
+      UnknownEventTypeError
+    ].each { |error_name| const_set(error_name, Class.new(Error)) }
     def add_tasks(args = {})
       given_relations = args.fetch(:relations, [])
 
@@ -51,16 +54,12 @@ module Task
       tasks.find{ |task| task.id.to_s == id.to_s }
     end
 
-    def update_computed_attributes(args = {})
-      update_date = args.fetch :after
-      tasks.each{ |t| t.computed_attributes_updated :after => update_date }
-    end
-
     def compute_events_from(events)
       attrs_to_compute = events.flat_map do |event|
         case event
         when CreationEvent
           event.task.computed_attributes_after_creation
+        when CompletionEvent
         when UpdateEvent
           rev = event.revision
           rev.task.computed_attributes_after_attribute_update(rev)
@@ -73,30 +72,13 @@ module Task
             computed_attributes_after_relation_update(rel.type, :super, date)
           super_revs + sub_revs
         else
-          raise UnknownEventType.new event: event
+          raise UnknownEventTypeError.new event: event
         end
-      end
+      end.compact
       attrs_to_compute.reverse.uniq.reverse.
         map do |task, attr, date|
         task.compute_attribute(attr, date)
       end.compact.collect(&:update_event)
-    end
-
-    def new_events(args = {})
-      update_date = args.fetch :after
-      interval = TimeInterval.beginning_on update_date
-      task = args.fetch :for
-      tasks, relations = task.with_connected_tasks_and_relations
-      tasks.each{ |t| t.computed_attributes_updated :after => update_date }
-      created_tasks = tasks.select{ |t| interval.include? t.creation_date }
-      relations = relations.select do |r|
-        interval.include?(r.addition_date) ||
-          r.removal_date && interval.include?(r.removal_date)
-      end
-      attribute_revisions = tasks.collect_concat do |t|
-        t.attribute_revisions in: interval
-      end
-      (tasks + relations + attribute_revisions).collect_concat(&:events)
     end
 
     def all_events

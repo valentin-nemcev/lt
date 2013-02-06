@@ -87,11 +87,12 @@ module Task
             updated_value: val,
             update_date: update_date)
         end.compact
-        editable_attributes_updated(attributes)
-        attributes.collect(&:update_event)
+        events_after_attribute_update(attributes) +
+          attributes.collect(&:update_event)
       end
 
-      def editable_attributes_updated(attributes)
+      def events_after_attribute_update(attributes)
+        []
       end
 
       def editable_attribute_events

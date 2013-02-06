@@ -120,8 +120,7 @@ module Task
     end
 
     def removal_event
-      return nil unless removed?
-      @removal_event ||= RemovalEvent.new self
+      @removal_event ||= RemovalEvent.new self if removed?
     end
 
     def events

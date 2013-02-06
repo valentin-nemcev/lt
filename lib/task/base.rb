@@ -10,19 +10,19 @@ module Task
     has_editable_attribute :state,     revision_class: Attributes::StateRevision
     has_editable_attribute :objective, revision_class: Attributes::ObjectiveRevision
 
-    def editable_attributes_updated(revisions)
-      completed_rev = revisions.detect do |rev|
+    def events_after_attribute_update(revisions)
+      revisions.detect do |rev|
         rev.attribute_name == :state &&
           rev.updated_value.in?([:done, :canceled])
+      end.try do |completed_rev|
+        update_date = completed_rev.update_date
+        subtasks = filtered_relations(:for => :subtasks, :on => update_date).nodes
+        subtasks.all?(&:completed?) or raise Error,
+          "Can't complete task with incomplete subtasks"
+
+        self.completion_date = update_date
       end
-      return if completed_rev.nil?
-
-      update_date = completed_rev.update_date
-      subtasks = filtered_relations(:for => :subtasks, :on => update_date).nodes
-      subtasks.all?(&:completed?) or raise Error,
-        "Can't complete task with incomplete subtasks"
-
-      self.completion_date = update_date
+      [self.completion_event].compact
     end
 
 

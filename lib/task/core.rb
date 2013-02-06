@@ -41,6 +41,10 @@ module Task
       @creation_event ||= CreationEvent.new(self)
     end
 
+    def completion_event
+      @completion_event ||= CompletionEvent.new(self) if completed?
+    end
+
     def events
       [creation_event]
     end
@@ -67,6 +71,26 @@ module Task
         :id      => task.id,
         :task_id => task.id,
         :date    => task.creation_date.httpdate,
+      }
+    end
+  end
+
+  class CompletionEvent
+    def initialize(task)
+      @task = task
+    end
+    attr_reader :task
+
+    def date
+      task.creation_date
+    end
+
+    def as_json(*)
+      {
+        :type    => 'task_creation',
+        :id      => task.id,
+        :task_id => task.id,
+        :date    => task.completion_date.httpdate,
       }
     end
   end
