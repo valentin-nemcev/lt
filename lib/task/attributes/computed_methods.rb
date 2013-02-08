@@ -5,8 +5,16 @@ module Task
       extend ActiveSupport::Concern
 
       module ClassMethods
-        def has_computed_attribute(attribute, opts = {}, &block)
-          opts[:proc] = block
+        def has_computed_attribute(attribute, opts = {})
+          opts[:aggregate] = false
+          computed_attributes_opts[attribute] = opts
+        end
+
+        def has_aggregate_computed_attribute(attribute, opts = {})
+          opts[:aggregate] = true
+          opts[:computed_from] = Hash[
+            opts[:computed_from].map { |rel, attrs| [rel, Array(attrs)] }
+          ]
           computed_attributes_opts[attribute] = opts
         end
 
@@ -95,45 +103,50 @@ module Task
         end
       end
 
-      def computed_attributes_after_relation_update(
-        given_rel_type, given_rel_dir, given_date
-      )
-        deps_for_relation(given_rel_type, given_rel_dir, given_date).
-          flat_map do |task, attr|
-          task.computed_attribute_with_deps(attr, given_date)
+      def computed_attributes_after_relation_update(rel_type, rel_dir, date, ev)
+        deps_for_relation(rel_type, rel_dir, date).flat_map do |task, attr|
+          task.computed_attribute_with_deps(attr, date)
         end
       end
 
       def deps_for_attribute(given_attribute, given_date)
-        computed_attributes_opts.flat_map do |attr, attr_opts|
-          depended_on_attributes = attr_opts[:computed_from]
-          depended_on_attributes.flat_map do |rel, attrs|
-            next unless Array(attrs).include? given_attribute
-            rel_tasks = if rel == :self
-              [self]
-            else
-              filtered_relations(
-                :on => given_date,
-                :for => self.class.reversed_relation(rel)).nodes
-            end
-            rel_tasks.map{ |rel_task| [rel_task, attr, given_date] }
-          end.compact
+        aggregate, computed = computed_attributes_opts.partition do |_, opts|
+          opts[:aggregate]
         end
+        aggregate = aggregate.flat_map do |attr, attr_opts|
+          attr_opts[:computed_from].
+            select { |rel, attrs| attrs.include? given_attribute }.
+            flat_map do |rel, attrs|
+              rel_tasks = filtered_relations(
+                :on => given_date,
+                :for => self.class.reversed_relation(rel)
+              ).nodes
+              rel_tasks.map{ |rel_task| [rel_task, attr, given_date] }
+            end
+          end
+        computed = computed.
+          select do |attr, attr_opts|
+            attr_opts[:computed_from].include? given_attribute
+          end.
+          map do |attr, attr_opts|
+            [self, attr, given_date]
+          end
+        aggregate + computed
       end
 
       def deps_for_relation(given_rel_type, given_rel_dir, given_date)
-        computed_attributes_opts.flat_map do |attr, attr_opts|
-          depended_on_attributes = attr_opts[:computed_from]
-          depended_on_attributes.map do |rel, attrs|
-            next if rel == :self
-            opts = relation_opts_for(rel)
-            unless opts[:type] == given_rel_type &&
-                opts[:relation] == given_rel_dir
-              next
-            end
-            [self, attr, given_date]
-          end.compact
-        end
+        computed_attributes_opts.
+          select { |attr, attr_opts| attr_opts[:aggregate] }.
+          flat_map do |attr, attr_opts|
+            attr_opts[:computed_from].map do |rel, attrs|
+              opts = relation_opts_for(rel)
+              unless opts[:type] == given_rel_type &&
+                  opts[:relation] == given_rel_dir
+                next
+              end
+              [self, attr, given_date]
+            end.compact
+          end
       end
 
       def computed_attribute_with_deps(attribute, date)
@@ -145,38 +158,34 @@ module Task
 
       def compute_attribute(attribute, date)
         attr_opts = computed_attributes_opts.fetch attribute
-        attribute_proc = attr_opts[:proc]
         depended_on_attributes = attr_opts[:computed_from]
 
-        current_values = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-        depended_on_attributes.each_pair do |rel, attrs|
-          rel_tasks = if rel == :self
-            [self]
-          else
-            filtered_relations(:on => date, :for => rel).nodes
-          end
-          rel_tasks.each do |task|
-            Array(attrs).each do |attr|
-              msg = attr == attribute && task == self ?
-                :last_editable_attribute_revision : :last_attribute_revision
-              revision = task.public_send(msg, :for => attr, on: date)
-              value = revision.updated_value if revision
-              current_values[rel][attr][task] = value
+
+        if attr_opts[:aggregate]
+          attribute_proc = attr_opts[:added]
+          computed_value = attr_opts.fetch(:initial_value)
+
+          depended_on_attributes.each_pair do |rel, attrs|
+            rel_tasks = filtered_relations(:on => date, :for => rel).nodes
+            rel_tasks.each do |task|
+              args = attrs.map do |attr|
+                revision = task.last_attribute_revision(:for => attr, :on => date)
+                revision.updated_value if revision
+              end
+              computed_value = attribute_proc.(computed_value, *args)
             end
           end
-        end
-
-        proc_arguments = depended_on_attributes.flat_map do |rel, attrs|
-          Array(attrs).map do |attr|
-            if rel == :self
-              current_values[rel][attr].values.first
-            else
-              current_values[rel][attr].values
-            end
+        else
+          attribute_proc = attr_opts[:changed]
+          proc_arguments = depended_on_attributes.map do |attr|
+            msg = (attr == attribute) ?
+              :last_editable_attribute_revision : :last_attribute_revision
+            revision = self.public_send(msg, :for => attr, on: date)
+            value = revision.updated_value if revision
           end
-        end
 
-        computed_value = attribute_proc.(*proc_arguments, date)
+          computed_value = attribute_proc.(*proc_arguments, date)
+        end
 
         rev = @computed_attribute_revisions[attribute].new_revision \
           attribute_name: attribute,

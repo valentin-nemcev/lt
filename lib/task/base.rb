@@ -28,40 +28,53 @@ module Task
 
     include Attributes::ComputedMethods
 
-    has_computed_attribute :computed_state, computed_from:
-      {self: :state, subtasks: :computed_state} \
-    do |self_state, subtasks_states|
-      if !subtasks_states.empty? && self_state == :underway &&
-           subtasks_states.all? { |s| s.in? [:done, :subtasks_done, :canceled] }
-        :subtasks_done
-      else
-        self_state
-      end
-    end
+    COMPLETED_STATES = [:done, :subtasks_done, :canceled]
+    has_aggregate_computed_attribute \
+      :subtask_count,
+      :initial_value => 0,
+      :computed_from => {:subtasks => :_id},
+      :added   => Proc.new { |initial| initial += 1 },
+      :removed => Proc.new { |initial| initial -= 1 }
 
-    has_computed_attribute :blocked, computed_from:
-      {blocking: :state} \
-    do |blocking|
-      blocking.any? { |s| s.in? [:underway, :considered] }
-    end
+    has_aggregate_computed_attribute \
+      :completed_subtask_count,
+      :initial_value => 0,
+      :computed_from => {:subtasks => :computed_state},
+      :added   => Proc.new { |i, s| i += s.in?(COMPLETED_STATES) ? 1 : 0 },
+      :removed => Proc.new { |i, s| i -= s.in?(COMPLETED_STATES) ? 1 : 0 }
 
-    has_computed_attribute :subtask_count, computed_from:
-      {subtasks: :state} \
-    do |subtasks|
-      subtasks.count
-    end
+    has_aggregate_computed_attribute \
+      :blocking_count,
+      :initial_value => 0,
+      :computed_from => {:blocking => :computed_state},
+      :added   => Proc.new { |i, s| i += !s.in?(COMPLETED_STATES) ? 1 : 0 },
+      :removed => Proc.new { |i, s| i -= !s.in?(COMPLETED_STATES) ? 1 : 0 }
 
-    has_computed_attribute :type, computed_from:
-      {subtasks: :state} \
-    do |subtasks|
-      subtasks.empty? ? :action : :project
-    end
+    has_computed_attribute \
+      :computed_state,
+      :computed_from => [:state, :subtask_count, :completed_subtask_count],
+      :changed => Proc.new { |state, total, completed|
+        if total > 0 && state == :underway && total == completed
+          :subtasks_done
+        else
+          state
+        end
+      }
 
-    has_computed_attribute :last_state_change_date, computed_from:
-      {self: :computed_state} \
-    do |_, date|
-      date
-    end
+    has_computed_attribute \
+      :blocked,
+      :computed_from => [:blocking_count],
+      :changed => Proc.new { |c| c > 0 }
+
+    has_computed_attribute \
+      :type,
+      :computed_from => [:subtask_count],
+      :changed => Proc.new { |c| c > 0 ? :project : :action }
+
+    has_computed_attribute \
+      :last_state_change_date,
+      :computed_from => [:computed_state],
+      :changed => Proc.new { |_, date| date }
 
     def self.order_hash(els)
       els.each_with_index.
@@ -73,13 +86,14 @@ module Task
       [:done, :subtasks_done, :canceled],
       :underway,
       :considered]
-    TYPES_ORDER = order_hash [:action, :project]
-    has_computed_attribute :sort_rank, computed_from:
-      {self: [:computed_state, :blocked, :last_state_change_date]} \
-    do |state, blocked, last_state_change_date|
-      blocked = nil if state.in? [:done, :subtasks_done, :canceled]
-      [STATES_ORDER[state], blocked, last_state_change_date.to_i]
-    end
+
+    has_computed_attribute \
+      :sort_rank,
+      :computed_from => [:computed_state, :blocked, :last_state_change_date],
+      :changed => Proc.new { |state, blocked, last_state_change_date|
+        blocked = nil if state.in? COMPLETED_STATES
+        [STATES_ORDER[state], blocked, last_state_change_date.to_i]
+      }
 
     include Attributes::Methods
 

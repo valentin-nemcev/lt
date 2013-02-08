@@ -66,19 +66,19 @@ module Task
         when AdditionEvent, RemovalEvent
           rel = event.relation
           date = event.date
+          ev = event.is_a?(AdditionEvent) ? :added : :removed
           super_revs = rel.supertask.
-            computed_attributes_after_relation_update(rel.type, :sub, date)
+            computed_attributes_after_relation_update(rel.type, :sub, date, ev)
           sub_revs = rel.subtask.
-            computed_attributes_after_relation_update(rel.type, :super, date)
+            computed_attributes_after_relation_update(rel.type, :super, date, ev)
           super_revs + sub_revs
         else
           raise UnknownEventTypeError.new event: event
         end
       end.compact
       attrs_to_compute.reverse.uniq.reverse.
-        map do |task, attr, date|
-        task.compute_attribute(attr, date)
-      end.compact.collect(&:update_event)
+        map { |task, attr, date| task.compute_attribute(attr, date) }.
+        compact.collect(&:update_event)
     end
 
     def all_events
