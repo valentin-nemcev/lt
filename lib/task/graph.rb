@@ -60,13 +60,13 @@ module Task
         when CreationEvent
           event.task.computed_attributes_after_creation
         when CompletionEvent
-        when UpdateEvent
+        when Attributes::RevisionUpdateEvent
           rev = event.revision
           rev.task.computed_attributes_after_attribute_update(rev)
-        when AdditionEvent, RemovalEvent
+        when RelationAdditionEvent, RelationRemovalEvent
           rel = event.relation
           date = event.date
-          ev = event.is_a?(AdditionEvent) ? :added : :removed
+          ev = event.is_a?(RelationAdditionEvent) ? :added : :removed
           super_revs = rel.supertask.
             computed_attributes_after_relation_update(rel.type, :sub, date, ev)
           sub_revs = rel.subtask.

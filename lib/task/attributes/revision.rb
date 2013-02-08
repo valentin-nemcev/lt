@@ -77,7 +77,7 @@ module Task
     alias_method :task, :owner
 
     def update_event
-      @update_event ||= UpdateEvent.new(self)
+      @update_event ||= Attributes::RevisionUpdateEvent.new(self)
     end
 
     def events
@@ -86,37 +86,6 @@ module Task
 
     def task_id
       task.id
-    end
-  end
-
-  class UpdateEvent
-    def initialize(revision)
-      @revision = revision
-    end
-    attr_reader :revision
-
-    def previous_revision
-      revision.previous_revision
-    end
-
-    def changed_revisions
-      [previous_revision, revision].compact
-    end
-
-    def date
-      revision.update_date
-    end
-
-
-    def as_json(*)
-      {
-        :type           => 'task_update',
-        :id             => "#{revision.id}-#{revision.task_id}",
-        :task_id        => revision.task_id,
-        :attribute_name => revision.attribute_name,
-        :updated_value  => revision.updated_value,
-        :date           => revision.update_date.httpdate,
-      }
     end
   end
 end

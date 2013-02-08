@@ -1,4 +1,3 @@
-Task::Relation # TODO: Remove
 module Task
   class Storage
     %w[
@@ -20,11 +19,11 @@ module Task
           case event
           when CreationEvent, CompletionEvent
             task_record = task_base.save_task(event.task)
-          when UpdateEvent
+          when Attributes::RevisionUpdateEvent
             event.changed_revisions.map do |revision|
               task_attribute_base.save_revision(revision)
             end
-          when AdditionEvent, RemovalEvent
+          when RelationEvent
             relation = event.relation
             relation_base.save_relation(relation)
           else

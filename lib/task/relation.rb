@@ -116,11 +116,11 @@ module Task
     end
 
     def addition_event
-      @addition_event ||= AdditionEvent.new self
+      @addition_event ||= RelationAdditionEvent.new self
     end
 
     def removal_event
-      @removal_event ||= RemovalEvent.new self if removed?
+      @removal_event ||= RelationRemovalEvent.new self if removed?
     end
 
     def events
@@ -135,60 +135,6 @@ module Task
       " of #{@supertask.inspect} - #{@subtask.inspect}" \
       " (#{connection_state})" \
       " effective in #{effective_interval.inspect}>"
-    end
-  end
-
-  class AdditionEvent
-    def initialize(relation)
-      @relation = relation
-    end
-    attr_reader :relation
-
-    def date
-      relation.addition_date
-    end
-
-    def as_json(*)
-      {
-        :type => 'relation_addition',
-        :id => [
-          relation.id,
-          relation.subtask.id,
-          relation.supertask.id,
-          'a'
-        ].join('-'),
-        :date          => relation.addition_date.httpdate,
-        :relation_type => relation.type,
-        :supertask_id  => relation.supertask.id,
-        :subtask_id    => relation.subtask.id,
-      }
-    end
-  end
-
-  class RemovalEvent
-    def initialize(relation)
-      @relation = relation
-    end
-    attr_reader :relation
-
-    def date
-      relation.removal_date
-    end
-
-    def as_json(*)
-      {
-        :type => 'relation_removal',
-        :id => [
-          relation.id,
-          relation.subtask.id,
-          relation.supertask.id,
-          'r'
-        ].join('-'),
-        :date          => relation.removal_date.httpdate,
-        :relation_type => relation.type,
-        :supertask_id  => relation.supertask.id,
-        :subtask_id    => relation.subtask.id,
-      }
     end
   end
 end

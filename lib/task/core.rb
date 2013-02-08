@@ -54,44 +54,4 @@ module Task
       "<#{self.class}:#{sprintf('%016x', object_id)}#{id_str}>"
     end
   end
-
-  class CreationEvent
-    def initialize(task)
-      @task = task
-    end
-    attr_reader :task
-
-    def date
-      task.creation_date
-    end
-
-    def as_json(*)
-      {
-        :type    => 'task_creation',
-        :id      => task.id,
-        :task_id => task.id,
-        :date    => task.creation_date.httpdate,
-      }
-    end
-  end
-
-  class CompletionEvent
-    def initialize(task)
-      @task = task
-    end
-    attr_reader :task
-
-    def date
-      task.creation_date
-    end
-
-    def as_json(*)
-      {
-        :type    => 'task_creation',
-        :id      => task.id,
-        :task_id => task.id,
-        :date    => task.completion_date.httpdate,
-      }
-    end
-  end
 end
