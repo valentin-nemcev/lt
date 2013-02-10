@@ -14,6 +14,10 @@ module Task
       task.creation_date
     end
 
+    def attribute_changes
+      task.computed_attributes_after_creation
+    end
+
     def as_json(*)
       super.merge :task_id => task.id
     end

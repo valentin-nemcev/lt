@@ -21,6 +21,15 @@ class Lt.Models.TaskCreation extends Lt.Models.TaskEvent
     else
       tasks.add(attrs)
 
+class Lt.Models.TaskCompletion extends Lt.Models.TaskEvent
+  type: 'task_completion'
+  typePriority: 5
+
+  apply: (tasks) ->
+    task = tasks.get(@get('task_id'))
+    task or throw "No creation event for task " + @get('task_id')
+    task.set('completed', true)
+
 class Lt.Models.TaskUpdate extends Lt.Models.TaskEvent
   type: 'task_update'
   typePriority: 2
@@ -67,7 +76,11 @@ class Lt.TaskEvents extends Backbone.Collection
   applyEvent: (event) -> event.apply @tasks
 
   classes = _.chain(Lt.Models).pick(
-    'TaskCreation', 'TaskUpdate', 'RelationAddition', 'RelationRemoval'
+    'TaskCreation',
+    'TaskCompletion',
+    'TaskUpdate',
+    'RelationAddition',
+    'RelationRemoval'
   ).values().value()
   eventClasses = {}
   eventClasses[cls.prototype.type] = cls for cls in classes

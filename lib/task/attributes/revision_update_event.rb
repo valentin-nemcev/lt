@@ -22,6 +22,9 @@ module Task
       revision.update_date
     end
 
+    def attribute_changes
+      revision.task.computed_attributes_after_attribute_update(revision)
+    end
 
     def as_json(*)
       super.merge \

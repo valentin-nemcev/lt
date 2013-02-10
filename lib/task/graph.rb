@@ -55,30 +55,17 @@ module Task
     end
 
     def compute_events_from(events)
-      attrs_to_compute = events.flat_map do |event|
-        case event
-        when CreationEvent
-          event.task.computed_attributes_after_creation
-        when CompletionEvent
-        when Attributes::RevisionUpdateEvent
-          rev = event.revision
-          rev.task.computed_attributes_after_attribute_update(rev)
-        when RelationAdditionEvent, RelationRemovalEvent
-          rel = event.relation
-          date = event.date
-          ev = event.is_a?(RelationAdditionEvent) ? :added : :removed
-          super_revs = rel.supertask.
-            computed_attributes_after_relation_update(rel.type, :sub, date, ev)
-          sub_revs = rel.subtask.
-            computed_attributes_after_relation_update(rel.type, :super, date, ev)
-          super_revs + sub_revs
-        else
-          raise UnknownEventTypeError.new event: event
-        end
-      end.compact
-      attrs_to_compute.reverse.uniq.reverse.
-        map { |task, attr, date| task.compute_attribute(attr, date) }.
-        compact.collect(&:update_event)
+      merge_attribute_changes(events.collect_concat(&:attribute_changes)).
+        collect(&:attribute_revision).compact.collect(&:update_event)
+    end
+
+    def merge_attribute_changes(changes)
+      merged = Hash.new { |h, k| h[k] = [] }
+      changes.reverse.each_with_object(merged) do |change, merged|
+        merged[change].push(change)
+      end.map do |_, changes|
+        changes.reverse.reduce(&:merge)
+      end.reverse
     end
 
     def all_events

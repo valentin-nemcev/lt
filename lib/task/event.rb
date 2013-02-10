@@ -14,6 +14,10 @@ module Task
     def date
     end
 
+    def attribute_changes
+      []
+    end
+
     def as_json(*)
       {
         :id   => id,

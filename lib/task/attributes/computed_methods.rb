@@ -98,18 +98,20 @@ module Task
 
       def computed_attributes_after_attribute_update(revision)
         attribute, date = revision.attribute_name, revision.update_date
-        deps_for_attribute(attribute, date).flat_map do |task, attr|
-          task.computed_attribute_with_deps(attr, date)
+        changes_for_attribute(attribute, date).flat_map do |change|
+          change.task.
+            computed_attribute_with_deps(change.attribute, change.date)
         end
       end
 
       def computed_attributes_after_relation_update(rel_type, rel_dir, date, ev)
-        deps_for_relation(rel_type, rel_dir, date).flat_map do |task, attr|
-          task.computed_attribute_with_deps(attr, date)
+        deps_for_relation(rel_type, rel_dir, date).flat_map do |change|
+          change.task.
+            computed_attribute_with_deps(change.attribute, change.date)
         end
       end
 
-      def deps_for_attribute(given_attribute, given_date)
+      def changes_for_attribute(given_attribute, given_date)
         aggregate, computed = computed_attributes_opts.partition do |_, opts|
           opts[:aggregate]
         end
@@ -121,7 +123,9 @@ module Task
                 :on => given_date,
                 :for => self.class.reversed_relation(rel)
               ).nodes
-              rel_tasks.map{ |rel_task| [rel_task, attr, given_date] }
+              rel_tasks.map do |rel_task|
+                AttributeChange.new(rel_task, attr, given_date)
+              end
             end
           end
         computed = computed.
@@ -129,7 +133,7 @@ module Task
             attr_opts[:computed_from].include? given_attribute
           end.
           map do |attr, attr_opts|
-            [self, attr, given_date]
+            AttributeChange[self, attr, given_date]
           end
         aggregate + computed
       end
@@ -144,15 +148,16 @@ module Task
                   opts[:relation] == given_rel_dir
                 next
               end
-              [self, attr, given_date]
+              AttributeChange[self, attr, given_date]
             end.compact
           end
       end
 
       def computed_attribute_with_deps(attribute, date)
-        [[self, attribute, date]] +
-          deps_for_attribute(attribute, date).flat_map do |task, attr|
-            task.computed_attribute_with_deps(attr, date)
+        [AttributeChange[self, attribute, date]] +
+          changes_for_attribute(attribute, date).flat_map do |change|
+            change.task.
+              computed_attribute_with_deps(change.attribute, change.date)
           end
       end
 
@@ -180,7 +185,7 @@ module Task
           proc_arguments = depended_on_attributes.map do |attr|
             msg = (attr == attribute) ?
               :last_editable_attribute_revision : :last_attribute_revision
-            revision = self.public_send(msg, :for => attr, on: date)
+            revision = self.public_send(msg, :for => attr, :on => date)
             value = revision.updated_value if revision
           end
 
