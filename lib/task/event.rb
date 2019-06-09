@@ -5,6 +5,15 @@ module Task
     end
     attr_reader :target
 
+    def priority
+      0
+    end
+
+    include Comparable
+    def <=> other
+      self.priority <=> other.priority
+    end
+
     def type
     end
 

@@ -13,7 +13,7 @@ Spork.prefork do
 
 
   require 'config.rb'
-  require 'acceptance/capybara_config.rb'
+  # require 'acceptance/capybara_config.rb'
 
   RSpec.configure do |config|
     config.use_transactional_fixtures = false

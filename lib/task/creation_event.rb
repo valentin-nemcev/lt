@@ -2,6 +2,10 @@ module Task
   class CreationEvent < Event
     alias_method :task, :target
 
+    def priority
+      1
+    end
+
     def type
       'task_creation'
     end
@@ -15,7 +19,7 @@ module Task
     end
 
     def attribute_changes
-      task.computed_attributes_after_creation
+      task.changes_after_creation
     end
 
     def as_json(*)

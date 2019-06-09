@@ -53,6 +53,10 @@ module Task
     end
 
     attr_reader :previous_revision
+    def previous_value
+      previous_revision.try(:updated_value)
+    end
+
     def previous_revision=(new_previous_revision)
       if previous_revision.present?
         raise PreviousRevisionAlreadySetError.new \

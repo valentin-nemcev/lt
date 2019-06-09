@@ -55,14 +55,17 @@ module Task
     end
 
     def compute_events_from(events)
-      merge_attribute_changes(events.collect_concat(&:attribute_changes)).
+      ap events
+      merge_attribute_changes(events.sort.collect_concat(&:attribute_changes)).
         collect(&:attribute_revision).compact.collect(&:update_event)
     end
 
     def merge_attribute_changes(changes)
+      puts "changes: #{changes.length}"
+      exit if changes.length > 100
       merged = Hash.new { |h, k| h[k] = [] }
       changes.reverse.each_with_object(merged) do |change, merged|
-        merged[change].push(change)
+        merged[change.merge_attrs].push(change)
       end.map do |_, changes|
         changes.reverse.reduce(&:merge)
       end.reverse

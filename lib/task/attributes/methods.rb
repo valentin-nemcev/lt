@@ -26,10 +26,15 @@ module Task
       }
     end
 
+    def id_revision
+      @id_revision = Struct.new(:updated_value, :previous_value).new(id, id)
+    end
+
     def last_attribute_revision(args = {})
       attr = args[:for]
       computed = self.class.computed_attributes
       editable = self.class.editable_attributes
+      return id_revision if attr == :_id
       return last_computed_attribute_revision(args) if computed.include? attr
       return last_editable_attribute_revision(args) if editable.include? attr
     end

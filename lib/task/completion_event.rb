@@ -6,6 +6,10 @@ module Task
       'task_completion'
     end
 
+    def priority
+      4
+    end
+
     def id
       task.id
     end

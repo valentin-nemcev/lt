@@ -6,13 +6,27 @@ module Task
       [relation.id, relation.subtask.id, relation.supertask.id].join('-')
     end
 
+    def priority
+      3
+    end
+
     def attribute_changes
       rel = relation
-      ev = self.is_a?(RelationAdditionEvent) ? :added : :removed
+      change = self.is_a?(RelationAdditionEvent) ? :added : :removed
       super_revs = rel.supertask.
-        computed_attributes_after_relation_update(rel.type, :sub, date, ev)
+        changes_after_relation_update \
+          :type => rel.type,
+          :relation => :sub,
+          :date => date,
+          :change => change,
+          :changed_task => rel.subtask
       sub_revs = rel.subtask.
-        computed_attributes_after_relation_update(rel.type, :super, date, ev)
+        changes_after_relation_update \
+          :type => rel.type,
+          :relation => :super,
+          :date => date,
+          :change => change,
+          :changed_task => rel.supertask
       super_revs + sub_revs
     end
 

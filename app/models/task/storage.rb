@@ -78,10 +78,11 @@ module Task
       task_base.destroy_computed_attribute_revisions
       clear_graph
       fetch_all
-      new_events = graph.all_events.sort_by(&:date).chunk(&:date).
-        flat_map do |date, events|
-        graph.compute_events_from(events)
-      end
+      new_events = graph.all_events.sort_by(&:date).chunk(&:date).first(10).
+        flat_map.with_index(1) do |(date, events), counter|
+          puts "#{counter} #{date}: #{events.length}"
+          graph.compute_events_from(events)
+        end
       store_events(new_events)
     end
 

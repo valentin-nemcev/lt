@@ -6,6 +6,10 @@ module Task
       'task_update'
     end
 
+    def priority
+      2
+    end
+
     def id
       "#{revision.id}-#{revision.task_id}"
     end
@@ -23,7 +27,9 @@ module Task
     end
 
     def attribute_changes
-      revision.task.computed_attributes_after_attribute_update(revision)
+      revision.task.changes_after_attribute_update \
+        revision.attribute_name,
+        revision.update_date
     end
 
     def as_json(*)
